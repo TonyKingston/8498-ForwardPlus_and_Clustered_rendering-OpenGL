@@ -51,15 +51,66 @@ bool CollisionDetection::RayIntersection(const Ray& r,GameObject& object, RayCol
 }
 
 bool CollisionDetection::RayBoxIntersection(const Ray&r, const Vector3& boxPos, const Vector3& boxSize, RayCollision& collision) {
-	return false;
+	Vector3 boxMin = boxPos - boxSize;
+	Vector3 boxMax = boxPos + boxSize;
+	
+	Vector3 rayPos = r.GetPosition();
+	Vector3 rayDir = r.GetDirection();
+	
+	Vector3 tVals(-1, -1, -1);
+	
+	for (int i = 0; i < 3; ++i) { //get best 3 intersections
+		if (rayDir[i] > 0) {
+			tVals[i] = (boxMin[i] - rayPos[i]) / rayDir[i];
+		}
+		else if (rayDir[i] < 0) {
+			tVals[i] = (boxMax[i] - rayPos[i]) / rayDir[i];
+		}
+		
+	}
+	float bestT = tVals.GetMaxElement();
+	if (bestT < 0.0f) {
+		return false; //no backwards rays!
+	}
+	Vector3 intersection = rayPos + (rayDir * bestT);
+	const float epsilon = 0.0001f; //an amount of leeway in our calcs
+	for (int i = 0; i < 3; ++i) {
+		if (intersection[i] + epsilon < boxMin[i] ||
+			intersection[i] - epsilon > boxMax[i]) {
+		    return false; //best intersection doesn’t touch the box!
+			
+		}
+	}
+	collision.collidedAt = intersection;
+	collision.rayDistance = bestT;
+	return true;
 }
 
 bool CollisionDetection::RayAABBIntersection(const Ray&r, const Transform& worldTransform, const AABBVolume& volume, RayCollision& collision) {
-	return false;
+	Vector3 boxPos = worldTransform.GetPosition();
+	Vector3 boxSize = volume.GetHalfDimensions();
+	return RayBoxIntersection(r, boxPos, boxSize, collision);
 }
 
 bool CollisionDetection::RayOBBIntersection(const Ray&r, const Transform& worldTransform, const OBBVolume& volume, RayCollision& collision) {
-	return false;
+	Quaternion orientation = worldTransform.GetOrientation();
+	Vector3 position = worldTransform.GetPosition();
+
+	Matrix3 transform = Matrix3(orientation);
+	Matrix3 invTransform = Matrix3(orientation.Conjugate());
+	
+	Vector3 localRayPos = r.GetPosition() - position;
+	
+	Ray tempRay(invTransform * localRayPos, invTransform * r.GetDirection());
+	
+	bool collided = RayBoxIntersection(tempRay, Vector3(),
+			volume.GetHalfDimensions(), collision);
+	
+	if (collided) {
+		collision.collidedAt = transform * collision.collidedAt + position;
+		
+	}
+	return collided;
 }
 
 bool CollisionDetection::RayCapsuleIntersection(const Ray& r, const Transform& worldTransform, const CapsuleVolume& volume, RayCollision& collision) {

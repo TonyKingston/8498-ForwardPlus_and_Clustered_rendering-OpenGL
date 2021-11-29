@@ -82,6 +82,7 @@ namespace NCL {
 
 			bool	isActive;
 			int		worldID;
+			int layer;
 			string	name;
 
 			Vector3 broadphaseAABB;
