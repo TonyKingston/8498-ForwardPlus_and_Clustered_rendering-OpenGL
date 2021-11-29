@@ -195,6 +195,24 @@ Ray CollisionDetection::BuildRayFromMouse(const Camera& cam) {
 	return Ray(cam.GetPosition(), c);
 }
 
+Ray CollisionDetection::BuildRayFromObject(GameObject& obj, Camera& cam) {
+	Vector2 screenObj = Vector2(obj.GetTransform().GetPosition().x, obj.GetTransform().GetPosition().y);
+	Vector2 screenSize = Window::GetWindow()->GetScreenSize();
+
+	Vector3 nearPos = Vector3(screenObj.x,
+		screenSize.y - screenObj.y,
+		-0.99999f
+	);
+
+	Vector3 farPos = Vector3(screenObj.x,
+		screenSize.y - screenObj.y,
+		0.99999f
+	);
+
+	Quaternion a = obj.GetTransform().GetOrientation();
+	return Ray(obj.GetTransform().GetPosition(), Vector3(a.x,a.y,a.z));
+}
+
 //http://bookofhook.com/mousepick.pdf
 Matrix4 CollisionDetection::GenerateInverseProjection(float aspect, float fov, float nearPlane, float farPlane) {
 	Matrix4 m;
