@@ -515,9 +515,9 @@ bool TutorialGame::SelectObject() {
 				Debug::DrawLine(ray.GetPosition(), closestCollision.collidedAt, Debug::RED, 10.0f);
 				selectionObject = (GameObject*)closestCollision.node;
 				selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
-				ray = CollisionDetection::BuildRayFromObject(*selectionObject, *world->GetMainCamera());
+				ray = CollisionDetection::BuildRayFromObject(*selectionObject, 100);
 				if (world->Raycast(ray, c2, true)) {
-				//	Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 30.0f);
+					Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 10.0f);
 				}
 				return true;
 			}
@@ -564,6 +564,12 @@ void TutorialGame::MoveSelectedObject() {
 	renderer->DrawString(" Click Force :" + std::to_string(forceMagnitude),
 		Vector2(10, 20)); // Draw debug text at 10 ,20
 	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {  // Add force when using laptop
+		forceMagnitude += 10.0f;
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::K)) {
+		forceMagnitude -= 10.0f;
+	}
 
 	if (!selectionObject) {
 		return;

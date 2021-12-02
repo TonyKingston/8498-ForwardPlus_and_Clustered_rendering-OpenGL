@@ -220,22 +220,18 @@ Ray CollisionDetection::BuildRayFromMouse(const Camera& cam) {
 	return Ray(cam.GetPosition(), c);
 }
 
-Ray CollisionDetection::BuildRayFromObject(GameObject& obj, Camera& cam) {
+Ray CollisionDetection::BuildRayFromObject(GameObject& obj, float maxRange) {
 	Vector2 screenObj = Vector2(obj.GetTransform().GetPosition().x, obj.GetTransform().GetPosition().y);
 	Vector2 screenSize = Window::GetWindow()->GetScreenSize();
-
-	Vector3 nearPos = Vector3(screenObj.x,
-		screenSize.y - screenObj.y,
-		-0.99999f
-	);
-
-	Vector3 farPos = Vector3(screenObj.x,
-		screenSize.y - screenObj.y,
-		0.99999f
-	);
-
-	Quaternion a = obj.GetTransform().GetOrientation();
-	return Ray(obj.GetTransform().GetPosition(), Vector3(a.x,a.y,a.z));
+	
+	const CollisionVolume* volume = obj.GetBoundingVolume();
+	Vector3 pos = obj.GetTransform().GetPosition();
+	if (volume->type == VolumeType::Sphere) {
+		const SphereVolume& sphere = (const SphereVolume&)* volume;
+		pos.z += sphere.GetRadius();
+		
+	}
+	return Ray(pos, obj.GetTransform().GetOrientation() * Vector3(0,0,1));
 }
 
 //http://bookofhook.com/mousepick.pdf
