@@ -260,7 +260,7 @@ A single function to add a large immoveable cube to the bottom of our world
 
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
+	GameObject* floor = new GameObject("floor");
 
 	Vector3 floorSize	= Vector3(100, 2, 100);
 	AABBVolume* volume	= new AABBVolume(floorSize);
@@ -288,7 +288,7 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 
 */
 GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass, bool hollow) {
-	GameObject* sphere = new GameObject();
+	GameObject* sphere = new GameObject("sphere");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -310,7 +310,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 }
 
 GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass) {
-	GameObject* capsule = new GameObject();
+	GameObject* capsule = new GameObject("capsule");
 
 	CapsuleVolume* volume = new CapsuleVolume(halfHeight, radius);
 	capsule->SetBoundingVolume((CollisionVolume*)volume);
@@ -332,7 +332,7 @@ GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfH
 }
 
 GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
-	GameObject* cube = new GameObject();
+	GameObject* cube = new GameObject("cube");
 
 	AABBVolume* volume = new AABBVolume(dimensions);
 

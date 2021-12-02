@@ -1,5 +1,6 @@
 #pragma once
 #include "../CSC8503Common/GameWorld.h"
+#include "CollisionDetection.h"
 #include <set>
 
 namespace NCL {
