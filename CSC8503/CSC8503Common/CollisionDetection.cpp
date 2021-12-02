@@ -118,7 +118,32 @@ bool CollisionDetection::RayCapsuleIntersection(const Ray& r, const Transform& w
 }
 
 bool CollisionDetection::RaySphereIntersection(const Ray&r, const Transform& worldTransform, const SphereVolume& volume, RayCollision& collision) {
-	return false;
+	Vector3 spherePos = worldTransform.GetPosition();
+	float sphereRadius = volume.GetRadius();
+
+	//Get the direction between the ray origin and the sphere origin
+	Vector3 dir = (spherePos - r.GetPosition());
+	
+	//Then project the sphere's origin onto our ray direction vector
+	float sphereProj = Vector3::Dot(dir, r.GetDirection());
+
+	if (sphereProj < 0.0f) {
+		return false; // point is behind the ray!
+	}
+
+	//Get closest point on ray line to sphere
+	Vector3 point = r.GetPosition() + (r.GetDirection() * sphereProj);
+
+	float sphereDist = (point - spherePos).Length();
+
+	if (sphereDist > sphereRadius) {
+		return false;
+	}
+	float offset = sqrt((sphereRadius * sphereRadius) - (sphereDist * sphereDist));
+	
+    collision.rayDistance = sphereProj - (offset);
+	collision.collidedAt = r.GetPosition() + (r.GetDirection() * collision.rayDistance);
+	return true;
 }
 
 Matrix4 GenerateInverseView(const Camera &c) {
@@ -373,7 +398,8 @@ bool CollisionDetection::AABBIntersection(const AABBVolume& volumeA, const Trans
 	Vector3 boxASize = volumeA.GetHalfDimensions();
 	Vector3 boxBSize = volumeB.GetHalfDimensions();
 	
-	bool overlap = AABBTest(boxAPos, boxBPos, boxASize, boxBSize);	if (overlap) {
+	bool overlap = AABBTest(boxAPos, boxBPos, boxASize, boxBSize);
+	if (overlap) {
 		static const Vector3 faces[6] =
 			{
 			Vector3(-1, 0, 0), Vector3(1, 0, 0),
