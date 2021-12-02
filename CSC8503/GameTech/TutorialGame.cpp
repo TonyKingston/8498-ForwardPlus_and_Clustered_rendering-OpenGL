@@ -512,12 +512,12 @@ bool TutorialGame::SelectObject() {
 			RayCollision c2;
 
 			if (world->Raycast(ray, closestCollision, true)) {
-				Debug::DrawLine(ray.GetPosition(), closestCollision.collidedAt, Debug::RED, 30.0f);
+				Debug::DrawLine(ray.GetPosition(), closestCollision.collidedAt, Debug::RED, 10.0f);
 				selectionObject = (GameObject*)closestCollision.node;
 				selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
 				ray = CollisionDetection::BuildRayFromObject(*selectionObject, *world->GetMainCamera());
 				if (world->Raycast(ray, c2, true)) {
-					Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 30.0f);
+				//	Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 30.0f);
 				}
 				return true;
 			}
@@ -553,6 +553,7 @@ bool TutorialGame::SelectObject() {
 	return false;
 }
 
+
 /*
 If an object has been clicked, it can be pushed with the right mouse button, by an amount
 determined by the scroll wheel. In the first tutorial this won't do anything, as we haven't
@@ -560,5 +561,24 @@ added linear motion into our physics system. After the second tutorial, objects 
 line - after the third, they'll be able to twist under torque aswell.
 */
 void TutorialGame::MoveSelectedObject() {
+	renderer->DrawString(" Click Force :" + std::to_string(forceMagnitude),
+		Vector2(10, 20)); // Draw debug text at 10 ,20
+	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
 
+	if (!selectionObject) {
+		return;
+	}
+	// Push the selected object !
+	if (Window::GetMouse()->ButtonPressed(NCL::MouseButtons::RIGHT)) {
+		Ray ray = CollisionDetection::BuildRayFromMouse(
+			*world->GetMainCamera());
+		RayCollision closestCollision;
+		if (world->Raycast(ray, closestCollision, true)) {
+			if (closestCollision.node == selectionObject) {
+				selectionObject->GetPhysicsObject()->
+					AddForce(ray.GetDirection() * forceMagnitude);
+
+			}
+		}
+	}
 }
