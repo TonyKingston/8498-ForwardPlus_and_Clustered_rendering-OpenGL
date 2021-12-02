@@ -287,7 +287,7 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
-GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
+GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass, bool hollow) {
 	GameObject* sphere = new GameObject();
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
@@ -302,7 +302,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
-	sphere->GetPhysicsObject()->InitSphereInertia();
+	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
 
 	world->AddGameObject(sphere);
 
@@ -575,9 +575,11 @@ void TutorialGame::MoveSelectedObject() {
 		RayCollision closestCollision;
 		if (world->Raycast(ray, closestCollision, true)) {
 			if (closestCollision.node == selectionObject) {
+				//selectionObject->GetPhysicsObject()->
+					//AddForce(ray.GetDirection() * forceMagnitude);
 				selectionObject->GetPhysicsObject()->
-					AddForce(ray.GetDirection() * forceMagnitude);
-
+					AddForceAtPosition(ray.GetDirection() * forceMagnitude, 
+						closestCollision.collidedAt);
 			}
 		}
 	}
