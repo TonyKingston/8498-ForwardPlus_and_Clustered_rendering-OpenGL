@@ -19,5 +19,7 @@ namespace NCL {
 		~CollisionVolume() {}
 
 		VolumeType type;
+
+		virtual void DrawVolume(const Vector3& position, const Vector4& colour = Vector4(0, 0, 1, 1)) {};
 	};
 }

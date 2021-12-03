@@ -262,7 +262,6 @@ void GameTechRenderer::RenderCamera() {
 		glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
 
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1:0);
-
 		BindMesh((*i).GetMesh());
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
 		for (int i = 0; i < layerCount; ++i) {
