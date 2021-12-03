@@ -41,6 +41,10 @@ namespace NCL {
 				return physicsObject;
 			}
 
+			Vector3 GetForwordDirection() {
+				return transform.GetOrientation() * worldForward;
+			}
+
 			void SetRenderObject(RenderObject* newObject) {
 				renderObject = newObject;
 			}
@@ -66,7 +70,11 @@ namespace NCL {
 			void UpdateBroadphaseAABB();
 
 			void DrawBoundingVolume() {
-				boundingVolume->DrawVolume(transform.GetPosition());
+				//boundingVolume->DrawVolume(transform.GetPosition());
+				MeshGeometry* mesh = boundingVolume->GetVolumeMesh();
+				if (mesh) {
+
+				}
 			}
 
 			void SetWorldID(int newID) {
@@ -82,7 +90,7 @@ namespace NCL {
 
 			CollisionVolume*	boundingVolume;
 			PhysicsObject*		physicsObject;
-			RenderObject*		renderObject;
+			RenderObject* renderObject;
 
 			bool	isActive;
 			int		worldID;
