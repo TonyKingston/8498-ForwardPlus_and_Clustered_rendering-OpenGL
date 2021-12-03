@@ -124,3 +124,10 @@ void GameWorld::GetConstraintIterators(
 	first	= constraints.begin();
 	last	= constraints.end();
 }
+
+void GameWorld::DrawBoundingVolumes()
+{
+	for (auto& o : gameObjects) {
+		o->DrawBoundingVolume();
+	}
+}

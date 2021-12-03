@@ -16,6 +16,7 @@ TutorialGame::TutorialGame()	{
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
 	inSelectionMode = false;
+	inDebugMode = false;
 
 	Debug::SetRenderer(renderer);
 
@@ -107,7 +108,13 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Update(dt);
 
 	Debug::FlushRenderables(dt);
-	renderer->Render();
+	if (inDebugMode) {
+		world->DrawBoundingVolumes();
+		renderer->Render();
+	}
+	else {
+		renderer->Render();
+	}
 }
 
 void TutorialGame::UpdateKeys() {
@@ -124,6 +131,9 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
 		physics->UseGravity(useGravity);
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N)) {
+		inDebugMode = !inDebugMode;
 	}
 	//Running certain physics updates in a consistent order might cause some
 	//bias in the calculations - the same objects might keep 'winning' the constraint

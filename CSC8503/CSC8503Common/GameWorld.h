@@ -43,6 +43,8 @@ namespace NCL {
 
 			virtual void UpdateWorld(float dt);
 
+			void DrawBoundingVolumes();
+
 			void OperateOnContents(GameObjectFunc f);
 
 			void GetObjectIterators(

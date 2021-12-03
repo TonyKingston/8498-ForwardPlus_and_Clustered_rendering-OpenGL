@@ -65,6 +65,10 @@ namespace NCL {
 
 			void UpdateBroadphaseAABB();
 
+			void DrawBoundingVolume() {
+				boundingVolume->DrawVolume(transform.GetPosition());
+			}
+
 			void SetWorldID(int newID) {
 				worldID = newID;
 			}

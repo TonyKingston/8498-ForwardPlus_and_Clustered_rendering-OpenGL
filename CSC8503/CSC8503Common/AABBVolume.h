@@ -1,6 +1,8 @@
 #pragma once
 #include "CollisionVolume.h"
 #include "../../Common/Vector4.h"
+#include "Debug.h"
+
 namespace NCL {
 	class AABBVolume : CollisionVolume
 	{
@@ -43,7 +45,7 @@ namespace NCL {
 				colour
 			);
 
-			// y
+			
 			Debug::DrawLine
 			(
 				Vector3(position.x + halfSizes.x, position.y - halfSizes.y, position.z + halfSizes.z),
@@ -71,7 +73,7 @@ namespace NCL {
 				colour
 			);
 
-			// x
+		
 			Debug::DrawLine(
 				Vector3(position.x - halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
 				Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
@@ -97,6 +99,11 @@ namespace NCL {
 				Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
 				colour
 			);
+
+			// Use a small line to draw centre of AABB
+			Debug::DrawLine(Vector3(position.x, position.y, position.z),
+				Vector3(position.x + 0.01, position.y + 0.01, position.z + 0.01),
+				colour);
 		}
 	protected:
 		Vector3 halfSizes;
