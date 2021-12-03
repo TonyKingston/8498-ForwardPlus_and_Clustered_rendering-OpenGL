@@ -4,7 +4,7 @@
 #include "Debug.h"
 
 namespace NCL {
-	class AABBVolume : CollisionVolume
+	class AABBVolume : public CollisionVolume
 	{
 	public:
 		AABBVolume(const Vector3& halfDims) {
@@ -12,7 +12,7 @@ namespace NCL {
 			halfSizes	= halfDims;
 		}
 		~AABBVolume() {
-
+		
 		}
 
 		Vector3 GetHalfDimensions() const {
@@ -23,7 +23,7 @@ namespace NCL {
 			Debug::DrawLine(Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
 				Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
 				colour);
-
+			
 			Debug::DrawLine
 			(
 				Vector3(position.x + halfSizes.x, position.y - halfSizes.y, position.z - halfSizes.z),
@@ -33,15 +33,16 @@ namespace NCL {
 
 			Debug::DrawLine
 			(
-				Vector3(position.x - halfSizes.x, position.y - halfSizes.y, position.z - halfSizes.z),
-				Vector3(position.x - halfSizes.x, position.y - halfSizes.y, position.z + halfSizes.z),
+				Vector3(position.x - halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
+				Vector3(position.x - halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
 				colour
 			);
 
+
 			Debug::DrawLine
 			(
-				Vector3(position.x - halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
-				Vector3(position.x - halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
+				Vector3(position.x - halfSizes.x, position.y - halfSizes.y, position.z - halfSizes.z),
+				Vector3(position.x - halfSizes.x, position.y - halfSizes.y, position.z + halfSizes.z),
 				colour
 			);
 

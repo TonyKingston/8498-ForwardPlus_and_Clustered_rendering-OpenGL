@@ -26,6 +26,7 @@ bool CollisionDetection::RayPlaneIntersection(const Ray&r, const Plane&p, RayCol
 	float d = Vector3::Dot(pointDir, p.GetNormal()) / ln;
 
 	collisions.collidedAt = r.GetPosition() + (r.GetDirection() * d);
+	collisions.rayDistance = d;
 
 	return true;
 }
@@ -114,6 +115,50 @@ bool CollisionDetection::RayOBBIntersection(const Ray&r, const Transform& worldT
 }
 
 bool CollisionDetection::RayCapsuleIntersection(const Ray& r, const Transform& worldTransform, const CapsuleVolume& volume, RayCollision& collision) {
+	Vector3 rayPos = r.GetPosition();
+	Vector3 rayDir = r.GetDirection();
+	float radius = volume.GetRadius();
+	float halfHeight = volume.GetHalfHeight();
+	
+	Vector3 position = worldTransform.GetPosition();
+	Vector3 project = Vector3::Cross(position + worldUp, rayDir);
+
+	Vector3 topPosition = position + (worldUp * (halfHeight - radius));
+	Vector3 point3 = position + Vector3::Cross(rayDir, (topPosition - position).Normalised());
+	Plane plane = Plane::PlaneFromTri(position, topPosition - position, point3);
+
+	RayPlaneIntersection(r, plane, collision);
+
+	Vector3 vA = topPosition - collision.collidedAt;
+	Vector3 vB = topPosition - position;
+	float dotPos = Vector3::Dot(vA, vB);
+
+	if (dotPos < 0) {
+		float distance = (collision.collidedAt - topPosition).Length();
+		if (distance <= radius) {
+			return true;
+		}
+		return false;
+	}
+
+	Vector3 bottomPosition = position - (worldUp * (halfHeight - radius));
+	vA = bottomPosition - collision.collidedAt;
+	vB = bottomPosition - position;
+	dotPos = Vector3::Dot(vA, vB);
+	if (dotPos < 0) {
+		float distance = (collision.collidedAt - bottomPosition).Length();
+		if (distance <= radius) {
+			return true;
+		}
+		return false;
+	}
+
+	Vector3 d = position + (worldUp * (Vector3::Dot(collision.collidedAt - position, worldUp)));
+	float distance = (d - collision.collidedAt).Length();
+
+	if (distance <= radius) {
+		return true;
+	}
 	return false;
 }
 
@@ -231,7 +276,7 @@ Ray CollisionDetection::BuildRayFromObject(GameObject& obj, float maxRange) {
 		pos.z += sphere.GetRadius();
 		
 	}
-	return Ray(pos, obj.GetTransform().GetOrientation() * Vector3(0,0,1));
+	return Ray(pos, obj.GetForwordDirection());
 }
 
 //http://bookofhook.com/mousepick.pdf

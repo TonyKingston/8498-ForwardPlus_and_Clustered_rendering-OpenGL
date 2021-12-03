@@ -129,5 +129,8 @@ void GameWorld::DrawBoundingVolumes()
 {
 	for (auto& o : gameObjects) {
 		o->DrawBoundingVolume();
+		OGLShader* shader = (OGLShader*)o->GetRenderObject()->GetShader();
+		//BindShader(shader);
+		//BindTextureToShader((OGLTexture*)(*i).GetDefaultTexture(), "mainTex", 0);
 	}
 }

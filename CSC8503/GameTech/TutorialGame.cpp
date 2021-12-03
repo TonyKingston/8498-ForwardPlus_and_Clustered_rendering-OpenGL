@@ -123,6 +123,11 @@ void TutorialGame::UpdateKeys() {
 		selectionObject = nullptr;
 		lockedObject	= nullptr;
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
+		InitCapsuleTest(); //We can reset the simulation at any time with F1
+		selectionObject = nullptr;
+		lockedObject = nullptr;
+	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
@@ -259,6 +264,13 @@ void TutorialGame::InitWorld() {
 	InitDefaultFloor();
 }
 
+void TutorialGame::InitCapsuleTest() {
+	world->ClearAndErase();
+	physics->Clear();
+	Vector3 position = Vector3(0, 10.0f, 0);
+	AddCapsuleToWorld(position, 5, 2);
+}
+
 void TutorialGame::BridgeConstraintTest() {
 
 
@@ -303,6 +315,8 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
 	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	volume->SetVolumeMesh(sphereMesh);
+	
 
 	sphere->GetTransform()
 		.SetScale(sphereSize)
@@ -347,6 +361,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	AABBVolume* volume = new AABBVolume(dimensions);
 
 	cube->SetBoundingVolume((CollisionVolume*)volume);
+	volume->SetVolumeMesh(cubeMesh);
 
 	cube->GetTransform()
 		.SetPosition(position)

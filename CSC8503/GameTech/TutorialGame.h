@@ -18,6 +18,7 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
+			void InitCapsuleTest();
 
 			void InitGameExamples();
 
