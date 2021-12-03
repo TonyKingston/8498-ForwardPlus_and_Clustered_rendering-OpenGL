@@ -269,6 +269,7 @@ void TutorialGame::InitCapsuleTest() {
 	physics->Clear();
 	Vector3 position = Vector3(0, 10.0f, 0);
 	AddCapsuleToWorld(position, 5, 2);
+	AddSphereToWorld(position + Vector3(10, 0, 0), 2);
 }
 
 void TutorialGame::BridgeConstraintTest() {

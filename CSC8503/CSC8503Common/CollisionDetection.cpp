@@ -533,5 +533,30 @@ bool CollisionDetection::OBBIntersection(
 bool CollisionDetection::SphereCapsuleIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
-	return false;
+	
+	Vector3 A = worldTransformA.GetPosition() + (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); //upPos
+	Vector3 B = worldTransformA.GetPosition() - (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); //downPos
+
+	// This method will be more efficient than using PointFromTriangle
+	float dist2 = SquaredDistancePointLine(A, B, worldTransformB.GetPosition());
+
+
+	float radiiSum = volumeA.GetRadius() + volumeB.GetRadius();
+	return dist2 <= radiiSum * radiiSum;
+}
+
+float CollisionDetection::SquaredDistancePointLine(const Vector3& A, const Vector3& B, const Vector3& C)
+{
+	Vector3 AB = B - A;
+	Vector3 AC = C - A;
+	Vector3 BC = C - B;
+	float norm = Vector3::Dot(AB, AC);
+	if (norm <= 0.0f) {
+		return AC.LengthSquared();
+	}
+	float f = AB.LengthSquared();
+	if (norm >= f) {
+		return BC.LengthSquared();
+	}
+	return AC.LengthSquared() - (e * e) / f;
 }
