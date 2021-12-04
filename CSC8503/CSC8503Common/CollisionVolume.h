@@ -1,8 +1,14 @@
 #pragma once
 #include "../../Common/Vector4.h"
 #include "../../Common/MeshGeometry.h"
+#include "Debug.h"
+
 
 namespace NCL {
+
+	namespace CSC8503 {
+		class GameObject;
+	}
 
 	enum class VolumeType {
 		AABB = 1,
@@ -13,7 +19,6 @@ namespace NCL {
 		Compound = 32,
 		Invalid = 256
 	};
-
 	class CollisionVolume
 	{
 	public:
@@ -25,10 +30,17 @@ namespace NCL {
 
 		VolumeType type;
 
-		virtual void DrawVolume(const Vector3& position, const Vector4& colour = Vector4(0, 0, 1, 1)) {};
+		virtual void DrawVolume(const Vector3& position, const Vector4& colour = Debug::BLUE) {
+			if (mesh) {
+				mesh->SetPrimitiveType(Lines);
+				
+			}
+		};
 		void SetVolumeMesh(MeshGeometry* m) { mesh = m; }
+		void SetObject(CSC8503::GameObject* object) { collisionObj = object; }
 		MeshGeometry* GetVolumeMesh() { return mesh; }
 	private:
 		MeshGeometry* mesh;
+		CSC8503::GameObject* collisionObj;
 	};
 }

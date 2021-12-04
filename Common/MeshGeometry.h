@@ -23,7 +23,8 @@ namespace NCL {
 		Triangles,
 		TriangleFan,
 		TriangleStrip,
-		Patches
+		Patches,
+		LineStrip
 	};
 
 	enum VertexAttribute {

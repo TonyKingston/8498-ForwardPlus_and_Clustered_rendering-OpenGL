@@ -188,6 +188,7 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		case GeometryPrimitive::TriangleFan:	mode = GL_TRIANGLE_FAN;		break;
 		case GeometryPrimitive::TriangleStrip:	mode = GL_TRIANGLE_STRIP;	break;
 		case GeometryPrimitive::Patches:		mode = GL_PATCHES;			break;
+		case GeometryPrimitive::LineStrip:   mode = GL_LINE_STRIP;       break;
 	}
 
 	if (boundMesh->GetIndexCount() > 0) {

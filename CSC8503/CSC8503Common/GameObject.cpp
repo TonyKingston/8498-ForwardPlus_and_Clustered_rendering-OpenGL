@@ -3,6 +3,7 @@
 
 using namespace NCL::CSC8503;
 
+
 GameObject::GameObject(string objectName)	{
 	name			= objectName;
 	worldID			= -1;
@@ -43,4 +44,9 @@ void GameObject::UpdateBroadphaseAABB() {
 		Vector3 halfSizes = ((OBBVolume&)*boundingVolume).GetHalfDimensions();
 		broadphaseAABB = mat * halfSizes;
 	}
+}
+
+void GameObject::InitObjects(TutorialGame* game)
+{
+	game = game;
 }

@@ -59,6 +59,14 @@ namespace NCL {
 				angularVelocity = v;
 			}
 
+			float GetElasticity() {
+				return elasticity;
+			}
+
+			void SetElasticity(float elast) {
+				elasticity = elast;
+			}
+
 			void InitCubeInertia();
 			void InitSphereInertia(bool hollow = false);
 

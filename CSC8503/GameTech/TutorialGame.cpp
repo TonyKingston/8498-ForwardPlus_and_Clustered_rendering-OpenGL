@@ -20,6 +20,7 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
+	GameObject::InitObjects(this);
 	InitialiseAssets();
 }
 
@@ -183,7 +184,7 @@ void TutorialGame::LockedObjectMovement() {
 	Vector3 charForward  = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 	Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 
-	float force = 100.0f;
+	float force = 5.0f;
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
 		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);
@@ -202,8 +203,11 @@ void TutorialGame::LockedObjectMovement() {
 		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NEXT)) {
-		lockedObject->GetPhysicsObject()->AddForce(Vector3(0,-10,0));
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+		lockedObject->GetPhysicsObject()->AddForce(Vector3(0,-force,0));
+	}
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SHIFT)) {
+		lockedObject->GetPhysicsObject()->AddForce(Vector3(0, force, 0));
 	}
 }
 
@@ -316,6 +320,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
 	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	volume->SetObject(sphere);
 	volume->SetVolumeMesh(sphereMesh);
 	
 
@@ -328,6 +333,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
+	sphere->GetPhysicsObject()->SetElasticity(1.0);
 
 	world->AddGameObject(sphere);
 

@@ -533,16 +533,50 @@ bool CollisionDetection::OBBIntersection(
 bool CollisionDetection::SphereCapsuleIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
+
+	Vector3 capsPos = worldTransformA.GetPosition();
+	Vector3 spherePos = worldTransformB.GetPosition();
+
+	Vector3 A = worldTransformA.GetPosition() + (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); //upPos
+	Vector3 B = worldTransformA.GetPosition() - (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); // downPos
+
+	Vector3 closestPoint = ClosestPointOnALine(A, B, spherePos);
+	if (Vector3::Dot(A, closestPoint) < 0) {
+		SphereVolume newSphere = SphereVolume(volumeA.GetRadius());
+		Transform trans = Transform();
+		trans.SetPosition(A);
+		return SphereIntersection(newSphere, trans, volumeB, worldTransformB, collisionInfo);
+	}
+	SphereVolume newSphere = SphereVolume(volumeA.GetRadius());
+
+	return SphereIntersection(newSphere, worldTransformA, volumeB, worldTransformB, collisionInfo);
+	/*float radiiSum = volumeA.GetRadius() + volumeB.GetRadius();
+	Vector3 delta = spherePos - capsPos;
+	float length = delta.Length();
+	if (length < radiiSum) {
+		float penetration = radiiSum - length;
+		Vector3 normal = delta.Normalised();
+		Vector3 localA = normal * volumeA.GetRadius();
+		Vector3 localB = -normal * volumeB.GetRadius();
+		collisionInfo.AddContactPoint(localA, localB, normal, penetration);
+		return true;
+	}*/
+	//return false;
 	
+	/*Vector3 C = worldTransformB.GetPosition();
 	Vector3 A = worldTransformA.GetPosition() + (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); //upPos
 	Vector3 B = worldTransformA.GetPosition() - (worldUp * (volumeA.GetHalfHeight() - volumeA.GetRadius())); //downPos
-
+	Vector3 AB = B - A;
+	Vector3 AC = C - A;
 	// This method will be more efficient than using PointFromTriangle
-	float dist2 = SquaredDistancePointLine(A, B, worldTransformB.GetPosition());
+	Plane plane = Plane::PlaneFromTri(A, B, C);
+	plane = Plane(Vector3::Cross(AB, AC), (A - B).Length());
+	float dist2 = plane.DistanceFromPlane(C);
+	//float dist2 = SquaredDistancePointLine(A, B, worldTransformB.GetPosition());
 
 
 	float radiiSum = volumeA.GetRadius() + volumeB.GetRadius();
-	return dist2 <= radiiSum * radiiSum;
+	return dist2 - volumeB.GetRadius() <= volumeA.GetRadius();*/
 }
 
 float CollisionDetection::SquaredDistancePointLine(const Vector3& A, const Vector3& B, const Vector3& C)
@@ -556,7 +590,17 @@ float CollisionDetection::SquaredDistancePointLine(const Vector3& A, const Vecto
 	}
 	float f = AB.LengthSquared();
 	if (norm >= f) {
-		return BC.LengthSquared();
+		return BC.LengthSquared(); 
 	}
-	return AC.LengthSquared() - (e * e) / f;
+	return AC.LengthSquared() - (norm * norm) / f;
+}
+
+
+Vector3 CollisionDetection::ClosestPointOnALine(const Vector3& start, const Vector3& end, const Vector3& point)
+{
+	Vector3 line = end - start;
+
+	float t = Clamp(Vector3::Dot(point - start, line) / line.LengthSquared(), 0.0f, 1.0f);
+
+	return start + (line * t);
 }

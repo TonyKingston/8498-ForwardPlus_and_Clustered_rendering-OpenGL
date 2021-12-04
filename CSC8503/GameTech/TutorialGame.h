@@ -4,6 +4,7 @@
 
 namespace NCL {
 	namespace CSC8503 {
+		class GameObject;
 		class TutorialGame		{
 		public:
 			TutorialGame();
