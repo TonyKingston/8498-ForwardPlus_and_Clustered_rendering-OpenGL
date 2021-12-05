@@ -406,6 +406,15 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return AABBSphereIntersection((AABBVolume&)*volB, transformB, (SphereVolume&)*volA, transformA, collisionInfo);
 	}
 
+	if (volA->type == VolumeType::OBB && volB->type == VolumeType::Sphere) {
+		return OBBSphereIntersection((OBBVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
+	}
+	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::OBB) {
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return OBBSphereIntersection((OBBVolume&)*volB, transformB, (SphereVolume&)*volA, transformA, collisionInfo);
+	}
+
 	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::Sphere) {
 		return SphereCapsuleIntersection((CapsuleVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
@@ -505,7 +514,7 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 	Vector3 boxSize = volumeA.GetHalfDimensions();
 	
 	Vector3 delta = worldTransformB.GetPosition() -
-	worldTransformA.GetPosition();
+	                worldTransformA.GetPosition();
 	
 	Vector3 closestPointOnBox = Maths::Clamp(delta, -boxSize, boxSize);
 	Vector3 localPoint = delta - closestPointOnBox;
@@ -527,6 +536,26 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 bool CollisionDetection::OBBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
+	return false;
+}
+
+bool NCL::CollisionDetection::OBBSphereIntersection(
+	const OBBVolume& volumeA, const Transform& worldTransformA, 
+	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
+{
+	AABBVolume aabb = AABBVolume(volumeA.GetHalfDimensions());
+	Transform transform1;
+	Transform transform2;
+	const Vector3 delta = worldTransformB.GetPosition() - worldTransformA.GetPosition();
+	transform2.SetPosition(worldTransformA.GetOrientation().Conjugate() * delta);
+
+	if (AABBSphereIntersection(aabb, transform1, volumeB, transform2, collisionInfo))
+	{
+		collisionInfo.point.normal = worldTransformA.GetOrientation() * collisionInfo.point.normal;
+		collisionInfo.point.localA = worldTransformA.GetOrientation() * collisionInfo.point.localA;
+		collisionInfo.point.localB = worldTransformA.GetOrientation() * collisionInfo.point.localB;
+		return true;
+	}
 	return false;
 }
 

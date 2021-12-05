@@ -328,7 +328,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		Vector3 angAccel = object->GetInertiaTensor() * torque;
 	
 		angVel += angAccel * dt; // integrate angular accel !
-		object-> SetAngularVelocity(angVel);
+		object->SetAngularVelocity(angVel);
 	}
 }
 /*
@@ -360,6 +360,10 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		
 		Quaternion orientation = transform.GetOrientation();
 		Vector3 angVel = object->GetAngularVelocity();
+
+		if (angVel.x > 0 || angVel.y > 0 || angVel.z > 0) {
+			std::cout << "Hello";
+		}
 		
 		orientation = orientation + 
 			(Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);

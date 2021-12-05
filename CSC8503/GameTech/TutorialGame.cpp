@@ -125,11 +125,15 @@ void TutorialGame::UpdateKeys() {
 		lockedObject	= nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		InitCapsuleTest(); //We can reset the simulation at any time with F1
+		InitCapsuleTest();
 		selectionObject = nullptr;
 		lockedObject = nullptr;
 	}
-
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM2)) {
+		InitOBBTest();
+		selectionObject = nullptr;
+		lockedObject = nullptr;
+	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
@@ -197,6 +201,7 @@ void TutorialGame::LockedObjectMovement() {
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
 		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * force);
+		lockedObject->GetPhysicsObject()->AddTorque(fwdAxis * force);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
@@ -215,13 +220,6 @@ void TutorialGame::DebugObjectMovement() {
 //If we've selected an object, we can manipulate it with some key presses
 	if (inSelectionMode && selectionObject) {
 		//Twist the selected object!
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(-10, 0, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(10, 0, 0));
-		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM7)) {
 			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, 10, 0));
@@ -230,17 +228,20 @@ void TutorialGame::DebugObjectMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM8)) {
 			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, -10, 0));
 		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(10, 0, 0));
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM0)) {
+			selectionObject->GetPhysicsObject()->AddTorque(Vector3(-5, 0, 0));
 		}
-
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
 			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, -10));
 		}
-
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
 			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, 10));
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+			selectionObject->GetPhysicsObject()->AddForce(Vector3(-10, 0, 0));
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
+			selectionObject->GetPhysicsObject()->AddForce(Vector3(10, 0, 0));
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
@@ -274,6 +275,15 @@ void TutorialGame::InitCapsuleTest() {
 	Vector3 position = Vector3(0, 10.0f, 0);
 	AddCapsuleToWorld(position, 5, 2);
 	AddSphereToWorld(position + Vector3(10, 0, 0), 2);
+}
+
+void NCL::CSC8503::TutorialGame::InitOBBTest() {
+	world->ClearAndErase();
+	physics->Clear();
+	Vector3 position = Vector3(0, 10.0f, 0);
+	Vector3 cubeDims = Vector3(5, 2, 2);
+	AddCubeToWorld(position, cubeDims, true, 1.0f);
+	AddSphereToWorld(position + Vector3(10, 0, 0), 2, 10.0f);
 }
 
 void TutorialGame::BridgeConstraintTest() {
@@ -333,7 +343,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
-	sphere->GetPhysicsObject()->SetElasticity(1.0);
+	sphere->GetPhysicsObject()->SetElasticity(0.8);
 
 	world->AddGameObject(sphere);
 
@@ -362,13 +372,43 @@ GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfH
 
 }
 
-GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB, float inverseMass) {
 	GameObject* cube = new GameObject("cube");
 
-	AABBVolume* volume = new AABBVolume(dimensions);
+	if (isOBB) {
+		OBBVolume* volume = new OBBVolume(dimensions);
+		cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	}
+	else {
+		AABBVolume* volume = new AABBVolume(dimensions);
+		cube->SetBoundingVolume((CollisionVolume*)volume);
+	}
+
+//	volume->SetVolumeMesh(cubeMesh);
+
+	cube->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(cube);
+
+	return cube;
+}
+
+GameObject* NCL::CSC8503::TutorialGame::AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass)
+{
+	GameObject* cube = new GameObject("cube");
+
+	OBBVolume* volume = new OBBVolume(dimensions);
 
 	cube->SetBoundingVolume((CollisionVolume*)volume);
-	volume->SetVolumeMesh(cubeMesh);
 
 	cube->GetTransform()
 		.SetPosition(position)
@@ -404,7 +444,7 @@ void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing
 			Vector3 position = Vector3(x * colSpacing, 10.0f, z * rowSpacing);
 
 			if (rand() % 2) {
-				AddCubeToWorld(position, cubeDims);
+				AddCubeToWorld(position, cubeDims, true);
 			}
 			else {
 				AddSphereToWorld(position, sphereRadius);
@@ -596,10 +636,10 @@ void TutorialGame::MoveSelectedObject() {
 	renderer->DrawString(" Click Force :" + std::to_string(forceMagnitude),
 		Vector2(10, 20)); // Draw debug text at 10 ,20
 	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {  // Add force when using laptop
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {  // Add force when using laptop
 		forceMagnitude += 10.0f;
 	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::K)) {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
 		forceMagnitude -= 10.0f;
 	}
 

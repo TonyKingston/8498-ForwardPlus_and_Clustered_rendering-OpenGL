@@ -67,6 +67,14 @@ namespace NCL {
 				elasticity = elast;
 			}
 
+			float GetFriction() {
+				return friction;
+			}
+
+			void SetFriction(float f) {
+				friction = f;
+			}
+
 			void InitCubeInertia();
 			void InitSphereInertia(bool hollow = false);
 
