@@ -87,6 +87,10 @@ namespace NCL {
 					Vector2(halfSize.x, -halfSize.y), halfSize);
 			}
 
+			void Clear() {
+				delete[] children;
+			}
+
 			void DebugDraw() {
 				Vector2 halfSizes = size / 2.0f;
 				Vector4 colour = Debug::GREEN;
@@ -143,6 +147,10 @@ namespace NCL {
 		class QuadTree
 		{
 		public:
+			QuadTree() {
+
+			}
+
 			QuadTree(Vector2 size, int maxDepth = 6, int maxSize = 5){
 				root = QuadTreeNode<T>(Vector2(), size);
 				this->maxDepth	= maxDepth;
@@ -157,6 +165,10 @@ namespace NCL {
 
 			void DebugDraw() {
 				root.DebugDraw();
+			}
+
+			void Clear() {
+				delete[] root.children;
 			}
 
 			void OperateOnContents(typename QuadTreeNode<T>::QuadTreeFunc  func) {

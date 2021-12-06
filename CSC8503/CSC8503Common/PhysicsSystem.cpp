@@ -22,7 +22,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= false;
 	useBroadPhase	= true;	
 	if (useBroadPhase) {
-		tree = QuadTree<GameObject*>(Vector2(1024, 1024), 7, 6);
+		tree = QuadTree <GameObject*>(Vector2(1024, 1024), 7, 6);
 	}
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
@@ -279,7 +279,7 @@ compare the collisions that we absolutely need to.
 
 void PhysicsSystem::BroadPhase() {
 	broadphaseCollisions.clear();
-	
+	tree.Clear();
 	std::vector <GameObject*>::const_iterator first;
 	std::vector <GameObject*>::const_iterator last;
 	gameWorld.GetObjectIterators(first, last);
@@ -291,7 +291,7 @@ void PhysicsSystem::BroadPhase() {
 		Vector3 pos = (*i)->GetTransform().GetPosition();
 		tree.Insert(*i, pos, halfSizes);
 	}
-	tree.DebugDraw();
+	//tree.DebugDraw();
 	tree.OperateOnContents(
 		[&](std::list <QuadTreeEntry <GameObject*>>& data) {
 			CollisionDetection::CollisionInfo info;
