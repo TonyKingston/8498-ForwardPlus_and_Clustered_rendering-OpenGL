@@ -526,7 +526,6 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 		
 		Vector3 localA = Vector3();
 		Vector3 localB = -collisionNormal * volumeB.GetRadius();
-		
 		collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);
 		return true;
 	}
@@ -551,8 +550,9 @@ bool NCL::CollisionDetection::OBBSphereIntersection(
 
 	if (AABBSphereIntersection(aabb, transform1, volumeB, transform2, collisionInfo))
 	{
+		Vector3 closestPointOnBox = Maths::Clamp(delta, -volumeA.GetHalfDimensions(), volumeA.GetHalfDimensions());
 		collisionInfo.point.normal = worldTransformA.GetOrientation() * collisionInfo.point.normal;
-		collisionInfo.point.localA = worldTransformA.GetOrientation() * collisionInfo.point.localA;
+		collisionInfo.point.localA = worldTransformA.GetOrientation() * closestPointOnBox;
 		collisionInfo.point.localB = worldTransformA.GetOrientation() * collisionInfo.point.localB;
 		return true;
 	}

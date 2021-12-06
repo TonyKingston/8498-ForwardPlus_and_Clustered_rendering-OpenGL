@@ -88,6 +88,8 @@ namespace NCL {
 				return game;
 			}
 
+			void PrintDebugInfo();
+
 		protected:
 			Transform			transform;
 
@@ -99,6 +101,7 @@ namespace NCL {
 			int		worldID;
 			int layer;
 			string	name;
+
 
 			Vector3 broadphaseAABB;
 			static TutorialGame* game;

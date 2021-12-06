@@ -1,8 +1,15 @@
 #include "GameObject.h"
-#include "CollisionDetection.h"
+#include "CollisionDetection.h" 
 
 using namespace NCL::CSC8503;
+using std::string;
 
+//std to_string can be problematic with floats so I've defined my own function
+template <typename T> string tostr(const T& t) {
+	std::ostringstream os;
+	os << t;
+	return os.str();
+}
 
 GameObject::GameObject(string objectName)	{
 	name			= objectName;
@@ -46,7 +53,21 @@ void GameObject::UpdateBroadphaseAABB() {
 	}
 }
 
-void GameObject::InitObjects(TutorialGame* game)
-{
+void GameObject::InitObjects(TutorialGame* game) {
 	game = game;
+}
+
+void GameObject::PrintDebugInfo() {
+	string selected = "Selected: " + tostr(worldID) + " " + name;
+	Debug::Print(selected, Vector2(60, 5), Debug::BLACK);
+	const Vector3 pos = transform.GetPosition();
+    Quaternion orient = transform.GetOrientation();
+	string position = "Position: " + tostr(pos.x) + ", " + tostr(pos.y) + ", " + tostr(pos.z);
+	Debug::Print(position, Vector2(60, 10), Debug::BLACK);
+	string orientation = "Orientation: " + tostr(orient.x) + ", " + tostr(orient.y) + ", " + tostr(orient.z);
+	Debug::Print(orientation, Vector2(60, 15), Debug::BLACK);
+	//string volume = "Collision Volume: " + tostr(boundingVolume->type);
+	//Debug::Print(volume, Vector2(60, 20), Debug::BLACK);
+
+
 }

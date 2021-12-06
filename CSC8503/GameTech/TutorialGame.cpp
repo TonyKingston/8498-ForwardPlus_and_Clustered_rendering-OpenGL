@@ -608,6 +608,7 @@ bool TutorialGame::SelectObject() {
 
 	else if(selectionObject){
 		renderer->DrawString("Press L to lock selected object object!", Vector2(5, 80));
+		selectionObject->PrintDebugInfo();
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(NCL::KeyboardKeys::L)) {

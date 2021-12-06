@@ -204,6 +204,8 @@ void PhysicsSystem::BasicCollisionDetection() {
 				std::cout << " Collision between " << (*i)->GetName()
 					<< " and " << (*j)->GetName() << std::endl;
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
+				//PhysicsObject* obj = (*j)->GetPhysicsObject();
+				//obj->AddForceAtPosition(obj->getinfo.point);
 				info.framesLeft = numCollisionFrames;
 				allCollisions.insert(info);
 				
