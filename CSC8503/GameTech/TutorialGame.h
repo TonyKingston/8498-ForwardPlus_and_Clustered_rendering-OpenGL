@@ -2,6 +2,7 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
+
 namespace NCL {
 	namespace CSC8503 {
 		class GameObject;
@@ -74,6 +75,8 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+		//	QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
 
 		};
 	}

@@ -88,7 +88,26 @@ namespace NCL {
 			}
 
 			void DebugDraw() {
+				Vector2 halfSizes = size / 2.0f;
+				Vector4 colour = Debug::GREEN;
+				Debug::DrawLine(Vector3(position.x + halfSizes.x, 0, position.y + halfSizes.y),
+					Vector3(position.x + halfSizes.x, 0, position.y - halfSizes.y),
+					colour);
+				Debug::DrawLine(Vector3(position.x + halfSizes.x, 0, position.y - halfSizes.y),
+					Vector3(position.x - halfSizes.x, 0, position.y - halfSizes.y),
+					colour);
+				Debug::DrawLine(Vector3(position.x - halfSizes.x, 0, position.y - halfSizes.y),
+					Vector3(position.x - halfSizes.x, 0, position.y + halfSizes.y),
+					colour);
+				Debug::DrawLine(Vector3(position.x - halfSizes.x, 0, position.y + halfSizes.y),
+					Vector3(position.x + halfSizes.x, 0, position.y + halfSizes.y),
+					colour);
+				if (children) {
+					for (int i = 0; i < 4; ++i) {
+						children[i].DebugDraw();
+					}
 
+				}
 			}
 
 			void OperateOnContents(QuadTreeFunc& func) {

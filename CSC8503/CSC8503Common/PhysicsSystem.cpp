@@ -45,7 +45,6 @@ any collisions they are in.
 
 */
 void PhysicsSystem::Clear() {
-	broadphaseCollisions.clear();
 	allCollisions.clear();
 }
 
@@ -290,6 +289,7 @@ void PhysicsSystem::BroadPhase() {
 		Vector3 pos = (*i)->GetTransform().GetPosition();
 		tree.Insert(*i, pos, halfSizes);
 	}
+	tree.DebugDraw();
 	tree.OperateOnContents(
 		[&](std::list <QuadTreeEntry <GameObject*>>& data) {
 			CollisionDetection::CollisionInfo info;
