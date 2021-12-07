@@ -202,7 +202,7 @@ void TutorialGame::LockedObjectMovement() {
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
 		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * force);
-		lockedObject->GetPhysicsObject()->AddTorque(fwdAxis * force);
+		//lockedObject->GetPhysicsObject()->AddTorque(fwdAxis * force);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
@@ -265,10 +265,10 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
 	InitDefaultFloor();
-	BridgeConstraintTest();
+	//BridgeConstraintTest();
 }
 
 void TutorialGame::InitCapsuleTest() {

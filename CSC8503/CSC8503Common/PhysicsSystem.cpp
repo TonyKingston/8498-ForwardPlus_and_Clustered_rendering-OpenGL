@@ -22,7 +22,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= false;
 	useBroadPhase	= true;	
 	if (useBroadPhase) {
-		tree = QuadTree <GameObject*>(Vector2(1024, 1024), 7, 6);
+		//tree = QuadTree <GameObject*>(Vector2(1024, 1024), 7, 6);
 	}
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
@@ -259,10 +259,19 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3 inertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, p.normal), relativeB);
 	float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
 	float cRestitution = physA->GetElasticity() * physB->GetElasticity(); // disperse some kinectic energy
+	float cFriction = physA->GetFriction() * physB->GetFriction();
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
+	Vector3 t = (contactVelocity - (p.normal * impulseForce)).Normalised();
+	float frictionForce = Vector3::Dot(contactVelocity, t);
 	
-	Vector3 fullImpulse = p.normal * j;
+	Vector3 frictionInertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, t), relativeA);
+	Vector3 frictionInertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, t), relativeB);
+	float frictionAngularEffect = Vector3::Dot(frictionInertiaA + frictionInertiaB, t);
+
+	float jt = (-cFriction * frictionForce) / (totalMass + frictionAngularEffect);
+	
+	Vector3 fullImpulse = (p.normal * j) + (t * jt);
 
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
@@ -281,7 +290,8 @@ compare the collisions that we absolutely need to.
 
 void PhysicsSystem::BroadPhase() {
 	broadphaseCollisions.clear();
-	tree.Clear();
+	//tree.Clear();
+	QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
 	std::vector <GameObject*>::const_iterator first;
 	std::vector <GameObject*>::const_iterator last;
 	gameWorld.GetObjectIterators(first, last);
@@ -404,7 +414,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		Vector3 angVel = object->GetAngularVelocity();
 
 		if (angVel.x > 0 || angVel.y > 0 || angVel.z > 0) {
-			std::cout << "Hello";
+			//std::cout << "Hello";
 		}
 		
 		orientation = orientation + 

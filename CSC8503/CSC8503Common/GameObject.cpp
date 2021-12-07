@@ -1,5 +1,6 @@
 #include "GameObject.h"
 #include "CollisionDetection.h" 
+#include <sstream>
 
 using namespace NCL::CSC8503;
 using std::string;
