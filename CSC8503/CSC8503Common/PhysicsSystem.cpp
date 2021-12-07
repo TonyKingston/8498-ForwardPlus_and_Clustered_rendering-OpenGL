@@ -262,16 +262,19 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	float cFriction = physA->GetFriction() * physB->GetFriction();
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
-	Vector3 t = (contactVelocity - (p.normal * impulseForce)).Normalised();
-	float frictionForce = Vector3::Dot(contactVelocity, t);
+
+	Vector3 tangent = (contactVelocity - (p.normal * impulseForce)).Normalised();
+	float frictionForce = Vector3::Dot(contactVelocity, tangent);
 	
-	Vector3 frictionInertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, t), relativeA);
-	Vector3 frictionInertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, t), relativeB);
-	float frictionAngularEffect = Vector3::Dot(frictionInertiaA + frictionInertiaB, t);
+	Vector3 frictionInertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, tangent), relativeA);
+	Vector3 frictionInertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, tangent), relativeB);
+	float frictionAngularEffect = Vector3::Dot(frictionInertiaA + frictionInertiaB, tangent);
 
 	float jt = (-cFriction * frictionForce) / (totalMass + frictionAngularEffect);
 	
-	Vector3 fullImpulse = (p.normal * j) + (t * jt);
+	Vector3 frictionImpulse = tangent * jt;
+	Vector3 fullImpulse = (p.normal * j);
+	fullImpulse += frictionImpulse;
 
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
