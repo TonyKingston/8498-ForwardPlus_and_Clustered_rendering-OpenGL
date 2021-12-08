@@ -16,6 +16,7 @@ GameObject::GameObject(string objectName)	{
 	name			= objectName;
 	worldID			= -1;
 	isActive		= true;
+	isAsleep = false;
 	boundingVolume	= nullptr;
 	physicsObject	= nullptr;
 	renderObject	= nullptr;

@@ -32,6 +32,18 @@ namespace NCL {
 				return isActive;
 			}
 
+			bool IsAsleep() const {
+				return isAsleep;
+			}
+
+			void PutToSleep() {
+				isAsleep = true;
+			}
+
+			void Wake() {
+				isAsleep = false;
+			}
+
 			Transform& GetTransform() {
 				return transform;
 			}
@@ -98,6 +110,7 @@ namespace NCL {
 			RenderObject* renderObject;
 
 			bool	isActive;
+			bool    isAsleep;
 			int		worldID;
 			int layer;
 			string	name;

@@ -2,7 +2,7 @@
 #include "PhysicsObject.h"
 #include "GameObject.h"
 #include "../../Common/Quaternion.h"
-
+#include "../../Common/Maths.h"
 #include "Constraint.h"
 
 #include "Debug.h"
@@ -28,6 +28,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
 	linearDamping = 0.4f;
+	sleepEpsilon = 0.00005f;
 }
 
 PhysicsSystem::~PhysicsSystem()	{
@@ -111,10 +112,12 @@ void PhysicsSystem::Update(float dt) {
 		for (int i = 0; i < constraintIterationCount; ++i) {
 			UpdateConstraints(constraintDt);	
 		}
+		
 		IntegrateVelocity(realDT); //update positions from new velocity changes
 
 		dTOffset -= realDT;
 	}
+	UpdateSleepingObjects();
 
 	ClearForces();	//Once we've finished with the forces, reset them to zero
 
@@ -181,6 +184,31 @@ void PhysicsSystem::UpdateObjectAABBs() {
 	);
 }
 
+void NCL::CSC8503::PhysicsSystem::UpdateSleepingObjects() {
+	std::vector < GameObject* >::const_iterator first;
+	std::vector < GameObject* >::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+
+	for (auto i = first; i != last; ++i) {
+		PhysicsObject* object = (*i)->GetPhysicsObject();
+		object->UpdateWeightedAverageMotion();
+
+		if (object->GetWeightedAverageMotion() < sleepEpsilon) {
+			if (applyGravity) {
+				std::cout << "hello";
+			}
+			(*i)->PutToSleep();
+			object->SetLinearVelocity(Vector3(0, 0, 0));
+			object->SetAngularVelocity(Vector3(0, 0, 0));
+		}
+		else if (object->GetWeightedAverageMotion() > 10 * sleepEpsilon) { // multiply so the object doesn't oscillate between awake/asleep
+			(*i)->Wake();
+			object->SetWeightedAverageMotion(10 * sleepEpsilon);
+		}
+	}
+	
+}
+
 /*
 
 This is how we'll be doing collision detection in tutorial 4.
@@ -207,8 +235,6 @@ void PhysicsSystem::BasicCollisionDetection() {
 				std::cout << " Collision between " << (*i)->GetName()
 					<< " and " << (*j)->GetName() << std::endl;
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
-				//PhysicsObject* obj = (*j)->GetPhysicsObject();
-				//obj->AddForceAtPosition(obj->getinfo.point);
 				info.framesLeft = numCollisionFrames;
 				allCollisions.insert(info);
 				
@@ -235,11 +261,17 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	if (totalMass == 0) {
 		return; //two static objects ??
 	}
+
+	const float allowedPenetration = 0.1f;
+
+	const float biasFactor = 0.1f;
+	float bias = biasFactor * max(0.0f, p.penetration - allowedPenetration);
+
 	// Separate them out using projection
-	transformA.SetPosition(transformA.GetPosition() -
+	/*transformA.SetPosition(transformA.GetPosition() -
 			(p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
 	transformB.SetPosition(transformB.GetPosition() +
-			(p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));
+			(p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));*/
 
 	Vector3 relativeA = p.localA;
 	Vector3 relativeB = p.localB;
@@ -250,18 +282,29 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3 fullVelocityA = physA->GetLinearVelocity() + angVelocityA;
 	Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
 
+
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
+	
+	if (-impulseForce < -0.01f) {
+		return;
+	}
 
 	//now to work out the effect of inertia ....
 	Vector3 inertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, p.normal), relativeA);
 	Vector3 inertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, p.normal), relativeB);
 	float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
 	float cRestitution = physA->GetElasticity() * physB->GetElasticity(); // disperse some kinectic energy
-	float cFriction = physA->GetFriction() * physB->GetFriction();
+	//float cFriction = physA->GetFriction() * physB->GetFriction();
+	float cFriction = (physA->GetFriction() + physB->GetFriction()) / 2;
 
-	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
+	//float massNormal = 1.0f / (totalMass + angularEffect);
+	//float dPn = massNormal * (-impulseForce + bias);
+	//dPn = max(dPn, 0.0f);
+	float j = ((-(1.0f + cRestitution) * impulseForce)) / (totalMass + angularEffect);
+	//j = max(j, 0.0f);
+	j = j + (p.penetration * 1.5);
 
 	Vector3 tangent = (contactVelocity - (p.normal * impulseForce)).Normalised();
 	float frictionForce = Vector3::Dot(contactVelocity, tangent);
@@ -271,6 +314,8 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	float frictionAngularEffect = Vector3::Dot(frictionInertiaA + frictionInertiaB, tangent);
 
 	float jt = (-cFriction * frictionForce) / (totalMass + frictionAngularEffect);
+	float maxJt = cFriction * j;
+	jt = Maths::Clamp(jt, -maxJt, maxJt);
 	
 	Vector3 frictionImpulse = tangent * jt;
 	Vector3 fullImpulse = (p.normal * j);
@@ -280,6 +325,26 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	physB->ApplyLinearImpulse(fullImpulse);
 	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
 	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+}
+
+void PhysicsSystem::ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
+	PhysicsObject* physA = a.GetPhysicsObject();
+	PhysicsObject* physB = b.GetPhysicsObject();
+
+	Transform& transformA = a.GetTransform();
+	Transform& transformB = b.GetTransform();
+
+	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
+
+	Vector3 springPosA = p.localA;
+	Vector3 springPosB = p.localB;
+
+	Vector3 springExtensionDir = p.normal;
+	float springExtensionLength = p.penetration;
+
+	Vector3 hookeX = springExtensionDir * springExtensionLength;
+	physA->AddForceAtPosition(-hookeX * physA->GetElasticity(), springPosA);
+	physB->AddForceAtPosition(hookeX * physA->GetElasticity(), springPosB);
 }
 
 /*
@@ -358,7 +423,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 	
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject * object = (*i)->GetPhysicsObject();
-		if (object == nullptr) {
+		if (object == nullptr || (*i)->IsAsleep()) {
 			continue; // No physics object for this GameObject !
 		}
 		float inverseMass = object->GetInverseMass();
@@ -400,7 +465,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 	
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject * object = (*i)->GetPhysicsObject();
-		if (object == nullptr) {
+		if (object == nullptr || (*i)->IsAsleep()) {
 			continue;
 		}
 		Transform & transform = (*i)->GetTransform();
@@ -430,7 +495,6 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		float frameAngularDamping = 1.0f - (linearDamping * dt);
 		angVel = angVel * frameAngularDamping;
 		object->SetAngularVelocity(angVel);
-
 	}
 }
 

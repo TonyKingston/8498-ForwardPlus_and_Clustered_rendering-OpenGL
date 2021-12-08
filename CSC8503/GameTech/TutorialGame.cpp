@@ -136,6 +136,11 @@ void TutorialGame::UpdateKeys() {
 		selectionObject = nullptr;
 		lockedObject = nullptr;
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM3)) {
+		InitSleepTest();
+		selectionObject = nullptr;
+		lockedObject = nullptr;
+	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
@@ -289,6 +294,14 @@ void NCL::CSC8503::TutorialGame::InitOBBTest() {
 	AddSphereToWorld(position + Vector3(10, 0, 0), 2, 10.0f);
 }
 
+void NCL::CSC8503::TutorialGame::InitSleepTest() {
+	world->ClearAndErase();
+	physics->Clear();
+	InitDefaultFloor();
+	Vector3 position = Vector3(0, 10.0f, 0);
+	AddSphereToWorld(position + Vector3(10, 0, 0), 2, 10.0f);
+}
+
 void TutorialGame::BridgeConstraintTest() {
 	Vector3 cubeSize = Vector3(8, 8, 8);
 	
@@ -340,6 +353,7 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 
 	floor->GetPhysicsObject()->SetInverseMass(0);
 	floor->GetPhysicsObject()->InitCubeInertia();
+	floor->GetPhysicsObject()->SetFriction(0.5f);
 
 	world->AddGameObject(floor);
 
@@ -372,7 +386,8 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
-	sphere->GetPhysicsObject()->SetElasticity(0.8);
+	sphere->GetPhysicsObject()->SetElasticity(0.7);
+	
 
 	world->AddGameObject(sphere);
 

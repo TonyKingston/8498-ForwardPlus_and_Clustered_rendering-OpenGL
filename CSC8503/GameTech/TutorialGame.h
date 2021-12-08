@@ -22,6 +22,7 @@ namespace NCL {
 			void InitWorld();
 			void InitCapsuleTest();
 			void InitOBBTest();
+			void InitSleepTest();
 
 			void InitGameExamples();
 

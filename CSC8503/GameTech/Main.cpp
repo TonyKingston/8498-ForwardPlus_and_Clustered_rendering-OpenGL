@@ -65,7 +65,7 @@ void TestStateMachine() {
 	StateMachine* testMachine = new StateMachine();
 	int data = 0;
 		
-	State * A = new State([&](float dt)->void
+	/*State * A = new State([&](float dt)->void
 			{
 		std::cout << "I’m in state A!\n";
 		data++;
@@ -97,5 +97,5 @@ void TestStateMachine() {
 	
 	for (int i = 0; i < 100; ++i) {
 		testMachine->Update(1.0f);
-	}
+	}*/
 }

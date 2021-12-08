@@ -75,6 +75,22 @@ namespace NCL {
 				friction = f;
 			}
 
+			void UpdateWeightedAverageMotion() {
+				float bias = 0.96f;
+				float motion = linearVelocity.LengthSquared() + angularVelocity.LengthSquared();
+				rwaMotion = bias * rwaMotion + (1 - bias) * motion;
+			}
+
+			void SetWeightedAverageMotion(float m) {
+				rwaMotion = m;
+			}
+
+			float GetWeightedAverageMotion() {
+				return rwaMotion;
+			}
+
+			
+
 			void InitCubeInertia();
 			void InitSphereInertia(bool hollow = false);
 
@@ -95,7 +111,7 @@ namespace NCL {
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
-			
+			float rwaMotion;
 
 			//angular stuff
 			Vector3 angularVelocity;

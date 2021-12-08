@@ -41,13 +41,16 @@ namespace NCL {
 
 			void UpdateCollisionList();
 			void UpdateObjectAABBs();
+			void UpdateSleepingObjects();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
+			void ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const;
 
 			GameWorld& gameWorld;
 
 			bool	applyGravity;
 			Vector3 gravity;
+			float sleepEpsilon;
 			float	dTOffset;
 			float	globalDamping;
 			float linearDamping;
