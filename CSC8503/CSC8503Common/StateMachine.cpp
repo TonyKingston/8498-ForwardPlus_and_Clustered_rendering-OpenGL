@@ -11,6 +11,13 @@ StateMachine::StateMachine()
 
 StateMachine::~StateMachine()
 {
+	for (auto& i : allStates) {
+		delete i;
+	}
+	
+	for (auto& i : allTransitions) {
+		delete i.second;
+	}
 }
 
 void StateMachine::AddState(State* s) {
@@ -24,7 +31,7 @@ void StateMachine::AddTransition(StateTransition* t) {
 	allTransitions.insert(std::make_pair(t->GetSourceState(), t));
 }
 
-void StateMachine::Update() {
+void StateMachine::Update(float dt) {
 	if (activeState) {
 		activeState->Update();
 	
