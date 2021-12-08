@@ -54,7 +54,7 @@ namespace NCL {
 
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
-		//	QuadTree <GameObject*> tree;
+			//QuadTree <GameObject*> tree;
 
 
 			bool useBroadPhase		= true;
