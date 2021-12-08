@@ -5,6 +5,7 @@
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 #include "..//CSC8503Common/PositionConstraint.h"
+#include "..//CSC8503Common/PositionOrientationConstraint.h"
 
 using namespace NCL;
 using namespace CSC8503;

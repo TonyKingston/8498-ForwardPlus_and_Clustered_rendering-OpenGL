@@ -105,6 +105,9 @@
     <ClInclude Include="PositionConstraint.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="PositionOrientationConstraint.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">
@@ -153,6 +156,9 @@
       <Filter>CollisionDetection</Filter>
     </ClCompile>
     <ClCompile Include="PositionConstraint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PositionOrientationConstraint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
