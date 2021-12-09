@@ -76,6 +76,10 @@ void TutorialGame::UpdateGame(float dt) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
 
+	if (testStateObject) {
+		testStateObject->Update(dt);
+	}
+
 	UpdateKeys();
 
 	if (useGravity) {
@@ -274,6 +278,8 @@ void TutorialGame::InitWorld() {
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
 	InitDefaultFloor();
+	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+
 	//BridgeConstraintTest();
 }
 
@@ -415,6 +421,26 @@ GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfH
 
 	return capsule;
 
+}
+
+StateGameObject* NCL::CSC8503::TutorialGame::AddStateObjectToWorld(const Vector3& position) {
+	StateGameObject* apple = new StateGameObject();
+
+	SphereVolume* volume = new SphereVolume(0.25f);
+	apple->SetBoundingVolume((CollisionVolume*)volume);
+	apple->GetTransform()
+		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetPosition(position);
+
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
+
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(apple);
+
+	return apple;
 }
 
 GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB, float inverseMass) {

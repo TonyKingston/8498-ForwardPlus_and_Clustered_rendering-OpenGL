@@ -412,7 +412,7 @@ void PhysicsSystem::BroadPhase() {
 		}
 		bool b = true;
 		//QuadTreeNode<GameObject*> node = *nodePointer;
-		if (nodePointer != nullptr) {
+	/*	if (nodePointer != nullptr) {
 			nodePointer->OperateOnContents(
 				[&](std::list <QuadTreeEntry <GameObject*>>& data) {
 					CollisionDetection::CollisionInfo info;
@@ -424,7 +424,7 @@ void PhysicsSystem::BroadPhase() {
 				
 			});
 
-		}
+		}*/
 	}
 	
 }
