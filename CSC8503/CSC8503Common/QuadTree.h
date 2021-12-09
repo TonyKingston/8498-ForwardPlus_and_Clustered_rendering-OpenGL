@@ -38,7 +38,7 @@ namespace NCL {
 				this->position	= pos;
 				this->size		= size;
 				sleepCount = 0;
-				isAsleep = false;
+				isAsleep = true;
 			}
 
 			~QuadTreeNode() {
@@ -59,10 +59,8 @@ namespace NCL {
 				}
 				else { // currently a leaf node , can just expand
 					contents.push_back(QuadTreeEntry <T>(object, objectPos, objectSize));
-					if (objectState == true) {
-						sleepCount++;
-					}
-					isAsleep = sleepCount >= maxSize ? true : false;
+					//isAsleep = sleepCount >= maxSize ? true : false;
+					isAsleep = isAsleep && objectState;
 					if ((int)contents.size() > maxSize && depthLeft > 0) {
 						isAsleep = isAsleep && objectState; // Wakeup the node if the final insert is not asleep
 						if (!children) {
@@ -128,7 +126,7 @@ namespace NCL {
 					}
 				}
 				else {
-					if (!contents.empty()) {
+					if (!contents.empty() && !isAsleep) {
 						func(contents);
 					}
 					
