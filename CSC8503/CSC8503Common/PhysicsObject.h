@@ -76,7 +76,7 @@ namespace NCL {
 			}
 
 			void UpdateWeightedAverageMotion() {
-				float bias = 0.96f;
+				float bias = 0.94f;
 				float motion = linearVelocity.LengthSquared() + angularVelocity.LengthSquared();
 				rwaMotion = bias * rwaMotion + (1 - bias) * motion;
 			}
@@ -87,6 +87,14 @@ namespace NCL {
 
 			float GetWeightedAverageMotion() {
 				return rwaMotion;
+			}
+
+			bool IsStatic() {
+				return isStatic;
+			}
+
+			void SetIsStatic(bool val) {
+				isStatic = val;
 			}
 
 			
@@ -107,6 +115,7 @@ namespace NCL {
 			float inverseMass;
 			float elasticity;
 			float friction;
+			bool isStatic;
 
 			//linear stuff
 			Vector3 linearVelocity;

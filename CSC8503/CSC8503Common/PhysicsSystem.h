@@ -49,6 +49,7 @@ namespace NCL {
 			GameWorld& gameWorld;
 
 			bool	applyGravity;
+			bool    useSleep;
 			Vector3 gravity;
 			float sleepEpsilon;
 			float	dTOffset;

@@ -386,7 +386,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
-	sphere->GetPhysicsObject()->SetElasticity(0.7);
+	sphere->GetPhysicsObject()->SetElasticity(0.8);
 	
 
 	world->AddGameObject(sphere);

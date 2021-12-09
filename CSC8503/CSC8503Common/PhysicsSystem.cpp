@@ -21,6 +21,7 @@ and the forces that are added to objects to change those positions
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= false;
 	useBroadPhase	= true;	
+	useSleep = false;
 	if (useBroadPhase) {
 		//tree = QuadTree <GameObject*>(Vector2(1024, 1024), 7, 6);
 	}
@@ -28,7 +29,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
 	linearDamping = 0.4f;
-	sleepEpsilon = 0.00005f;
+	sleepEpsilon = 0.0005f;
 }
 
 PhysicsSystem::~PhysicsSystem()	{
@@ -85,6 +86,10 @@ void PhysicsSystem::Update(float dt) {
 		constraintIterationCount++;
 		std::cout << "Setting constraint iterations to " << constraintIterationCount << std::endl;
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+		useSleep = !useSleep;
+		std::cout << "Setting sleeping to " << useSleep << std::endl;
+	}
 
 	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
 
@@ -117,7 +122,9 @@ void PhysicsSystem::Update(float dt) {
 
 		dTOffset -= realDT;
 	}
-	UpdateSleepingObjects();
+	if (useSleep) {
+		UpdateSleepingObjects();
+	}
 
 	ClearForces();	//Once we've finished with the forces, reset them to zero
 
@@ -304,7 +311,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	//dPn = max(dPn, 0.0f);
 	float j = ((-(1.0f + cRestitution) * impulseForce)) / (totalMass + angularEffect);
 	//j = max(j, 0.0f);
-	j = j + (p.penetration * 1.5);
+	//j = j + (p.penetration * 1.5);
 
 	Vector3 tangent = (contactVelocity - (p.normal * impulseForce)).Normalised();
 	float frictionForce = Vector3::Dot(contactVelocity, tangent);
@@ -315,7 +322,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float jt = (-cFriction * frictionForce) / (totalMass + frictionAngularEffect);
 	float maxJt = cFriction * j;
-	jt = Maths::Clamp(jt, -maxJt, maxJt);
+	//jt = Maths::Clamp(jt, -maxJt, maxJt);
 	
 	Vector3 frictionImpulse = tangent * jt;
 	Vector3 fullImpulse = (p.normal * j);
@@ -369,7 +376,7 @@ void PhysicsSystem::BroadPhase() {
 			continue;
 		}
 		Vector3 pos = (*i)->GetTransform().GetPosition();
-		tree.Insert(*i, pos, halfSizes);
+		tree.Insert(*i, pos, halfSizes, (*i)->IsAsleep());
 	}
 	//tree.DebugDraw();
 	tree.OperateOnContents(

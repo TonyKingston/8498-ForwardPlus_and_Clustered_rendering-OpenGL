@@ -37,13 +37,15 @@ namespace NCL {
 				children		= nullptr;
 				this->position	= pos;
 				this->size		= size;
+				sleepCount = 0;
+				isAsleep = false;
 			}
 
 			~QuadTreeNode() {
 				delete[] children;
 			}
 
-			void Insert(T& object, const Vector3& objectPos, const Vector3& objectSize, int depthLeft, int maxSize) {
+			void Insert(T& object, const Vector3& objectPos, const Vector3& objectSize, int depthLeft, int maxSize, bool objectState = false) {
 				if (!CollisionDetection::AABBTest(objectPos,
 					Vector3(position.x, 0, position.y), objectSize,
 					Vector3(size.x, 1000.0f, size.y))) {
@@ -57,7 +59,12 @@ namespace NCL {
 				}
 				else { // currently a leaf node , can just expand
 					contents.push_back(QuadTreeEntry <T>(object, objectPos, objectSize));
+					if (objectState == true) {
+						sleepCount++;
+					}
+					isAsleep = sleepCount == maxSize ? true : false;
 					if ((int)contents.size() > maxSize && depthLeft > 0) {
+						isAsleep = isAsleep && objectState; // Wakeup the node if the final insert is not asleep
 						if (!children) {
 							Split();
 							//we need to reinsert the contents so far!
@@ -115,7 +122,7 @@ namespace NCL {
 			}
 
 			void OperateOnContents(QuadTreeFunc& func) {
-				if (children) {
+				if (children && !isAsleep) {
 					for (int i = 0; i < 4; ++i) {
 						children[i].OperateOnContents(func);
 					}
@@ -133,7 +140,8 @@ namespace NCL {
 
 			Vector2 position;
 			Vector2 size;
-
+			int sleepCount;
+			bool isAsleep;
 			QuadTreeNode<T>* children;
 		};
 	}
@@ -159,8 +167,8 @@ namespace NCL {
 			~QuadTree() {
 			}
 
-			void Insert(T object, const Vector3& pos, const Vector3& size) {
-				root.Insert(object, pos, size, maxDepth, maxSize);
+			void Insert(T object, const Vector3& pos, const Vector3& size, bool objectState = false) {
+				root.Insert(object, pos, size, maxDepth, maxSize, objectState);
 			}
 
 			void DebugDraw() {
