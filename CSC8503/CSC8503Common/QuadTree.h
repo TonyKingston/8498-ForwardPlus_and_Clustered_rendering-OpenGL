@@ -28,6 +28,24 @@ namespace NCL {
 		class QuadTreeNode	{
 		public:
 			typedef std::function<void(std::list<QuadTreeEntry<T>>&)> QuadTreeFunc;
+
+			void OperateOnContents(QuadTreeFunc& func) {
+				if (children && !isAsleep) {
+					for (int i = 0; i < 4; ++i) {
+						children[i].OperateOnContents(func);
+					}
+				}
+				else {
+					if (!contents.empty() && !isAsleep) {
+						func(contents);
+					}
+
+				}
+			}
+
+			int ContentsSize() {
+				return contents.size();
+			}
 		protected:
 			friend class QuadTree<T>;
 
@@ -79,16 +97,18 @@ namespace NCL {
 				}
 			}
 
-			QuadTreeNode<T> GetNodeToInsert(T object) {
+			void GetNodeToInsert(T object, QuadTreeNode<T>*& node) {
+				if (node != nullptr) {
+					return;
+				}
 				if (children) {
 					for (int i = 0; i < 4; ++i) {
-						children[i].GetNodeToInsert();
+						children[i].GetNodeToInsert(object, node);
 					}
 				}
-				else {
-					/*if ((int)contents.size() < maxSize) {
-
-					}*/
+				else if (node == nullptr) {
+					node = this;
+					bool a = true;
 				}
 			}
 
@@ -132,19 +152,7 @@ namespace NCL {
 				}
 			}
 
-			void OperateOnContents(QuadTreeFunc& func) {
-				if (children && !isAsleep) {
-					for (int i = 0; i < 4; ++i) {
-						children[i].OperateOnContents(func);
-					}
-				}
-				else {
-					if (!contents.empty() && !isAsleep) {
-						func(contents);
-					}
-					
-				}
-			}
+			
 
 		protected:
 			std::list< QuadTreeEntry<T> >	contents;
@@ -185,9 +193,11 @@ namespace NCL {
 			void DebugDraw() {
 				root.DebugDraw();
 			}
-
-			QuadTreeNode<T> GetNodeToInsert(T object) {
-				//root.GetNodeToInsert(T object);
+			
+			QuadTreeNode<T>* GetNodeToInsert(T object) {
+				QuadTreeNode<T>* node = nullptr;
+				root.GetNodeToInsert(object, node);
+				return node;
 			}
 
 			void Clear() {
@@ -200,6 +210,7 @@ namespace NCL {
 
 		protected:
 			QuadTreeNode<T> root;
+			//QuadTreeNode<T>* insertionNode;
 			int maxDepth;
 			int maxSize;
 		};

@@ -380,7 +380,7 @@ void PhysicsSystem::BroadPhase() {
 	gameWorld.GetObjectIterators(first, last);
 	for (auto i = first; i != last; ++i) {
 		Vector3 halfSizes;
-		if (!(*i)->GetBroadphaseAABB(halfSizes) ) { // || (*i)->GetPhysicsObject()->IsStatic()
+		if (!(*i)->GetBroadphaseAABB(halfSizes) || (*i)->GetPhysicsObject()->IsStatic()) { // || (*i)->GetPhysicsObject()->IsStatic()
 			continue;
 		}
 		Vector3 pos = (*i)->GetTransform().GetPosition();
@@ -405,8 +405,26 @@ void PhysicsSystem::BroadPhase() {
 	std::vector <GameObject*>::const_iterator first2;
 	std::vector <GameObject*>::const_iterator last2;
 	gameWorld.GetObjectIterators(first2, last2, true);
-	for (auto i = first; i != last; ++i) {
-		//QuadTreeNode<GameObject*> node = 
+	for (auto i = first2; i != last2; ++i) {
+		QuadTreeNode<GameObject*>* nodePointer = tree.GetNodeToInsert((*i));
+		if (useSleep) {
+			bool a = true;
+		}
+		bool b = true;
+		//QuadTreeNode<GameObject*> node = *nodePointer;
+		if (nodePointer != nullptr) {
+			nodePointer->OperateOnContents(
+				[&](std::list <QuadTreeEntry <GameObject*>>& data) {
+					CollisionDetection::CollisionInfo info;
+					for (auto j = data.begin(); j != data.end(); ++j) {
+						info.a = min((*i), (*j).object);
+						info.b = max((*i), (*j).object);
+						broadphaseCollisions.insert(info);
+					}
+				
+			});
+
+		}
 	}
 	
 }
