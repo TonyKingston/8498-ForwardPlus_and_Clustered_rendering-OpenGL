@@ -36,11 +36,21 @@ namespace NCL {
 				
 			}
 		};
+
+		bool IsTrigger() {
+			return isTrigger;
+		}
+		
+		void SetIsTrigger(bool val) {
+			isTrigger = val;
+		}
+
 		void SetVolumeMesh(MeshGeometry* m) { mesh = m; }
 		void SetObject(CSC8503::GameObject* object) { collisionObj = object; }
 		MeshGeometry* GetVolumeMesh() { return mesh; }
 	private:
 		MeshGeometry* mesh;
+		bool isTrigger;
 		CSC8503::GameObject* collisionObj;
 	};
 }

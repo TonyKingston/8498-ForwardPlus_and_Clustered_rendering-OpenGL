@@ -79,6 +79,19 @@ namespace NCL {
 				}
 			}
 
+			QuadTreeNode<T> GetNodeToInsert(T object) {
+				if (children) {
+					for (int i = 0; i < 4; ++i) {
+						children[i].GetNodeToInsert();
+					}
+				}
+				else {
+					/*if ((int)contents.size() < maxSize) {
+
+					}*/
+				}
+			}
+
 			void Split() {
 				Vector2 halfSize = size / 2.0f;
 				children = new QuadTreeNode <T >[4];
@@ -171,6 +184,10 @@ namespace NCL {
 
 			void DebugDraw() {
 				root.DebugDraw();
+			}
+
+			QuadTreeNode<T> GetNodeToInsert(T object) {
+				//root.GetNodeToInsert(T object);
 			}
 
 			void Clear() {

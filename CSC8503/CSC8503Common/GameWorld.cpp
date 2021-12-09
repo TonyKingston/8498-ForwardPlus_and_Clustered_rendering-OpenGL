@@ -35,7 +35,13 @@ void GameWorld::ClearAndErase() {
 }
 
 void GameWorld::AddGameObject(GameObject* o) {
-	gameObjects.emplace_back(o);
+	if (o->GetPhysicsObject()->IsStatic()) {
+		gameObjects.emplace_back(o);
+		staticObjects.emplace_back(o);
+	}
+	else {
+		gameObjects.emplace_back(o);
+	}
 	o->SetWorldID(worldIDCounter++);
 }
 
@@ -48,10 +54,16 @@ void GameWorld::RemoveGameObject(GameObject* o, bool andDelete) {
 
 void GameWorld::GetObjectIterators(
 	GameObjectIterator& first,
-	GameObjectIterator& last) const {
+	GameObjectIterator& last, bool isStatic) const {
 
-	first	= gameObjects.begin();
-	last	= gameObjects.end();
+	if (isStatic) {
+		first = staticObjects.begin();
+		last = staticObjects.end();
+	}
+	else {
+		first = gameObjects.begin();
+		last = gameObjects.end();
+	}
 }
 
 void GameWorld::OperateOnContents(GameObjectFunc f) {

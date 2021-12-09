@@ -49,7 +49,7 @@ namespace NCL {
 
 			void GetObjectIterators(
 				GameObjectIterator& first,
-				GameObjectIterator& last) const;
+				GameObjectIterator& last, bool isStatic = false) const;
 
 			void GetConstraintIterators(
 				std::vector<Constraint*>::const_iterator& first,
@@ -57,6 +57,7 @@ namespace NCL {
 
 		protected:
 			std::vector<GameObject*> gameObjects;
+			std::vector<GameObject*> staticObjects;
 			std::vector<Constraint*> constraints;
 
 			Camera* mainCamera;

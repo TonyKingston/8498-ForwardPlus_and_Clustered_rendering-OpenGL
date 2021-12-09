@@ -33,7 +33,7 @@ void StateMachine::AddTransition(StateTransition* t) {
 
 void StateMachine::Update(float dt) {
 	if (activeState) {
-		activeState->Update();
+		activeState->Update(dt);
 	
 		//Get the transition set starting from this state node;
 		std::pair<TransitionIterator, TransitionIterator> range = allTransitions.equal_range(activeState);

@@ -25,9 +25,12 @@ This time, we've added some extra functionality to the window class - we can
 hide or show the 
 
 */
+
+void TestStateMachine();
+
 int main() {
 	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-
+	TestStateMachine();
 	if (!w->HasInitialised()) {
 		return -1;
 	}	
@@ -65,7 +68,7 @@ void TestStateMachine() {
 	StateMachine* testMachine = new StateMachine();
 	int data = 0;
 		
-	/*State * A = new State([&](float dt)->void
+	State * A = new State([&](float dt)->void
 			{
 		std::cout << "I’m in state A!\n";
 		data++;
@@ -79,12 +82,12 @@ void TestStateMachine() {
 		}
 	);
 
-	StateTransition* stateAB = new GenericTransition<State,State>(A, B, [&](void)->bool
+	StateTransition* stateAB = new StateTransition(A, B, [&](void)->bool
 		{
 		return data > 10;
 		}
 	);
-	StateTransition * stateBA = new GenericTransition(B, A, [&](void)->bool
+	StateTransition * stateBA = new StateTransition(B, A, [&](void)->bool
 	 {
 		return data < 0;
 	}
@@ -97,5 +100,5 @@ void TestStateMachine() {
 	
 	for (int i = 0; i < 100; ++i) {
 		testMachine->Update(1.0f);
-	}*/
+	}
 }

@@ -213,6 +213,17 @@ void NCL::CSC8503::PhysicsSystem::UpdateSleepingObjects() {
 	
 }
 
+void NCL::CSC8503::PhysicsSystem::BuildStaticList() {
+	std::vector < GameObject* >::const_iterator first;
+	std::vector < GameObject* >::const_iterator last;
+	gameWorld.GetObjectIterators(first, last, true);
+
+	for (auto i = first; i != last; ++i) {
+
+	}
+
+}
+
 /*
 
 This is how we'll be doing collision detection in tutorial 4.
@@ -369,7 +380,7 @@ void PhysicsSystem::BroadPhase() {
 	gameWorld.GetObjectIterators(first, last);
 	for (auto i = first; i != last; ++i) {
 		Vector3 halfSizes;
-		if (!(*i)->GetBroadphaseAABB(halfSizes)) {
+		if (!(*i)->GetBroadphaseAABB(halfSizes) ) { // || (*i)->GetPhysicsObject()->IsStatic()
 			continue;
 		}
 		Vector3 pos = (*i)->GetTransform().GetPosition();
@@ -389,6 +400,15 @@ void PhysicsSystem::BroadPhase() {
 				}
 			}
 	});
+
+	// Static Objects
+	std::vector <GameObject*>::const_iterator first2;
+	std::vector <GameObject*>::const_iterator last2;
+	gameWorld.GetObjectIterators(first2, last2, true);
+	for (auto i = first; i != last; ++i) {
+		//QuadTreeNode<GameObject*> node = 
+	}
+	
 }
 
 /*

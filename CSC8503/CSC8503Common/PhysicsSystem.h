@@ -42,6 +42,7 @@ namespace NCL {
 			void UpdateCollisionList();
 			void UpdateObjectAABBs();
 			void UpdateSleepingObjects();
+			void BuildStaticList();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
 			void ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const;
@@ -58,6 +59,7 @@ namespace NCL {
 
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
+			std::vector<GameObject*> staticObjects;
 			//QuadTree <GameObject*> tree;
 
 
