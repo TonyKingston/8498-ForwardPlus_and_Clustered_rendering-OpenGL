@@ -29,7 +29,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
 	linearDamping = 0.4f;
-	sleepEpsilon = 0.0005f;
+	sleepEpsilon = 0.005f;
 }
 
 PhysicsSystem::~PhysicsSystem()	{
@@ -201,9 +201,6 @@ void NCL::CSC8503::PhysicsSystem::UpdateSleepingObjects() {
 		object->UpdateWeightedAverageMotion();
 
 		if (object->GetWeightedAverageMotion() < sleepEpsilon) {
-			if (applyGravity) {
-				std::cout << "hello";
-			}
 			(*i)->PutToSleep();
 			object->SetLinearVelocity(Vector3(0, 0, 0));
 			object->SetAngularVelocity(Vector3(0, 0, 0));
@@ -378,7 +375,7 @@ void PhysicsSystem::BroadPhase() {
 		Vector3 pos = (*i)->GetTransform().GetPosition();
 		tree.Insert(*i, pos, halfSizes, (*i)->IsAsleep());
 	}
-	//tree.DebugDraw();
+	tree.DebugDraw();
 	tree.OperateOnContents(
 		[&](std::list <QuadTreeEntry <GameObject*>>& data) {
 			CollisionDetection::CollisionInfo info;

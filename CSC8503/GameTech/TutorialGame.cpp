@@ -353,7 +353,8 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 
 	floor->GetPhysicsObject()->SetInverseMass(0);
 	floor->GetPhysicsObject()->InitCubeInertia();
-	floor->GetPhysicsObject()->SetFriction(0.5f);
+	//floor->GetPhysicsObject()->SetFriction(0.5f);
+	floor->GetPhysicsObject()->SetIsStatic(true);
 
 	world->AddGameObject(floor);
 

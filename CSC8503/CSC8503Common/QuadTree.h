@@ -62,7 +62,7 @@ namespace NCL {
 					if (objectState == true) {
 						sleepCount++;
 					}
-					isAsleep = sleepCount == maxSize ? true : false;
+					isAsleep = sleepCount >= maxSize ? true : false;
 					if ((int)contents.size() > maxSize && depthLeft > 0) {
 						isAsleep = isAsleep && objectState; // Wakeup the node if the final insert is not asleep
 						if (!children) {
