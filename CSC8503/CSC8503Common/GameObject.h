@@ -19,6 +19,7 @@ namespace NCL {
 			~GameObject();
 
 			static void InitObjects(TutorialGame* game);
+			//virtual bool UpdateObject(float dt);
 
 			void SetBoundingVolume(CollisionVolume* vol) {
 				boundingVolume = vol;

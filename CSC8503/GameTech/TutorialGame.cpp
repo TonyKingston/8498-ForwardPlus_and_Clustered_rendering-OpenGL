@@ -227,6 +227,10 @@ void TutorialGame::LockedObjectMovement() {
 	}
 }
 
+vector<GameObject*> TutorialGame::GetSeekers() {
+	return allSeekers;
+}
+
 void TutorialGame::DebugObjectMovement() {
 //If we've selected an object, we can manipulate it with some key presses
 	if (inSelectionMode && selectionObject) {

@@ -108,10 +108,10 @@
     <ClInclude Include="PositionOrientationConstraint.h">
       <Filter>Physics</Filter>
     </ClInclude>
-    <ClInclude Include="StateMachineObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StateGameObject.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Seeker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -168,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StateGameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Seeker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

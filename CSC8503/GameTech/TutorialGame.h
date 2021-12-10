@@ -4,6 +4,7 @@
 #include "../CSC8503Common/StateGameObject.h"
 
 
+
 namespace NCL {
 	namespace CSC8503 {
 		class GameObject;
@@ -13,6 +14,8 @@ namespace NCL {
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
+			vector<GameObject*> GetSeekers();
+
 
 		protected:
 			void InitialiseAssets();
@@ -37,6 +40,7 @@ namespace NCL {
 			void MoveSelectedObject();
 			void DebugObjectMovement();
 			void LockedObjectMovement();
+
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f, bool hollow = false);
@@ -82,7 +86,7 @@ namespace NCL {
 				lockedObject = o;
 			}
 
-		//	QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
+			vector<GameObject*> allSeekers;
 
 		};
 	}
