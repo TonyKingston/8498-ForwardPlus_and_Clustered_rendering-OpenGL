@@ -14,10 +14,12 @@ namespace NCL {
 			~PushdownState();
 
 			PushdownResult PushdownUpdate(PushdownState** pushResult);
+			virtual PushdownResult OnUpdate(float dt, 
+				PushdownState** pushResult) = 0;
+
 
 			virtual void OnAwake() {} //By default do nothing
 			virtual void OnSleep() {} //By default do nothing
 		};
 	}
 }
-
