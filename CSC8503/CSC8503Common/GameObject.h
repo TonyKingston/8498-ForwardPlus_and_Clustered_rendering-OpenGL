@@ -11,14 +11,14 @@ using std::vector;
 
 namespace NCL {
 	namespace CSC8503 {
-		class TutorialGame;
 		class GameObject	{
 		public:
 
 			GameObject(string name = "");
 			~GameObject();
 
-			static void InitObjects(TutorialGame* game);
+			//static void InitObjects(TutorialGame* game);
+			//virtual bool UpdateObject(float dt);
 
 			void SetBoundingVolume(CollisionVolume* vol) {
 				boundingVolume = vol;
@@ -96,10 +96,10 @@ namespace NCL {
 				return worldID;
 			}
 
-			TutorialGame* GetGame() const {
+			/*TutorialGame* GetGame() const {
 				return game;
 			}
-
+			*/
 			void PrintDebugInfo();
 
 		protected:
@@ -117,7 +117,7 @@ namespace NCL {
 
 
 			Vector3 broadphaseAABB;
-			static TutorialGame* game;
+		//static TutorialGame* game;
 		};
 	}
 }

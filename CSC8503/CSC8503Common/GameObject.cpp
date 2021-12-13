@@ -55,9 +55,9 @@ void GameObject::UpdateBroadphaseAABB() {
 	}
 }
 
-void GameObject::InitObjects(TutorialGame* game) {
-	game = game;
-}
+/*void GameObject::InitObjects(TutorialGame* g) {
+	game = g;
+}*/
 
 void GameObject::PrintDebugInfo() {
 	string selected = "Selected: " + tostr(worldID) + " " + name;

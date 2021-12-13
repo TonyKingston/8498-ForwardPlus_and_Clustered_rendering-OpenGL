@@ -146,6 +146,7 @@
     <ClInclude Include="OBBVolume.h" />
     <ClInclude Include="PositionConstraint.h" />
     <ClInclude Include="PositionOrientationConstraint.h" />
+    <ClInclude Include="Seeker.h" />
     <ClInclude Include="SphereVolume.h" />
     <ClInclude Include="CollisionVolume.h" />
     <ClInclude Include="CollisionDetection.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="State.h" />
+    <ClInclude Include="StateGameObject.h" />
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="StateTransition.h" />
     <ClInclude Include="Transform.h" />
@@ -185,6 +187,8 @@
     <ClCompile Include="PushdownState.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RenderObject.cpp" />
+    <ClCompile Include="Seeker.cpp" />
+    <ClCompile Include="StateGameObject.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="StateTransition.cpp" />
     <ClCompile Include="Transform.cpp" />
