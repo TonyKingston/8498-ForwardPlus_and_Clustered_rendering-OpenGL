@@ -559,6 +559,17 @@ bool NCL::CollisionDetection::OBBSphereIntersection(
 	return false;
 }
 
+Vector3 NCL::CollisionDetection::OBBSupport(const Transform& worldTransform, const Vector3& worldDir) {
+	Vector3 localDir = worldTransform.GetOrientation().Conjugate() * worldDir;
+	Vector3 vertex;
+	// Form a unit cube
+	vertex.x = localDir.x < 0 ? -1 : 1;
+	vertex.y = localDir.y < 0 ? -1 : 1;
+	vertex.z = localDir.z < 0 ? -1 : 1;
+
+	return worldTransform.GetMatrix() * vertex;
+}
+
 bool CollisionDetection::SphereCapsuleIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
@@ -627,9 +638,9 @@ float CollisionDetection::SquaredDistancePointLine(const Vector3& A, const Vecto
 
 Vector3 CollisionDetection::ClosestPointOnALine(const Vector3& start, const Vector3& end, const Vector3& point)
 {
-	Vector3 line = end - start;
+	Vector3 AB = end - start;
 
-	float t = Clamp(Vector3::Dot(point - start, line) / line.LengthSquared(), 0.0f, 1.0f);
+	float t = Clamp(Vector3::Dot(point - start, AB) / AB.LengthSquared(), 0.0f, 1.0f);
 
-	return start + (line * t);
+	return start + (AB * t);
 }
