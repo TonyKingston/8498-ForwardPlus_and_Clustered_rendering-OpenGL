@@ -108,6 +108,21 @@
     <ClInclude Include="PositionOrientationConstraint.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="BehaviourNode.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourAction.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourNodeWithChildren.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourSelector.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourSequence.h">
+      <Filter>AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">
@@ -159,6 +174,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PositionOrientationConstraint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourNodeWithChildren.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourSelector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourSequence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourAction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
