@@ -4,6 +4,9 @@
 #include "../CSC8503Common/PushdownState.h"
 using namespace NCL::CSC8503;
 
+GameState gameState = GameState();
+
+
 PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newState) {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::UP)) {
 		currentOption = currentOption > 0 ? currentOption - 1 : MAX_OPTIONS - 1;
@@ -19,7 +22,7 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
 		switch (currentOption) {
 		case 0:
-			*newState = new Game(gameWorld, renderer);
+			*newState = new Game();
 			return PushdownResult::Push;
 			break;
 		case 1:
@@ -41,14 +44,9 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 
 
 void MainMenu::OnAwake() {
-	gameWorld = new GameWorld();
-	renderer = new GameTechRenderer(*gameWorld);
-	/*Debug::SetRenderer(renderer);
-	gameWorld->GetMainCamera()->SetNearPlane(0.1f);
-	gameWorld->GetMainCamera()->SetFarPlane(500.0f);
-	gameWorld->GetMainCamera()->SetPitch(-15.0f);
-	gameWorld->GetMainCamera()->SetYaw(315.0f);
-	gameWorld->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));*/
+	//gameWorld = new GameWorld();
+	//renderer = new GameTechRenderer(*gameWorld);
+	renderer = gameState.GetRenderer();
 	DrawMenu();
 }
 
@@ -95,19 +93,16 @@ PushdownState::PushdownResult Game::OnUpdate(float dt, PushdownState** newState)
 	}
 }
 void Game::OnAwake() {
-	/*gameWorld = new GameWorld();
-	renderer = new GameTechRenderer(*gameWorld);
-	Debug::SetRenderer(renderer);*/
-	game = new TutorialGame(gameWorld, renderer);
+	game = gameState.GetGame();
 }
 
-void Game::OnSleep() {
+/*void Game::OnSleep() {
 	delete game;
-}
+}*/
 
 PushdownState::PushdownResult PauseMenu::OnUpdate(float dt, PushdownState** newState) {
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::P)) {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
 		return PushdownResult::Pop;
 	}
 	

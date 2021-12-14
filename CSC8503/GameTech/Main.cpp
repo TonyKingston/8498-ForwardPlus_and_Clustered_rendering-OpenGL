@@ -122,8 +122,9 @@ void TestStateMachine();
 void TestBehaviourTree();
 
 int main() {
-	Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-
+	gameState = GameState();
+	//Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+	Window* w = gameState.GetWindow();
 	if (!w->HasInitialised()) {
 		return -1;
 	}
