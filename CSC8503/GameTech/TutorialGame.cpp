@@ -65,7 +65,7 @@ NCL::CSC8503::TutorialGame::TutorialGame(GameWorld* gameWorld, GameTechRenderer*
 	useGravity = false;
 	inSelectionMode = false;
 	inDebugMode = false;
-
+	Debug::SetRenderer(renderer);
 	//GameObject::InitObjects(this);
 	InitialiseAssets();
 }

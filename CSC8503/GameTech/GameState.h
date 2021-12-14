@@ -35,6 +35,10 @@ namespace NCL {
 
 		class Game : public PushdownState {
 		public:
+			Game(GameWorld* world, GameTechRenderer* renderer) {
+				gameWorld = world;
+				this->renderer = renderer;
+			}
 			PushdownResult OnUpdate(float dt,
 				PushdownState** newState) override;
 			void OnAwake() override;

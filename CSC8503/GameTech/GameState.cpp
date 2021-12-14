@@ -12,12 +12,14 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 		currentOption = currentOption < MAX_OPTIONS - 1 ? currentOption + 1 : 0;
 	}
 	//Debug::FlushRenderables(dt);
+	renderer->Update(dt);
+	renderer->Render();
 	DrawMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
 		switch (currentOption) {
 		case 0:
-			*newState = new Game();
+			*newState = new Game(gameWorld, renderer);
 			return PushdownResult::Push;
 			break;
 		case 1:
@@ -41,18 +43,17 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 void MainMenu::OnAwake() {
 	gameWorld = new GameWorld();
 	renderer = new GameTechRenderer(*gameWorld);
-	Debug::SetRenderer(renderer);
+	/*Debug::SetRenderer(renderer);
 	gameWorld->GetMainCamera()->SetNearPlane(0.1f);
 	gameWorld->GetMainCamera()->SetFarPlane(500.0f);
 	gameWorld->GetMainCamera()->SetPitch(-15.0f);
 	gameWorld->GetMainCamera()->SetYaw(315.0f);
-	gameWorld->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	gameWorld->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));*/
 	DrawMenu();
 }
 
 void MainMenu::OnSleep() {
-	delete renderer;
-	delete gameWorld;
+
 }
 
 void MainMenu::DrawMenu() {
@@ -67,17 +68,16 @@ void MainMenu::DrawMenu() {
 		renderer->DrawString("Curveball Clammer", pos1, selectedColour);
 		renderer->DrawString("Maze of Terror", pos2, normalColour);
 		renderer->DrawString("Quit", pos3, normalColour);
-		
 		break;
 	case 1:
-		Debug::Print("Curveball Clammer", pos1, normalColour);
-		Debug::Print("Maze of Terror", pos2, selectedColour);
-		Debug::Print("Quit", pos3, normalColour);
+		renderer->DrawString("Curveball Clammer", pos1, normalColour);
+		renderer->DrawString("Maze of Terror", pos2, selectedColour);
+		renderer->DrawString("Quit", pos3, normalColour);
 		break;
 	case 2:
-		Debug::Print("Curveball Clammer", pos1, normalColour);
-		Debug::Print("Maze of Terror", pos2, normalColour);
-		Debug::Print("Quit", pos3, selectedColour);
+		renderer->DrawString("Curveball Clammer", pos1, normalColour);
+		renderer->DrawString("Maze of Terror", pos2, normalColour);
+		renderer->DrawString("Quit", pos3, selectedColour);
 		break;
 	}
 }
@@ -95,11 +95,10 @@ PushdownState::PushdownResult Game::OnUpdate(float dt, PushdownState** newState)
 	}
 }
 void Game::OnAwake() {
-	gameWorld = new GameWorld();
+	/*gameWorld = new GameWorld();
 	renderer = new GameTechRenderer(*gameWorld);
-	Debug::SetRenderer(renderer);
-
-	game = new TutorialGame();
+	Debug::SetRenderer(renderer);*/
+	game = new TutorialGame(gameWorld, renderer);
 }
 
 void Game::OnSleep() {
