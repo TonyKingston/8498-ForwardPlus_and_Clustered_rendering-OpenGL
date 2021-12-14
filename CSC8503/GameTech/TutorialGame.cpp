@@ -26,6 +26,7 @@ TutorialGame::TutorialGame()	{
 	InitialiseAssets();
 }
 
+
 /*
 
 Each of the little demo scenarios used in the game uses the same 2 meshes, 
@@ -53,6 +54,20 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
+}
+
+NCL::CSC8503::TutorialGame::TutorialGame(GameWorld* gameWorld, GameTechRenderer* gameRenderer) {
+	world = gameWorld;
+	renderer = gameRenderer;
+	physics = new PhysicsSystem(*world);
+
+	forceMagnitude = 10.0f;
+	useGravity = false;
+	inSelectionMode = false;
+	inDebugMode = false;
+
+	//GameObject::InitObjects(this);
+	InitialiseAssets();
 }
 
 TutorialGame::~TutorialGame()	{

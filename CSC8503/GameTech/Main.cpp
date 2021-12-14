@@ -13,10 +13,12 @@
 #include "../CSC8503Common/BehaviourAction.h"
 #include "../CSC8503Common/BehaviourSequence.h"
 #include "../CSC8503Common/BehaviourSelector.h"
-using namespace NCL;
-using namespace CSC8503;
 #include "..//CSC8503Common/PushdownState.h"
 #include "../CSC8503Common/PushdownMachine.h"
+#include "GameState.h"
+
+using namespace NCL;
+using namespace CSC8503;
 
 /*
 
@@ -45,7 +47,10 @@ class PauseScreen : public PushdownState {
 		std::cout << " Press U to unpause game !\n";
 
 	}
-};class GameScreen : public PushdownState {
+
+};
+
+class GameScreen : public PushdownState {
 	PushdownResult OnUpdate(float dt,
 		PushdownState** newState) override {
 		pauseReminder -= dt;
@@ -79,7 +84,10 @@ class PauseScreen : public PushdownState {
 protected:
 	int coinsMined = 0;
 	float pauseReminder = 1;
-};class IntroScreen : public PushdownState {
+
+};
+
+class IntroScreen : public PushdownState {
 	PushdownResult OnUpdate(float dt,
 		PushdownState** newState) override {
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
@@ -100,25 +108,22 @@ protected:
 		std::cout << " Press Space To Begin or escape to quit !\n";
 
 	}
-};void TestPushdownAutomata(Window* w) {
-	PushdownMachine machine(new IntroScreen());
-	while (w->UpdateWindow()) {
-		float dt = w->GetTimer()->GetTimeDeltaSeconds();
-		if (!machine.Update(dt)) {
-			return;
 
-		}
+};
 
-	}
-}
+void TestPushdownAutomata(Window* w) {
+	
+
+}
+
+
 
 void TestStateMachine();
 void TestBehaviourTree();
 
 int main() {
 	Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-	TestStateMachine();
-	TestBehaviourTree();
+
 	if (!w->HasInitialised()) {
 		return -1;
 	}
@@ -126,9 +131,9 @@ int main() {
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 
-	TestPushdownAutomata(w);
 
-/*	TutorialGame* g = new TutorialGame();
+	PushdownMachine machine(new MainMenu());
+
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -149,8 +154,10 @@ int main() {
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-		g->UpdateGame(dt);
-	}*/
+		if (!machine.Update(dt)) {
+			return -1;
+		}
+	}
 	Window::DestroyGameWindow();
 }
 
@@ -262,7 +269,9 @@ void TestBehaviourTree() {
 			}
 			return state;
 		}
-	);	BehaviourAction* lookForItems = new BehaviourAction(
+	);
+
+	BehaviourAction* lookForItems = new BehaviourAction(
 		" Look For Items ",
 		[&](float dt, BehaviourState state)->BehaviourState {
 			if (state == Initialise) {
@@ -283,7 +292,8 @@ void TestBehaviourTree() {
 			}
 			return state;
 		}
-	);	BehaviourSequence* sequence =
+	);
+	BehaviourSequence* sequence =
 		new BehaviourSequence(" Room Sequence ");
 	sequence->AddChild(findKey);
 	sequence->AddChild(goToRoom);
@@ -297,7 +307,9 @@ void TestBehaviourTree() {
 	BehaviourSequence* rootSequence =
 		new BehaviourSequence("Root Sequence");
 	rootSequence->AddChild(sequence);
-	rootSequence->AddChild(selection);	for (int i = 0; i < 5; ++i) {
+	rootSequence->AddChild(selection);
+
+	for (int i = 0; i < 5; ++i) {
 		rootSequence->Reset();
 		behaviourTimer = 0.0f;
 		distanceToTarget = rand() % 250;

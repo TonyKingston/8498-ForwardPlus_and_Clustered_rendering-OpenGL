@@ -3,8 +3,7 @@
 
 namespace NCL {
 	namespace CSC8503 {
-		class PushdownState :
-			public State
+		class PushdownState : public State
 		{
 		public:
 			enum PushdownResult {

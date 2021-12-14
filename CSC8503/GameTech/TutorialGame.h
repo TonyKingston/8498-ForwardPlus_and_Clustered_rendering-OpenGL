@@ -11,6 +11,7 @@ namespace NCL {
 		class TutorialGame		{
 		public:
 			TutorialGame();
+			TutorialGame(GameWorld* gameWorld, GameTechRenderer* gameRenderer);
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
