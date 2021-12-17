@@ -129,7 +129,7 @@
     <ClInclude Include="StateGameObject.h">
       <Filter>AI</Filter>
     </ClInclude>
-    <ClInclude Include="Bonus.h">
+    <ClInclude Include="BonusObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PlayerObject.h">
@@ -212,7 +212,7 @@
     <ClCompile Include="Seeker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bonus.cpp">
+    <ClCompile Include="BonusObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PlayerObject.cpp">

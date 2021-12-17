@@ -80,6 +80,15 @@ void GameWorld::UpdateWorld(float dt) {
 	if (shuffleConstraints) {
 		std::random_shuffle(constraints.begin(), constraints.end());
 	}
+	OperateOnContents([&](GameObject* g) {
+		if (g->IsActive()) {
+			g->UpdateObject(dt);
+		}
+		else {
+			RemoveGameObject(g, true);
+		}
+	});
+	
 }
 
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject) const {

@@ -380,7 +380,7 @@ void PhysicsSystem::BroadPhase() {
 	gameWorld.GetObjectIterators(first, last);
 	for (auto i = first; i != last; ++i) {
 		Vector3 halfSizes;
-		if (!(*i)->GetBroadphaseAABB(halfSizes) || (*i)->GetPhysicsObject()->IsStatic()) { // || (*i)->GetPhysicsObject()->IsStatic()
+		if (!(*i)->GetBroadphaseAABB(halfSizes)) { // || (*i)->GetPhysicsObject()->IsStatic()
 			continue;
 		}
 		Vector3 pos = (*i)->GetTransform().GetPosition();
@@ -396,16 +396,20 @@ void PhysicsSystem::BroadPhase() {
 					//if the same pair is in another quadtree node together etc
 					info.a = min((*i).object, (*j).object);
 					info.b = max((*i).object, (*j).object);
+					int layerMask = (*i).object->GetLayerMask() & (*j).object->GetLayerMask();
+					if (layerMask == 0) {
+						continue;
+					}
 					broadphaseCollisions.insert(info);
 				}
 			}
 	});
 
 	// Static Objects
-	std::vector <GameObject*>::const_iterator first2;
-	std::vector <GameObject*>::const_iterator last2;
-	gameWorld.GetObjectIterators(first2, last2, true);
-	for (auto i = first2; i != last2; ++i) {
+	//std::vector <GameObject*>::const_iterator first2;
+	//std::vector <GameObject*>::const_iterator last2;
+	//gameWorld.GetObjectIterators(first2, last2, true);
+	/*for (auto i = first2; i != last2; ++i) {
 		QuadTreeNode<GameObject*>* nodePointer = tree.GetNodeToInsert((*i));
 		if (useSleep) {
 			bool a = true;
@@ -424,8 +428,8 @@ void PhysicsSystem::BroadPhase() {
 				
 			});
 
-		}*/
-	}
+		}
+	}*/
 	
 }
 
@@ -466,7 +470,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject * object = (*i)->GetPhysicsObject();
 		if (object == nullptr || (*i)->IsAsleep()) {
-			continue; // No physics object for this GameObject !
+			continue; 
 		}
 		float inverseMass = object->GetInverseMass();
 		

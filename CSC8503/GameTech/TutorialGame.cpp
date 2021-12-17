@@ -10,6 +10,7 @@
 #include <fstream>
 
 
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -35,7 +36,7 @@ TutorialGame::TutorialGame(int level) {
 	physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
-	useGravity = false;
+	useGravity = true;
 	inSelectionMode = false;
 	inDebugMode = false;
 
@@ -113,6 +114,7 @@ TutorialGame::~TutorialGame() {
 	delete physics;
 	delete renderer;
 	delete world;
+	delete grid;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -335,12 +337,17 @@ void TutorialGame::InitMazeLevel() {
 	world->ClearAndErase();
 	physics->Clear();
 
+	grid = new NavigationGrid("MazeGrid.txt");
 	LoadWorldFromFile("MazeGrid.txt");
-	AddPlayerToWorld(Vector3(10, 10, 10));
-	enemy = AddEnemyToWorld(Vector3(160, 10, 130));
-	enemy->FindPath(player->GetTransform().GetPosition());
-	enemy->DisplayPathfinding();
-
+	AddPlayerToWorld(Vector3(10, 5, 10));
+	enemy = AddEnemyToWorld(Vector3(160, 5, 130));
+	enemy->SetNavigationGrid(grid);
+	AddBonusToWorld(Vector3(10, 5, 130));
+	AddBonusToWorld(Vector3(130, 5, 10));
+	AddBonusToWorld(Vector3(80, 5, 60));
+	AddBonusToWorld(Vector3(90, 5, 60));
+	AddBonusToWorld(Vector3(10, 5, 70));
+	AddBonusToWorld(Vector3(130, 5, 70 ));
 }
 
 void TutorialGame::InitCapsuleTest() {
@@ -400,7 +407,7 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 			case 'w':
 				float t = ((float)mapHeight / 2) * nodeSize;
 				AddCubeToWorld(Vector3(x * nodeSize, nodeSize / 2, (mapHeight / 2) * nodeSize),
-					Vector3(nodeSize / 2, nodeSize / 2, (mapHeight / 2) * nodeSize), 0.0f);
+					Vector3(nodeSize / 2, nodeSize / 2, (mapHeight / 2) * nodeSize), false, 0.0f);
 				break;
 			}
 
@@ -421,7 +428,7 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 					float midPoint = (float)((lastPos - tileCount + 1.0) + lastPos) / 2.0f;
 					//AddCubeToWorld(Vector3(y * nodeSize, nodeSize / 2, midPoint * nodeSize), Vector3(((tileCount * nodeSize) / 2), nodeSize / 2, nodeSize / 2), Vector3(0, 90, 0), 0.0f);
 				//	AddCubeToWorld(Vector3(y * nodeSize, nodeSize/2, midPoint * nodeSize), Vector3(nodeSize/2, nodeSize /2 , (tileCount * nodeSize) / 2), 0.0f);
-					AddCubeToWorld(Vector3(midPoint * nodeSize, nodeSize / 2, y * nodeSize), Vector3((tileCount * nodeSize) / 2, nodeSize / 2, nodeSize / 2), 0.0f);
+					AddCubeToWorld(Vector3(midPoint * nodeSize, nodeSize / 2, y * nodeSize), Vector3((tileCount * nodeSize) / 2, nodeSize / 2, nodeSize / 2), false, 0.0f);
 				}
 				tileCount = 0;
 			}
@@ -568,7 +575,7 @@ PlayerObject* NCL::CSC8503::TutorialGame::AddPlayerToWorld(const Vector3& positi
 		.SetScale(sphereSize)
 		.SetPosition(position);
 
-	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, NULL, basicShader, Debug::GREEN));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
 
 	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
@@ -583,7 +590,7 @@ PlayerObject* NCL::CSC8503::TutorialGame::AddPlayerToWorld(const Vector3& positi
 }
 
 EnemyObject* NCL::CSC8503::TutorialGame::AddEnemyToWorld(const Vector3& position) {
-	EnemyObject* sphere = new EnemyObject();
+	EnemyObject* sphere = new EnemyObject(player);
 
 	float radius = 2.0f;
 	Vector3 sphereSize = Vector3(radius, radius, radius);
@@ -597,7 +604,7 @@ EnemyObject* NCL::CSC8503::TutorialGame::AddEnemyToWorld(const Vector3& position
 		.SetScale(sphereSize)
 		.SetPosition(position);
 
-	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, NULL, basicShader, Debug::RED));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
 
 	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
@@ -817,19 +824,20 @@ void TutorialGame::InitGameExamples() {
 	return character;
 }*/
 
-GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
-	GameObject* apple = new GameObject();
+BonusObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
+	BonusObject* apple = new BonusObject(100);
 
-	SphereVolume* volume = new SphereVolume(0.25f);
+	SphereVolume* volume = new SphereVolume(0.5f);
 	apple->SetBoundingVolume((CollisionVolume*)volume);
 	apple->GetTransform()
 		.SetScale(Vector3(0.25, 0.25, 0.25))
 		.SetPosition(position);
 
-	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader, Debug::BLUE));
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
-	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->SetInverseMass(0.0f);
+	apple->GetPhysicsObject()->SetIsStatic(true);
 	apple->GetPhysicsObject()->InitSphereInertia();
 
 	world->AddGameObject(apple);

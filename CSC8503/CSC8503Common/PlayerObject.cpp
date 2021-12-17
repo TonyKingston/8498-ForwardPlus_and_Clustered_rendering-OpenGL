@@ -2,6 +2,7 @@
 
 NCL::CSC8503::PlayerObject::PlayerObject() : GameObject("player") {
 	magicCount = 0;
+	layer = Layer::Default || Layer::Player;
 
 }
 

@@ -4,6 +4,8 @@
 #include "../CSC8503Common/StateGameObject.h"
 #include "../CSC8503Common/PlayerObject.h"
 #include "../CSC8503Common/EnemyObject.h"
+#include "../CSC8503Common/BonusObject.h"
+#include "../CSC8503Common/NavigationGrid.h"
 
 
 
@@ -69,7 +71,7 @@ namespace NCL {
 
 			//GameObject* AddPlayerToWorld(const Vector3& position);
 			//GameObject* AddEnemyToWorld(const Vector3& position);
-			GameObject* AddBonusToWorld(const Vector3& position);
+			BonusObject* AddBonusToWorld(const Vector3& position);
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
@@ -84,6 +86,8 @@ namespace NCL {
 			GameObject* selectionObject = nullptr;
 			PlayerObject* player;
 			EnemyObject* enemy;
+			NavigationGrid* grid = nullptr;
+
 
 			OGLMesh*	capsuleMesh = nullptr;
 			OGLMesh*	cubeMesh	= nullptr;

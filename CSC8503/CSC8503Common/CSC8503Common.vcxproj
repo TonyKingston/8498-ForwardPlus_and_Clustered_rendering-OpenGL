@@ -138,7 +138,7 @@
     <ClInclude Include="BehaviourNodeWithChildren.h" />
     <ClInclude Include="BehaviourSelector.h" />
     <ClInclude Include="BehaviourSequence.h" />
-    <ClInclude Include="Bonus.h" />
+    <ClInclude Include="BonusObject.h" />
     <ClInclude Include="CapsuleVolume.h" />
     <ClInclude Include="EnemyObject.h" />
     <ClInclude Include="NavigationGrid.h" />
@@ -176,7 +176,7 @@
     <ClCompile Include="BehaviourNodeWithChildren.cpp" />
     <ClCompile Include="BehaviourSelector.cpp" />
     <ClCompile Include="BehaviourSequence.cpp" />
-    <ClCompile Include="Bonus.cpp" />
+    <ClCompile Include="BonusObject.cpp" />
     <ClCompile Include="CollisionDetection.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EnemyObject.cpp" />

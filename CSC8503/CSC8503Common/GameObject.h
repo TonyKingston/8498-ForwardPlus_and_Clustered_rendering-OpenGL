@@ -14,6 +14,12 @@ namespace NCL {
 		class GameObject	{
 		public:
 
+			enum Layer {
+				Default = 1,
+				IgnoreRaycast = 2,
+				Player = 4
+			};
+
 			GameObject(string name = "");
 			~GameObject();
 
@@ -96,10 +102,13 @@ namespace NCL {
 				return worldID;
 			}
 
-			/*TutorialGame* GetGame() const {
-				return game;
+			void SetLayerMask(int layerMask) {
+				layer = layerMask;
 			}
-			*/
+
+			int GetLayerMask() {
+				return layer;
+			}
 			void PrintDebugInfo();
 
 		protected:
@@ -111,13 +120,12 @@ namespace NCL {
 
 			bool	isActive;
 			bool    isAsleep;
+			bool    isTrigger;
 			int		worldID;
 			int layer;
 			string	name;
 
-
 			Vector3 broadphaseAABB;
-		//static TutorialGame* game;
 		};
 	}
 }

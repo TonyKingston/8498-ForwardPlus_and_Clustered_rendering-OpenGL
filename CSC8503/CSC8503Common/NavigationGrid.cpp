@@ -122,6 +122,7 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 	GridNode* startNode = &allNodes[(fromZ * gridWidth) + fromX];
 	GridNode* endNode	= &allNodes[(toZ * gridWidth) + toX];
 
+	//TODO: Change to priority queue implementation
 	//std::priority_queue<GridNode*>  openList;
 	std::list<GridNode*> openList;
 	GridNode* currentNode = startNode;

@@ -24,6 +24,7 @@ bool PushdownMachine::Update(float dt) {
 				stateStack.pop();
 				if (stateStack.empty()) {
 					activeState = nullptr; //??????
+					return false;
 				}
 				else {
 					activeState = stateStack.top();
@@ -55,5 +56,4 @@ void NCL::CSC8503::PushdownMachine::Reset() {
 		stateStack.pop();
 	}
 	activeState = initialState;
-
 }

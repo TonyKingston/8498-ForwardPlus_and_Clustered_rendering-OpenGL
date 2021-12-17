@@ -17,9 +17,11 @@ GameObject::GameObject(string objectName)	{
 	worldID			= -1;
 	isActive		= true;
 	isAsleep = false;
+	isTrigger = false;
 	boundingVolume	= nullptr;
 	physicsObject	= nullptr;
 	renderObject	= nullptr;
+	layer = Layer::Default;
 }
 
 GameObject::~GameObject()	{

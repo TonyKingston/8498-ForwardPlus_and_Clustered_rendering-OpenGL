@@ -377,6 +377,8 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return false;
 	}
 
+	
+
 	collisionInfo.a = a;
 	collisionInfo.b = b;
 
@@ -384,7 +386,6 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	Transform& transformB = b->GetTransform();
 
 	VolumeType pairType = (VolumeType)((int)volA->type | (int)volB->type);
-
 	if (pairType == VolumeType::AABB) {
 		return AABBIntersection((AABBVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
 	}
