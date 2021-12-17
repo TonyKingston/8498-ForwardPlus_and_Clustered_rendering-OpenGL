@@ -1,12 +1,8 @@
 #include "../../Common/Window.h"
-
 #include "../CSC8503Common/StateMachine.h"
 #include "../CSC8503Common/StateTransition.h"
 #include "../CSC8503Common/State.h"
-
 #include "../CSC8503Common/NavigationGrid.h"
-
-#include "TutorialGame.h"
 #include "..//CSC8503Common/StateMachine.h"
 #include "..//CSC8503Common/State.h"
 #include "..//CSC8503Common/StateTransition.h"
@@ -15,10 +11,12 @@
 #include "../CSC8503Common/BehaviourSelector.h"
 #include "..//CSC8503Common/PushdownState.h"
 #include "../CSC8503Common/PushdownMachine.h"
+#include "GamePushdownState.h"
 #include "GameState.h"
 
 using namespace NCL;
 using namespace CSC8503;
+
 
 /*
 
@@ -111,20 +109,46 @@ class IntroScreen : public PushdownState {
 
 };
 
-void TestPushdownAutomata(Window* w) {
-	
+void TestStateMachine();
+void TestBehaviourTree();
+vector < Vector3 > testNodes;
+void TestPathfinding() {
+	NavigationGrid grid("MazeGrid.txt");
+
+	NavigationPath outPath;
+
+	//Vector3 startPos(8, 9, 11);
+	//Vector3 endPos(130, 10, 147);
+	//Vector3 startPos(140, 10, 10);
+	//Vector3 endPos(20, 10, 130);
+	Vector3 startPos(10, 10, 10);
+	Vector3 endPos(140, 10, 130);
+	Debug::DrawLine(startPos, startPos * 1.01, Debug::BLUE, 60.0f);
+	Debug::DrawLine(endPos, endPos * 1.01, Debug::BLUE, 60.0f);
+	bool found = grid.FindPath(startPos, endPos, outPath);
+
+	Vector3 pos;
+	while (outPath.PopWaypoint(pos)) {
+		testNodes.push_back(pos);
+
+	}
+
+}
+void DisplayPathfinding() {
+	for (int i = 1; i < testNodes.size(); ++i) {
+		Vector3 a = testNodes[i - 1];
+		Vector3 b = testNodes[i];
+
+		Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+
+	}
 
 }
 
-
-
-void TestStateMachine();
-void TestBehaviourTree();
-
 int main() {
-	gameState = GameState();
+	GamePushdownState::InitGameState();
 	//Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-	Window* w = gameState.GetWindow();
+	Window* w = GamePushdownState::GetGameWindow();
 	if (!w->HasInitialised()) {
 		return -1;
 	}
@@ -134,7 +158,7 @@ int main() {
 
 
 	PushdownMachine machine(new MainMenu());
-
+	TestPathfinding();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -158,6 +182,7 @@ int main() {
 		if (!machine.Update(dt)) {
 			return -1;
 		}
+		DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }

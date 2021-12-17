@@ -11,23 +11,33 @@ namespace NCL {
 		class TutorialGame		{
 		public:
 			TutorialGame();
+			TutorialGame(int level);
 			TutorialGame(GameWorld* gameWorld, GameTechRenderer* gameRenderer);
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
 			vector<GameObject*> GetSeekers();
+			GameWorld* GetWorld() {
+				return world;
+			}
 
+			GameTechRenderer* GetRenderer() {
+				return renderer;
+			}
 
 		protected:
-			void InitialiseAssets();
+			void InitialiseAssets(int level = 1);
 
 			void InitCamera();
 			void UpdateKeys();
 
 			void InitWorld();
+			void InitMazeLevel();
 			void InitCapsuleTest();
 			void InitOBBTest();
 			void InitSleepTest();
+
+			void LoadWorldFromFile(const std::string& filename);
 
 			void InitGameExamples();
 
@@ -46,6 +56,7 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f, bool hollow = false);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB = false, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation = Vector3(), bool isOBB = false, float inverseMass = 10.0f);
 			GameObject* AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);

@@ -138,12 +138,14 @@
     <ClInclude Include="BehaviourNodeWithChildren.h" />
     <ClInclude Include="BehaviourSelector.h" />
     <ClInclude Include="BehaviourSequence.h" />
+    <ClInclude Include="Bonus.h" />
     <ClInclude Include="CapsuleVolume.h" />
     <ClInclude Include="NavigationGrid.h" />
     <ClInclude Include="NavigationMap.h" />
     <ClInclude Include="NavigationMesh.h" />
     <ClInclude Include="NavigationPath.h" />
     <ClInclude Include="OBBVolume.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="PositionConstraint.h" />
     <ClInclude Include="PositionOrientationConstraint.h" />
     <ClInclude Include="Seeker.h" />
@@ -173,6 +175,7 @@
     <ClCompile Include="BehaviourNodeWithChildren.cpp" />
     <ClCompile Include="BehaviourSelector.cpp" />
     <ClCompile Include="BehaviourSequence.cpp" />
+    <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="CollisionDetection.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -181,6 +184,7 @@
     <ClCompile Include="NavigationMesh.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="PhysicsSystem.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PositionConstraint.cpp" />
     <ClCompile Include="PositionOrientationConstraint.cpp" />
     <ClCompile Include="PushdownMachine.cpp" />

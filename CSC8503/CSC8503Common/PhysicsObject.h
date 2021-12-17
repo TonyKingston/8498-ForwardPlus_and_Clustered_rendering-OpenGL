@@ -33,6 +33,9 @@ namespace NCL {
 
 			void SetInverseMass(float invMass) {
 				inverseMass = invMass;
+				if (invMass == 0.0f) {
+					isStatic = true;
+				}
 			}
 
 			float GetInverseMass() const {

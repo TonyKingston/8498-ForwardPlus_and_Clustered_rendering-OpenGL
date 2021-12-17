@@ -1,30 +1,36 @@
 #pragma once
 #include "NavigationMap.h"
 #include <string>
+#include <vector>
 namespace NCL {
 	namespace CSC8503 {
 		struct GridNode {
-			GridNode* parent;
+			GridNode* bestParent;
 
-			GridNode* connected[4];
-			int		  costs[4];
+		//	GridNode* connected[4];
+			std::vector<GridNode*> connected;
+			//int		  costs[4];
+			int cost;
 
 			Vector3		position;
-
-			float f;
-			float g;
-
+			float    globalGoal;
+			float    localGoal;
+			bool     visited;
+			bool     obstacle;
 			int type;
 
 			GridNode() {
-				for (int i = 0; i < 4; ++i) {
-					connected[i] = nullptr;
+				/*for (int i = 0; i < 4; ++i) {
+					//connected[i] = nullptr;
 					costs[i] = 0;
-				}
-				f = 0;
-				g = 0;
+				}*/
+				cost = 0;
+				localGoal = INFINITY;
+				globalGoal = INFINITY;
 				type = 0;
-				parent = nullptr;
+				bestParent = nullptr;
+				obstacle = false;
+				visited = false;
 			}
 			~GridNode() {	}
 		};
@@ -40,7 +46,7 @@ namespace NCL {
 		protected:
 			bool		NodeInList(GridNode* n, std::vector<GridNode*>& list) const;
 			GridNode*	RemoveBestNode(std::vector<GridNode*>& list) const;
-			float		Heuristic(GridNode* hNode, GridNode* endNode) const;
+			inline float		Heuristic(GridNode* hNode, GridNode* endNode) const;
 			int nodeSize;
 			int gridWidth;
 			int gridHeight;
