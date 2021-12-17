@@ -336,11 +336,11 @@ void TutorialGame::InitMazeLevel() {
 	physics->Clear();
 
 	LoadWorldFromFile("MazeGrid.txt");
-	AddFloorToWorld(Vector3(0, -2, 0));
-	//AddCubeToWorld(Vector3(0, 10, 0), Vector3(1, 1, 1), 0.0f);
-	//AddCubeToWorld(Vector3(10, 10, 0), Vector3(1, 1, 5), 0.0f);
-	//AddFloorToWorld(Vector3(0, -10, 100));
-	//AddFloorToWorld(Vector3(100, -20, 100));
+	AddPlayerToWorld(Vector3(10, 10, 10));
+	enemy = AddEnemyToWorld(Vector3(160, 10, 130));
+	enemy->FindPath(player->GetTransform().GetPosition());
+	enemy->DisplayPathfinding();
+
 }
 
 void TutorialGame::InitCapsuleTest() {
@@ -398,9 +398,9 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 				continue;
 				break;
 			case 'w':
-				float t = ((float)mapHeight / 2)* nodeSize;
-				//AddCubeToWorld(Vector3((mapHeight / 2) * nodeSize, nodeSize/2, x * nodeSize),
-					//Vector3((mapHeight / 2) * nodeSize, nodeSize / 2, nodeSize / 2), 0.0f);
+				float t = ((float)mapHeight / 2) * nodeSize;
+				AddCubeToWorld(Vector3(x * nodeSize, nodeSize / 2, (mapHeight / 2) * nodeSize),
+					Vector3(nodeSize / 2, nodeSize / 2, (mapHeight / 2) * nodeSize), 0.0f);
 				break;
 			}
 
@@ -418,10 +418,10 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 						bool a = true;
 					}
 					//float midPoint = ((lastPos - tileCount + 1.0) + lastPos) / 2;
-					float midPoint = (float)((lastPos - tileCount + 1.0) + lastPos)/ 2.0f;
+					float midPoint = (float)((lastPos - tileCount + 1.0) + lastPos) / 2.0f;
 					//AddCubeToWorld(Vector3(y * nodeSize, nodeSize / 2, midPoint * nodeSize), Vector3(((tileCount * nodeSize) / 2), nodeSize / 2, nodeSize / 2), Vector3(0, 90, 0), 0.0f);
 				//	AddCubeToWorld(Vector3(y * nodeSize, nodeSize/2, midPoint * nodeSize), Vector3(nodeSize/2, nodeSize /2 , (tileCount * nodeSize) / 2), 0.0f);
-					AddCubeToWorld(Vector3(midPoint * nodeSize, nodeSize/2, y * nodeSize), Vector3((tileCount * nodeSize) / 2, nodeSize /2 , nodeSize/2), 0.0f);
+					AddCubeToWorld(Vector3(midPoint * nodeSize, nodeSize / 2, y * nodeSize), Vector3((tileCount * nodeSize) / 2, nodeSize / 2, nodeSize / 2), 0.0f);
 				}
 				tileCount = 0;
 			}
@@ -432,6 +432,9 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 		}
 
 	}
+
+	AddFloorToWorld(Vector3((mapWidth / 2) * nodeSize, 0, (mapHeight / 2) * nodeSize));
+
 }
 
 
@@ -548,6 +551,63 @@ GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfH
 
 	return capsule;
 
+}
+
+PlayerObject* NCL::CSC8503::TutorialGame::AddPlayerToWorld(const Vector3& position) {
+	PlayerObject* sphere = new PlayerObject();
+
+	float radius = 2.0f;
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	volume->SetObject(sphere);
+	volume->SetVolumeMesh(sphereMesh);
+
+
+	sphere->GetTransform()
+		.SetScale(sphereSize)
+		.SetPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
+	sphere->GetPhysicsObject()->InitSphereInertia(false);
+	sphere->GetPhysicsObject()->SetElasticity(0.7);
+
+
+	world->AddGameObject(sphere);
+	this->player = sphere;
+
+	return sphere;
+}
+
+EnemyObject* NCL::CSC8503::TutorialGame::AddEnemyToWorld(const Vector3& position) {
+	EnemyObject* sphere = new EnemyObject();
+
+	float radius = 2.0f;
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	volume->SetObject(sphere);
+	volume->SetVolumeMesh(sphereMesh);
+
+
+	sphere->GetTransform()
+		.SetScale(sphereSize)
+		.SetPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
+	sphere->GetPhysicsObject()->InitSphereInertia(false);
+	sphere->GetPhysicsObject()->SetElasticity(0.7);
+
+
+	world->AddGameObject(sphere);
+
+	return sphere;
 }
 
 StateGameObject* NCL::CSC8503::TutorialGame::AddStateObjectToWorld(const Vector3& position) {
@@ -696,12 +756,12 @@ void TutorialGame::InitDefaultFloor() {
 }
 
 void TutorialGame::InitGameExamples() {
-	AddPlayerToWorld(Vector3(0, 5, 0));
-	AddEnemyToWorld(Vector3(5, 5, 0));
+	//AddPlayerToWorld(Vector3(0, 5, 0));
+	//AddEnemyToWorld(Vector3(5, 5, 0));
 	//AddBonusToWorld(Vector3(10, 5, 0));
 }
 
-GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
+/*GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	float meshSize = 3.0f;
 	float inverseMass = 0.5f;
 
@@ -731,9 +791,9 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	//lockedObject = character;
 
 	return character;
-}
+}*/
 
-GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
+/*GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
 	float meshSize = 3.0f;
 	float inverseMass = 0.5f;
 
@@ -755,7 +815,7 @@ GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
 	world->AddGameObject(character);
 
 	return character;
-}
+}*/
 
 GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	GameObject* apple = new GameObject();

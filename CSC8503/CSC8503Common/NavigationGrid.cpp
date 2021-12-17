@@ -41,9 +41,6 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 			char type = 0;
 			infile >> type;
 			n.type = type;
-		//	Quaternion q = Quaternion::EulerAnglesToQuaternion(0, 90, 0);
-		//	n.position =  Vector3((float)(-y* nodeSize) + (gridHeight - 1) * nodeSize, 0, (float)(x * nodeSize));
-			//n.position = Vector3(x * nodeSize, 0, -y * nodeSize + (gridHeight - 1) * nodeSize);
 			n.position = Vector3(x * nodeSize, 0, y * nodeSize);
 		}
 	}
@@ -76,7 +73,9 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 				Vector4 colour = Debug::RED;
 				float height = 35.0f;
 				float time = 60.0f;
-				Debug::DrawLine(Vector3(n.position.x + nodeSize/2, height, n.position.z - nodeSize/2),
+
+				// Draw obstacles for debugging
+				/*Debug::DrawLine(Vector3(n.position.x + nodeSize/2, height, n.position.z - nodeSize/2),
 					Vector3(n.position.x + nodeSize / 2, height, n.position.z + nodeSize / 2),
 					colour, time);
 
@@ -89,21 +88,11 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 					colour, time);
 				Debug::DrawLine(Vector3(n.position.x - nodeSize / 2, height, n.position.z - nodeSize / 2),
 					Vector3(n.position.x + nodeSize / 2, height, n.position.z - nodeSize / 2),
-					colour, time);
+					colour, time);*/
 
 
 
 			}
-			/*for (int i = 0; i < n.connected.size(); i++) {
-				if (n.connected[i]) {
-					if (n.connected[i]->type == '.') {
-						n.costs[i]		= 1;
-					}
-					if (n.connected[i]->type == 'x' || n.connected[i]->type == 'W' || n.connected[i]->type == 'w') {
-						n.obstacle = true;
-					}
-				}
-			}*/
 		}	
 	}
 }

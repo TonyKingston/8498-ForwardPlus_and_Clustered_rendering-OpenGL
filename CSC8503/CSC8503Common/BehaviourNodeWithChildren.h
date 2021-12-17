@@ -24,6 +24,7 @@ public:
 		}
 	}
 protected:
-	std::vector < BehaviourNode* > childNodes;
+	std::vector < BehaviourNode* > childNodes;
+
 };
 

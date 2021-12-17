@@ -123,8 +123,6 @@ void TestPathfinding() {
 	//Vector3 endPos(20, 10, 130);
 	Vector3 startPos(10, 10, 10);
 	Vector3 endPos(140, 10, 130);
-	Debug::DrawLine(startPos, startPos * 1.01, Debug::BLUE, 60.0f);
-	Debug::DrawLine(endPos, endPos * 1.01, Debug::BLUE, 60.0f);
 	bool found = grid.FindPath(startPos, endPos, outPath);
 
 	Vector3 pos;
@@ -158,7 +156,7 @@ int main() {
 
 
 	PushdownMachine machine(new MainMenu());
-	TestPathfinding();
+//	TestPathfinding();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -182,7 +180,7 @@ int main() {
 		if (!machine.Update(dt)) {
 			return -1;
 		}
-		DisplayPathfinding();
+		//DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }

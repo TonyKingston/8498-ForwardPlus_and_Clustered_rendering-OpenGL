@@ -2,6 +2,8 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../CSC8503Common/StateGameObject.h"
+#include "../CSC8503Common/PlayerObject.h"
+#include "../CSC8503Common/EnemyObject.h"
 
 
 
@@ -60,11 +62,13 @@ namespace NCL {
 			GameObject* AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
+			PlayerObject* AddPlayerToWorld(const Vector3& position);
+			EnemyObject* AddEnemyToWorld(const Vector3& position);
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
-			GameObject* AddPlayerToWorld(const Vector3& position);
-			GameObject* AddEnemyToWorld(const Vector3& position);
+			//GameObject* AddPlayerToWorld(const Vector3& position);
+			//GameObject* AddEnemyToWorld(const Vector3& position);
 			GameObject* AddBonusToWorld(const Vector3& position);
 
 			GameTechRenderer*	renderer;
@@ -78,6 +82,8 @@ namespace NCL {
 			float		forceMagnitude;
 
 			GameObject* selectionObject = nullptr;
+			PlayerObject* player;
+			EnemyObject* enemy;
 
 			OGLMesh*	capsuleMesh = nullptr;
 			OGLMesh*	cubeMesh	= nullptr;
