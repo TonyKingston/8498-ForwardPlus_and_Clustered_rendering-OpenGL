@@ -21,7 +21,7 @@ namespace NCL {
 			StateUpdateFunc func;
 		};
 
-		typedef void(*StateFunc)(void*);
+		//typedef void(*StateFunc)(void*);
 
 	/*	class GenericState : public State		{
 		public:

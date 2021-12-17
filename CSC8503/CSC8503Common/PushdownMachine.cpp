@@ -36,6 +36,10 @@ bool PushdownMachine::Update(float dt) {
 				activeState = newState;
 				newState->OnAwake();
 			}break;
+			case PushdownState::Reset: {
+				activeState->OnSleep();
+				Reset();
+			}break;
 		}
 	}
 	else {
@@ -44,4 +48,12 @@ bool PushdownMachine::Update(float dt) {
 		activeState->OnAwake();
 	}
 	return true;
+}
+
+void NCL::CSC8503::PushdownMachine::Reset() {
+	while (stateStack.size() > 1) {
+		stateStack.pop();
+	}
+	activeState = initialState;
+
 }
