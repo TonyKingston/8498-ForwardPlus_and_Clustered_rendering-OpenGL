@@ -85,14 +85,18 @@ void MainMenu::DrawMenu() {
 NCL::CSC8503::Game::Game(int gameId) {
 	this->gameId = gameId;
 	game = new TutorialGame(gameId);
-	gameStatus = 0;
 }
 
 PushdownState::PushdownResult Game::OnUpdate(float dt, PushdownState** newState) {
 	if (game) {
+		if (game->GetGameStatus() == -1) {
+			*newState = new PauseMenu(game);
+
+			return PushdownResult::Push;
+		}
 		game->UpdateGame(dt);
 
-		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F10)) {
 			*newState = new PauseMenu(game);
 
 			return PushdownResult::Push;
@@ -114,7 +118,7 @@ NCL::CSC8503::PauseMenu::PauseMenu(TutorialGame* game) {
 
 PushdownState::PushdownResult PauseMenu::OnUpdate(float dt, PushdownState** newState) {
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F10)) {
 		return PushdownResult::Pop;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
@@ -148,4 +152,30 @@ void NCL::CSC8503::GamePushdownState::InitGameState() {
 
 Window* NCL::CSC8503::GamePushdownState::GetGameWindow() {
 	return gameState->GetWindow();
+}
+
+NCL::CSC8503::Results::Results(TutorialGame* game) {
+	score = game->GetPlayerScore();
+	time = game->GetGameTime();
+	this->game = game;
+}
+
+PushdownState::PushdownResult Results::OnUpdate(float dt, PushdownState** newState) {
+	Vector2 pos1(35, 35);
+	Vector2 pos2(25, 45);
+	Vector2 pos3(45, 45);
+	game->GetRenderer()->DrawString("Failure", pos1, Debug::BLACK);
+	game->GetRenderer()->DrawString("Score: " + std::to_string(score), pos2, Debug::BLACK);
+	game->GetRenderer()->DrawString("Time: " + std::to_string(time), pos3, Debug::BLACK);
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
+		return PushdownResult::Reset;
+	}
+}
+
+void Results::OnAwake() {
+
+}
+
+void Results::OnSleep() {
+	delete game;
 }

@@ -34,6 +34,7 @@ TutorialGame::TutorialGame(int level) {
 	world = new GameWorld();
 	renderer = new GameTechRenderer(*world);
 	physics = new PhysicsSystem(*world);
+	GameObject::InitObjects(this);
 
 	forceMagnitude = 10.0f;
 	useGravity = true;
@@ -76,7 +77,7 @@ void TutorialGame::InitialiseAssets(int level) {
 	switch (level) {
 	case 1: // Physics Sim game
 		InitCamera();
-		InitWorld();
+		InitPhysicsLevel();
 		break;
 	case 2: // Maze game
 		InitCamera();
@@ -118,6 +119,10 @@ TutorialGame::~TutorialGame() {
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	timeTaken += dt;
+	if (player->GetLives() == 0) {
+		EndGame();
+	}
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -134,7 +139,7 @@ void TutorialGame::UpdateGame(float dt) {
 	else {
 		Debug::Print("(G)ravity off", Vector2(5, 95));
 	}
-
+	ShowPlayerScore();
 	SelectObject();
 	MoveSelectedObject();
 	physics->Update(dt);
@@ -273,6 +278,14 @@ void TutorialGame::LockedObjectMovement() {
 	}
 }
 
+void NCL::CSC8503::TutorialGame::ShowPlayerScore() {
+	Debug::Print("Score: " + std::to_string(player->GetScore()), Vector3(5, 5, 5));
+}
+
+void NCL::CSC8503::TutorialGame::EndGame() {
+	gameStatus = -1;
+}
+
 vector<GameObject*> TutorialGame::GetSeekers() {
 	return allSeekers;
 }
@@ -328,7 +341,8 @@ void TutorialGame::InitWorld() {
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
 	InitDefaultFloor();
-	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+	//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+	testStateObject = nullptr;
 
 	//BridgeConstraintTest();
 }
@@ -340,14 +354,35 @@ void TutorialGame::InitMazeLevel() {
 	grid = new NavigationGrid("MazeGrid.txt");
 	LoadWorldFromFile("MazeGrid.txt");
 	AddPlayerToWorld(Vector3(10, 5, 10));
+	//AddPlayerToWorld(Vector3(160, 5, 110));
 	enemy = AddEnemyToWorld(Vector3(160, 5, 130));
 	enemy->SetNavigationGrid(grid);
-	AddBonusToWorld(Vector3(10, 5, 130));
-	AddBonusToWorld(Vector3(130, 5, 10));
-	AddBonusToWorld(Vector3(80, 5, 60));
-	AddBonusToWorld(Vector3(90, 5, 60));
-	AddBonusToWorld(Vector3(10, 5, 70));
-	AddBonusToWorld(Vector3(130, 5, 70 ));
+	int bonusNum = 6;
+	vector<Vector3> bonuses(bonusNum);
+	bonuses[0] = Vector3(10, 5, 130);
+	bonuses[1] = Vector3(130, 5, 10);
+	bonuses[2] = Vector3(100, 5, 50);
+	bonuses[3] = Vector3(110, 5, 50);
+	bonuses[4] = Vector3(10, 5, 70);
+	bonuses[5] = Vector3(130, 5, 70);
+	for (int i = 0; i < bonusNum; i++) {
+		AddBonusToWorld(bonuses[i]);
+	}
+}
+
+void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {
+	world->ClearAndErase();
+	physics->Clear();
+	LoadWorldFromFile("PhysicsGrid.txt");
+	playerSpawn = Vector3(15, 5, 15);
+	AddPlayerToWorld(playerSpawn);
+	for (int i = 1; i < 4; i++) {
+		AddBonusToWorld(playerSpawn + Vector3(20, 0, 0) * i);
+	}
+	AddKillPlaneToWorld(Vector3(0, -500, 0));
+	GameObject* floor = AddCubeToWorld(Vector3(165, -15, 113), Vector3(20, 2, 50), Vector3(15,0,0), true, 0.0f, Debug::CYAN);
+	floor->GetPhysicsObject()->SetElasticity(0.3);
+	floor->GetPhysicsObject()->SetFriction(0.2);
 }
 
 void TutorialGame::InitCapsuleTest() {
@@ -364,6 +399,7 @@ void NCL::CSC8503::TutorialGame::InitOBBTest() {
 	Vector3 position = Vector3(0, 10.0f, 0);
 	Vector3 cubeDims = Vector3(5, 2, 2);
 	AddCubeToWorld(position, cubeDims, true, 1.0f);
+	AddCubeToWorld(position - Vector3(10.0f,0,10.0f), cubeDims, true, 1.0f);
 	AddSphereToWorld(position + Vector3(10, 0, 0), 2, 10.0f);
 }
 
@@ -371,8 +407,15 @@ void NCL::CSC8503::TutorialGame::InitSleepTest() {
 	world->ClearAndErase();
 	physics->Clear();
 	InitDefaultFloor();
-	Vector3 position = Vector3(0, 10.0f, 0);
-	AddSphereToWorld(position + Vector3(10, 0, 0), 2, 10.0f);
+	Vector3 position = Vector3(0, 0, 0);
+	AddSphereToWorld(position + Vector3(10, 10, 0), 2, 10.0f);
+	//AddSphereToWorld(position + Vector3(15, 0, 0), 2, 10.0f);
+	//AddSphereToWorld(position + Vector3(10, 0, 5), 2, 10.0f);
+//	AddSphereToWorld(position + Vector3(15, 0, 5), 2, 10.0f);
+	AddCubeToWorld(position + Vector3(15, 0, 0), Vector3(1, 1, 1), false, 0.0f);
+	AddCubeToWorld(position + Vector3(15, 0, 5), Vector3(1, 1, 1), false, 0.0f);
+	AddCubeToWorld(position + Vector3(15, 0, 10), Vector3(1, 1, 1), false, 0.0f);
+
 }
 
 void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
@@ -406,8 +449,8 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 				break;
 			case 'w':
 				float t = ((float)mapHeight / 2) * nodeSize;
-				AddCubeToWorld(Vector3(x * nodeSize, nodeSize / 2, (mapHeight / 2) * nodeSize),
-					Vector3(nodeSize / 2, nodeSize / 2, (mapHeight / 2) * nodeSize), false, 0.0f);
+			//	AddCubeToWorld(Vector3(x * nodeSize, nodeSize / 2, (mapHeight / 2) * nodeSize),
+			//		Vector3(nodeSize / 2, nodeSize / 2, (mapHeight / 2) * nodeSize), false, 0.0f);
 				break;
 			}
 
@@ -417,14 +460,10 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 	int lastPos = 0;
 	for (int y = 0; y < mapHeight; ++y) {
 		int tileCount = 0;
-		for (int x = 1; x <= mapWidth - 1; ++x) {
+		for (int x = 0; x <= mapWidth; ++x) {
 			char tileType = mapData[(y * mapWidth) + x];
-			if (tileType == '.' || x == mapWidth - 1) {
+			if (tileType == '.' || x == mapWidth) {
 				if (tileCount > 0) {
-					if (tileCount == 2) {
-						bool a = true;
-					}
-					//float midPoint = ((lastPos - tileCount + 1.0) + lastPos) / 2;
 					float midPoint = (float)((lastPos - tileCount + 1.0) + lastPos) / 2.0f;
 					//AddCubeToWorld(Vector3(y * nodeSize, nodeSize / 2, midPoint * nodeSize), Vector3(((tileCount * nodeSize) / 2), nodeSize / 2, nodeSize / 2), Vector3(0, 90, 0), 0.0f);
 				//	AddCubeToWorld(Vector3(y * nodeSize, nodeSize/2, midPoint * nodeSize), Vector3(nodeSize/2, nodeSize /2 , (tileCount * nodeSize) / 2), 0.0f);
@@ -440,7 +479,7 @@ void NCL::CSC8503::TutorialGame::LoadWorldFromFile(const string& filename) {
 
 	}
 
-	AddFloorToWorld(Vector3((mapWidth / 2) * nodeSize, 0, (mapHeight / 2) * nodeSize));
+	AddCubeToWorld(Vector3((mapWidth / 2) * nodeSize, 0, (mapHeight / 2) * nodeSize), Vector3(nodeSize * mapWidth / 2, 2, nodeSize * mapHeight / 2 ), false, 0.0f);
 
 }
 
@@ -575,12 +614,13 @@ PlayerObject* NCL::CSC8503::TutorialGame::AddPlayerToWorld(const Vector3& positi
 		.SetScale(sphereSize)
 		.SetPosition(position);
 
-	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, NULL, basicShader, Debug::GREEN));
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader, Debug::GREEN));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
 
 	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
 	sphere->GetPhysicsObject()->InitSphereInertia(false);
 	sphere->GetPhysicsObject()->SetElasticity(0.7);
+	sphere->GetPhysicsObject()->SetFriction(0.4);
 
 
 	world->AddGameObject(sphere);
@@ -637,7 +677,7 @@ StateGameObject* NCL::CSC8503::TutorialGame::AddStateObjectToWorld(const Vector3
 	return apple;
 }
 
-GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB, float inverseMass) {
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB, float inverseMass, Vector4 colour) {
 	GameObject* cube = new GameObject("cube");
 
 	if (isOBB) {
@@ -656,7 +696,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 		.SetPosition(position)
 		.SetScale(dimensions * 2);
 
-	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, NULL, basicShader, colour));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
 
 	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
@@ -668,7 +708,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 }
 
 
-GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation, bool isOBB, float inverseMass) {
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation, bool isOBB, float inverseMass, Vector4 colour) {
 	GameObject* cube = new GameObject("cube");
 
 	if (isOBB) {
@@ -688,7 +728,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 		.SetScale(dimensions * 2)
 		.SetOrientation(Quaternion::EulerAnglesToQuaternion(orientation.x, orientation.y, orientation.z));
 
-	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, NULL, basicShader, colour));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
 
 	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
@@ -719,6 +759,31 @@ GameObject* NCL::CSC8503::TutorialGame::AddCubeOBBToWorld(const Vector3& positio
 	world->AddGameObject(cube);
 
 	return cube;
+}
+
+GameObject* NCL::CSC8503::TutorialGame::AddKillPlaneToWorld(const Vector3& position) {
+	GameObject* plane = new GameObject("kill plane");
+	Vector3 dimensions = Vector3(500, 1, 500);
+	AABBVolume* volume = new AABBVolume(dimensions);
+	plane->SetBoundingVolume(volume);
+
+	plane->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	plane->SetTriggerFunc([&](GameObject* otherObj) {
+		if (otherObj->GetName() == "player") {
+			player->GetTransform().SetPosition(playerSpawn);
+			player->TakeLife();
+			return;
+		}
+		otherObj->Deactivate();
+	});
+
+
+	world->AddGameObject(plane);
+
+	return plane;
 }
 
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {

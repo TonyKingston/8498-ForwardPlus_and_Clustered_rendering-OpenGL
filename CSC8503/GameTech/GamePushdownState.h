@@ -36,10 +36,6 @@ namespace NCL {
 
 		class Game : public PushdownState {
 		public:
-			/*Game(GameWorld* world, GameTechRenderer* renderer) {
-				gameWorld = world;
-				this->renderer = renderer;
-			}*/
 			Game(int gameId = 1);
 			PushdownResult OnUpdate(float dt,
 				PushdownState** newState) override;
@@ -48,10 +44,21 @@ namespace NCL {
 		private:
 			TutorialGame* game;
 			int gameId;
-			//	GameWorld* gameWorld;
-			//	GameTechRenderer* renderer;
 
-			int gameStatus;
+		};
+
+
+		class Results : public PushdownState {
+		public:
+			Results(TutorialGame* game);
+			PushdownResult OnUpdate(float dt,
+				PushdownState** newState) override;
+			void OnAwake() override;
+			void OnSleep() override;
+		private:
+			int score;
+			float time;
+			TutorialGame* game;
 		};
 
 		class PauseMenu : public PushdownState {

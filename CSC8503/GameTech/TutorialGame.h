@@ -29,6 +29,10 @@ namespace NCL {
 				return renderer;
 			}
 
+			int GetPlayerScore() { return player->GetScore(); }
+			float GetGameTime() { return timeTaken;}
+			int GetGameStatus() { return gameStatus; }
+
 		protected:
 			void InitialiseAssets(int level = 1);
 
@@ -37,6 +41,7 @@ namespace NCL {
 
 			void InitWorld();
 			void InitMazeLevel();
+			void InitPhysicsLevel();
 			void InitCapsuleTest();
 			void InitOBBTest();
 			void InitSleepTest();
@@ -56,12 +61,15 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 
+			void ShowPlayerScore();
+			void EndGame();
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f, bool hollow = false);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB = false, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation = Vector3(), bool isOBB = false, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB = false, float inverseMass = 10.0f, Vector4 colour = Debug::GRAY);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation = Vector3(), bool isOBB = false, float inverseMass = 10.0f, Vector4 colour = Debug::GRAY);
 			GameObject* AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddKillPlaneToWorld(const Vector3& position);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 			PlayerObject* AddPlayerToWorld(const Vector3& position);
@@ -82,11 +90,14 @@ namespace NCL {
 			bool inDebugMode;
 
 			float		forceMagnitude;
+			int gameStatus = 0;
+			float timeTaken = 0;
 
 			GameObject* selectionObject = nullptr;
 			PlayerObject* player;
 			EnemyObject* enemy;
 			NavigationGrid* grid = nullptr;
+			Vector3 playerSpawn;
 
 
 			OGLMesh*	capsuleMesh = nullptr;
