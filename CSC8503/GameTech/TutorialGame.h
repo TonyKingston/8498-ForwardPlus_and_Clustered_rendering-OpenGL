@@ -62,7 +62,7 @@ namespace NCL {
 			void LockedObjectMovement();
 
 			void ShowPlayerScore();
-			void EndGame();
+			void EndGame(int status);
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f, bool hollow = false);
@@ -70,6 +70,7 @@ namespace NCL {
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation = Vector3(), bool isOBB = false, float inverseMass = 10.0f, Vector4 colour = Debug::GRAY);
 			GameObject* AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddKillPlaneToWorld(const Vector3& position);
+			GameObject* AddVictoryTriggerToWorld(const Vector3& position);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 			PlayerObject* AddPlayerToWorld(const Vector3& position);

@@ -121,7 +121,7 @@ TutorialGame::~TutorialGame() {
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
 	if (player->GetLives() == 0) {
-		EndGame();
+		EndGame(-1);
 	}
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
@@ -282,8 +282,8 @@ void NCL::CSC8503::TutorialGame::ShowPlayerScore() {
 	Debug::Print("Score: " + std::to_string(player->GetScore()), Vector3(5, 5, 5));
 }
 
-void NCL::CSC8503::TutorialGame::EndGame() {
-	gameStatus = -1;
+void NCL::CSC8503::TutorialGame::EndGame(int status) {
+	gameStatus = status;
 }
 
 vector<GameObject*> TutorialGame::GetSeekers() {
@@ -379,7 +379,7 @@ void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {
 	for (int i = 1; i < 4; i++) {
 		AddBonusToWorld(playerSpawn + Vector3(20, 0, 0) * i);
 	}
-	AddKillPlaneToWorld(Vector3(0, -500, 0));
+	AddKillPlaneToWorld(Vector3(0, -200, 0));
 	GameObject* floor = AddCubeToWorld(Vector3(165, -15, 113), Vector3(20, 2, 50), Vector3(15,0,0), true, 0.0f, Debug::CYAN);
 	floor->GetPhysicsObject()->SetElasticity(0.3);
 	floor->GetPhysicsObject()->SetFriction(0.2);
@@ -771,14 +771,45 @@ GameObject* NCL::CSC8503::TutorialGame::AddKillPlaneToWorld(const Vector3& posit
 		.SetPosition(position)
 		.SetScale(dimensions * 2);
 
+	plane->SetRenderObject(new RenderObject(&plane->GetTransform(), cubeMesh, NULL, basicShader, Vector4(0,0,0,0)));
+	plane->SetTrigger();
+
+
 	plane->SetTriggerFunc([&](GameObject* otherObj) {
-		if (otherObj->GetName() == "player") {
+   		if (otherObj->GetName() == "player") {
 			player->GetTransform().SetPosition(playerSpawn);
 			player->TakeLife();
 			return;
 		}
 		otherObj->Deactivate();
 	});
+
+
+	world->AddGameObject(plane);
+
+	return plane;
+}
+
+GameObject* NCL::CSC8503::TutorialGame::AddVictoryTriggerToWorld(const Vector3& position) {
+	GameObject* plane = new GameObject("victory plane");
+	Vector3 dimensions = Vector3(50, 1, 50);
+	AABBVolume* volume = new AABBVolume(dimensions);
+	plane->SetBoundingVolume(volume);
+
+	plane->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	plane->SetRenderObject(new RenderObject(&plane->GetTransform(), cubeMesh, NULL, basicShader, Vector4(0, 0, 0, 0)));
+	plane->SetTrigger();
+
+
+	plane->SetTriggerFunc([&](GameObject* otherObj) {
+		if (otherObj->GetName() == "player") {
+			EndGame(1);
+			return;
+		}
+		});
 
 
 	world->AddGameObject(plane);

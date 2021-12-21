@@ -58,7 +58,7 @@ class GameScreen : public PushdownState {
 			pauseReminder += 1.0f;
 
 		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F10)) {
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::P)) {
 			*newState = new PauseScreen();
 			return PushdownResult::Push;
 
