@@ -5,6 +5,9 @@
 using namespace NCL::CSC8503;
 using std::string;
 
+
+TutorialGame* GameObject::game = nullptr;
+
 //std to_string can be problematic with floats so I've defined my own function
 template <typename T> string tostr(const T& t) {
 	std::ostringstream os;
@@ -28,6 +31,10 @@ GameObject::~GameObject()	{
 	delete boundingVolume;
 	delete physicsObject;
 	delete renderObject;
+}
+
+void NCL::CSC8503::GameObject::InitObjects(TutorialGame* game) {
+	GameObject::game = game;
 }
 
 bool GameObject::GetBroadphaseAABB(Vector3&outSize) const {

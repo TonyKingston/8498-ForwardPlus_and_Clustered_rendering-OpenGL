@@ -6,11 +6,13 @@
 #include "RenderObject.h"
 
 #include <vector>
+#include <functional>
 
 using std::vector;
 
 namespace NCL {
 	namespace CSC8503 {
+		class TutorialGame;
 		class GameObject	{
 		public:
 
@@ -23,7 +25,7 @@ namespace NCL {
 			GameObject(string name = "");
 			~GameObject();
 
-			//static void InitObjects(TutorialGame* game);
+			static void InitObjects(TutorialGame* game);
 			virtual bool UpdateObject(float dt) { return true; }
 
 			void SetBoundingVolume(CollisionVolume* vol) {
@@ -38,8 +40,16 @@ namespace NCL {
 				return isActive;
 			}
 
+			void Deactivate() {
+				isActive = false;
+			}
+
 			bool IsAsleep() const {
 				return isAsleep;
+			}
+
+			bool IsTrigger() const {
+				return isTrigger;
 			}
 
 			void PutToSleep() {
@@ -86,6 +96,15 @@ namespace NCL {
 				//std::cout << "OnCollisionEnd event occured!\n";
 			}
 
+			typedef std::function<void(GameObject*)> TriggerFunc;
+			void OnTrigger(GameObject* otherObject) {
+				triggerFunc(otherObject);
+			}
+
+			void SetTriggerFunc(TriggerFunc function) {
+				triggerFunc = function;
+			}
+
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
 			void UpdateBroadphaseAABB();
@@ -124,8 +143,9 @@ namespace NCL {
 			int		worldID;
 			int layer;
 			string	name;
-
+			TriggerFunc triggerFunc;
 			Vector3 broadphaseAABB;
+			static TutorialGame* game;
 		};
 	}
 }
