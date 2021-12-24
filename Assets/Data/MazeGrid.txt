@@ -1,6 +1,7 @@
-10
+10 10
 18
 15
+0 0 0
 wxxxxxxxxxxxxxxxxw
 W................W
 W.x..x.xxxx..x.x.W

@@ -10,9 +10,15 @@ namespace NCL {
 			void OnCollisionBegin(GameObject* otherObject) override;
 			void OnCollisionEnd(GameObject* otherObject) override;
 			int GetMagicCount() { return magicCount; }
+			int GetScore() { return score; }
+			int GetLives() { return lives; }
+			void AddScore(int val) { score += val; }
+			void TakeLife() { lives -= 1;}
 
 		private:
 			int magicCount;
+			int score;
+			int lives;
 			
 		};
 	}

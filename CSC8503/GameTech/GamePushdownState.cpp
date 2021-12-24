@@ -48,7 +48,6 @@ void MainMenu::OnAwake() {
 	gameWorld = new GameWorld();
 	renderer = new GameTechRenderer(*gameWorld);
 	Debug::SetRenderer(renderer);
-	//renderer = gameState->GetRenderer();
 	DrawMenu();
 }
 
@@ -158,14 +157,16 @@ Window* NCL::CSC8503::GamePushdownState::GetGameWindow() {
 
 NCL::CSC8503::Results::Results(TutorialGame* game) {
 	score = game->GetPlayerScore();
+	enemyScore = game->GetEnemyScore();
 	time = game->GetGameTime();
 	this->game = game;
 }
 
 PushdownState::PushdownResult Results::OnUpdate(float dt, PushdownState** newState) {
-	Vector2 pos1(35, 35);
-	Vector2 pos2(25, 45);
-	Vector2 pos3(45, 45);
+	Vector2 pos1(40, 35);
+	Vector2 pos2(30, 45);
+	Vector2 pos3(50, 45);
+	Vector2 pos4(30, 55);
 	if (game->GetGameStatus() == -1) {
 		game->GetRenderer()->DrawString("You Lose", pos1, Debug::RED);
 	}
@@ -174,6 +175,10 @@ PushdownState::PushdownResult Results::OnUpdate(float dt, PushdownState** newSta
 	}
 	game->GetRenderer()->DrawString("Score: " + std::to_string(score), pos2, Debug::BLACK);
 	game->GetRenderer()->DrawString("Time: " + std::to_string(time), pos3, Debug::BLACK);
+	if (enemyScore != -1) {
+		game->GetRenderer()->DrawString("Enemy Score: " + std::to_string(enemyScore), pos4, Debug::BLACK);
+	}
+
 	game->GetRenderer()->Update(dt);
 	game->GetRenderer()->Render();
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {

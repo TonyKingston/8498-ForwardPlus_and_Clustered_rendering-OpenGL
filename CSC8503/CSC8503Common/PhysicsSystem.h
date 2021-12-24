@@ -1,6 +1,7 @@
 #pragma once
 #include "../CSC8503Common/GameWorld.h"
 #include "CollisionDetection.h"
+#include "QuadTree.h"
 #include <set>
 
 namespace NCL {
@@ -26,6 +27,9 @@ namespace NCL {
 			void SetLinearDamping(float d) { linearDamping = d; }
 
 			void SetGravity(const Vector3& g);
+			QuadTree<GameObject*>* GetQuadTree() {
+				return tree;
+			}
 		
 		protected:
 			void BasicCollisionDetection();
@@ -34,7 +38,7 @@ namespace NCL {
 
 			void ClearForces();
 
-			void IntegrateAccel(float dt);
+			void IntegrateAccel(float dt, bool penalty = false);
 			void IntegrateVelocity(float dt);
 
 			void UpdateConstraints(float dt);
@@ -45,7 +49,7 @@ namespace NCL {
 			void BuildStaticList();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
-			void ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const;
+			void PenaltyResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const;
 
 			GameWorld& gameWorld;
 
@@ -56,11 +60,12 @@ namespace NCL {
 			float	dTOffset;
 			float	globalDamping;
 			float linearDamping;
+			bool usingPenalty;
 
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
 			std::vector<GameObject*> staticObjects;
-			//QuadTree <GameObject*> tree;
+			QuadTree <GameObject*>* tree;
 
 
 			bool useBroadPhase		= true;

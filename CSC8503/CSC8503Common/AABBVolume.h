@@ -19,7 +19,7 @@ namespace NCL {
 			return halfSizes;
 		}
 
-		virtual void DrawVolume(const Vector3& position, const Vector4& colour = Vector4(1, 0, 0, 1)) {
+		void DrawVolume(const Vector3& position, const Vector4& colour = Vector4(1, 0, 0, 1)) override{
 			Debug::DrawLine(Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
 				Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z + halfSizes.z),
 				colour);
@@ -100,11 +100,6 @@ namespace NCL {
 				Vector3(position.x + halfSizes.x, position.y + halfSizes.y, position.z - halfSizes.z),
 				colour
 			);
-
-			// Use a small line to draw centre of AABB
-			Debug::DrawLine(Vector3(position.x, position.y, position.z),
-				Vector3(position.x + 0.01, position.y + 0.01, position.z + 0.01),
-				colour);
 		}
 	protected:
 		Vector3 halfSizes;

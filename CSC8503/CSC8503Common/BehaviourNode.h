@@ -20,4 +20,5 @@ public:
 	virtual void Reset() { currentState = Initialise; }
 protected:
 	BehaviourState currentState;
-	std::string name;};
+	std::string name;
+};

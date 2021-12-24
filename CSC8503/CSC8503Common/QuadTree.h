@@ -4,9 +4,13 @@
 #include "Debug.h"
 #include <list>
 #include <functional>
+#include "Ray.h"
+#include <set>
+
 
 namespace NCL {
 	using namespace NCL::Maths;
+	using std::vector;
 	namespace CSC8503 {
 		template<class T>
 		class QuadTree;
@@ -30,7 +34,7 @@ namespace NCL {
 			typedef std::function<void(std::list<QuadTreeEntry<T>>&)> QuadTreeFunc;
 
 			void OperateOnContents(QuadTreeFunc& func) {
-				if (children && !isAsleep) {
+				if (children) { // !isAsleep Need to debug
 					for (int i = 0; i < 4; ++i) {
 						children[i].OperateOnContents(func);
 					}
@@ -45,6 +49,10 @@ namespace NCL {
 
 			int ContentsSize() {
 				return contents.size();
+			}
+
+			std::list< QuadTreeEntry<T> > GetContents() {
+				return contents;
 			}
 		protected:
 			friend class QuadTree<T>;
@@ -108,7 +116,22 @@ namespace NCL {
 				}
 				else if (node == nullptr) {
 					node = this;
-					bool a = true;
+				}
+			}
+
+			void BuildRayCollisionList(Ray& r, vector<T>& collisions) {
+				RayCollision c;
+				if (CollisionDetection::RayBoxIntersection(r, Vector3(position.x, 0, position.y), Vector3(size.x, 1000, size.y), c, true)) {
+					if (children) {
+						for (int i = 0; i < 4; ++i) {
+							children[i].BuildRayCollisionList(r, collisions);
+						}
+					}
+					else {
+						for (const auto& i : contents) {
+							collisions.push_back(i.object);
+						}
+					}
 				}
 			}
 
@@ -123,10 +146,15 @@ namespace NCL {
 					Vector2(-halfSize.x, -halfSize.y), halfSize);
 				children[3] = QuadTreeNode <T>(position +
 					Vector2(halfSize.x, -halfSize.y), halfSize);
+				for (int i = 0; i < 4; ++i) {
+					children[i].isAsleep = this->isAsleep;
+				}
 			}
 
 			void Clear() {
 				delete[] children;
+				children = nullptr;
+				contents.clear();
 			}
 
 			void DebugDraw() {
@@ -201,7 +229,13 @@ namespace NCL {
 			}
 
 			void Clear() {
-				delete[] root.children;
+				root.Clear();
+			}
+
+			vector<T> BuildRayCollisonList(Ray& r) {
+				vector<T> collisions;
+				root.BuildRayCollisionList(r, collisions);
+				return collisions;
 			}
 
 			void OperateOnContents(typename QuadTreeNode<T>::QuadTreeFunc  func) {

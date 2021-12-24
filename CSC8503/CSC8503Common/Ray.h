@@ -1,7 +1,7 @@
 #pragma once
 #include "../../Common/Vector3.h"
 #include "../../Common/Plane.h"
-
+#include "../CSC8503Common/Layer.h"
 namespace NCL {
 	namespace Maths {
 		struct RayCollision {
@@ -20,6 +20,12 @@ namespace NCL {
 			Ray(Vector3 position, Vector3 direction) {
 				this->position  = position;
 				this->direction = direction;
+				layerMask = Layer::Default;
+			}
+			Ray(Vector3 position, Vector3 direction, int layer) {
+				this->position = position;
+				this->direction = direction;
+				layerMask = layer;
 			}
 			~Ray(void) {}
 
@@ -27,9 +33,12 @@ namespace NCL {
 
 			Vector3 GetDirection() const {return direction;	}
 
+			int GetLayerMask() const { return layerMask; }
+
 		protected:
 			Vector3 position;	//World space position
 			Vector3 direction;	//Normalised world space direction
+			int layerMask;
 		};
 	}
 }

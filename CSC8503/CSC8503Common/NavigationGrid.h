@@ -46,6 +46,7 @@ namespace NCL {
 		protected:
 			bool		NodeInList(GridNode* n, std::vector<GridNode*>& list) const;
 			GridNode*	RemoveBestNode(std::vector<GridNode*>& list) const;
+			void ResetGrid();
 			inline float		Heuristic(GridNode* hNode, GridNode* endNode) const;
 			int nodeSize;
 			int gridWidth;

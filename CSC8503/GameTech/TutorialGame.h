@@ -6,6 +6,8 @@
 #include "../CSC8503Common/EnemyObject.h"
 #include "../CSC8503Common/BonusObject.h"
 #include "../CSC8503Common/NavigationGrid.h"
+#include "../CSC8503Common/PendulumObject.h"
+#include "../CSC8503Common/JumpPadObject.h"
 
 
 
@@ -30,6 +32,14 @@ namespace NCL {
 			}
 
 			int GetPlayerScore() { return player->GetScore(); }
+			int GetEnemyScore() {
+				if (enemy) {
+					return enemy->GetScore();
+				}
+				else {
+					return -1;
+				}
+			}
 			float GetGameTime() { return timeTaken;}
 			int GetGameStatus() { return gameStatus; }
 
@@ -45,6 +55,7 @@ namespace NCL {
 			void InitCapsuleTest();
 			void InitOBBTest();
 			void InitSleepTest();
+			void InitSpringTest();
 
 			void LoadWorldFromFile(const std::string& filename);
 
@@ -55,6 +66,7 @@ namespace NCL {
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
+			void PendulumConstraint();
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -70,11 +82,13 @@ namespace NCL {
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, Vector3 orientation = Vector3(), bool isOBB = false, float inverseMass = 10.0f, Vector4 colour = Debug::GRAY);
 			GameObject* AddCubeOBBToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddKillPlaneToWorld(const Vector3& position);
-			GameObject* AddVictoryTriggerToWorld(const Vector3& position);
+			GameObject* AddVictoryTriggerToWorld(const Vector3& position, Vector3 dimensions);
+			PendulumObject* AddPendulumToWorld(const Vector3& position);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 			PlayerObject* AddPlayerToWorld(const Vector3& position);
 			EnemyObject* AddEnemyToWorld(const Vector3& position);
+			JumpPadObject* AddJumpPadToWorld(const Vector3& position, Vector3 dimensions, Vector3 target);
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
@@ -121,6 +135,8 @@ namespace NCL {
 			}
 
 			vector<GameObject*> allSeekers;
+
+			const int GAME_LENGTH = 90.0f;
 
 		};
 	}

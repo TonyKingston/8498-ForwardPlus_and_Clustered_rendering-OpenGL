@@ -2,13 +2,14 @@
 #include <vector>
 #include "Ray.h"
 #include "CollisionDetection.h"
-#include "QuadTree.h"
+
 namespace NCL {
 		class Camera;
 		using Maths::Ray;
 	namespace CSC8503 {
 		class GameObject;
 		class Constraint;
+		class PhysicsSystem;
 
 		typedef std::function<void(GameObject*)> GameObjectFunc;
 		typedef std::vector<GameObject*>::const_iterator GameObjectIterator;
@@ -16,6 +17,8 @@ namespace NCL {
 		class GameWorld	{
 		public:
 			GameWorld();
+			GameWorld(PhysicsSystem* physics);
+			//GameWorld(TutorialGame* game);
 			~GameWorld();
 
 			void Clear();
@@ -55,10 +58,16 @@ namespace NCL {
 				std::vector<Constraint*>::const_iterator& first,
 				std::vector<Constraint*>::const_iterator& last) const;
 
+			void SetPhysicsSystem(PhysicsSystem* physics) {
+				this->physics = physics;
+			}
+
 		protected:
 			std::vector<GameObject*> gameObjects;
 			std::vector<GameObject*> staticObjects;
 			std::vector<Constraint*> constraints;
+
+			PhysicsSystem* physics;
 
 			Camera* mainCamera;
 

@@ -29,9 +29,15 @@ NavigationGrid::NavigationGrid()	{
 NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 	std::ifstream infile(Assets::DATADIR + filename);
 
+	Vector3 offset;
+	int nodeHeight;
 	infile >> nodeSize;
+	infile >> nodeHeight;
 	infile >> gridWidth;
 	infile >> gridHeight;
+	infile >> offset.x;
+	infile >> offset.y;
+	infile >> offset.z;
 
 	allNodes = new GridNode[gridWidth * gridHeight];
 
@@ -41,7 +47,7 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 			char type = 0;
 			infile >> type;
 			n.type = type;
-			n.position = Vector3(x * nodeSize, 0, y * nodeSize);
+			n.position = Vector3(offset.x + x * nodeSize, offset.y + 0, offset.z + y * nodeSize);
 		}
 	}
 	
@@ -90,8 +96,6 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 					Vector3(n.position.x + nodeSize / 2, height, n.position.z - nodeSize / 2),
 					colour, time);*/
 
-
-
 			}
 		}	
 	}
@@ -118,6 +122,8 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 		toZ < 0 || toZ > gridHeight - 1) {
 		return false; //outside of map region!
 	}
+
+	ResetGrid();
 
 	GridNode* startNode = &allNodes[(fromZ * gridWidth) + fromX];
 	GridNode* endNode	= &allNodes[(toZ * gridWidth) + toX];
@@ -196,6 +202,19 @@ bool NavigationGrid::NodeInList(GridNode* n, std::vector<GridNode*>& list) const
 
 	return bestNode;
 }*/
+
+void NavigationGrid::ResetGrid() {
+	for (int y = 0; y < gridHeight; ++y) {
+		for (int x = 0; x < gridWidth; ++x) {
+			int tileIndex = (y * gridWidth) + x;
+			allNodes[tileIndex].visited = false;
+			allNodes[tileIndex].globalGoal = INFINITY;
+			allNodes[tileIndex].localGoal = INFINITY;
+			allNodes[tileIndex].bestParent = nullptr;
+		}
+	}
+
+}
 
 float NavigationGrid::Heuristic(GridNode* hNode, GridNode* endNode) const {
 	//return (hNode->position - endNode->position).Length();

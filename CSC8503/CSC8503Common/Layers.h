@@ -1,5 +1,5 @@
-enum Layers {
+enum Layer {
 	Default = 1,
 	IgnoreRaycast = 2,
-	Platform = 4
+	Player = 4
 };

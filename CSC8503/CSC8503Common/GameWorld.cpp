@@ -4,17 +4,34 @@
 #include "CollisionDetection.h"
 #include "../../Common/Camera.h"
 #include <algorithm>
+#include "PhysicsSystem.h"
 
 using namespace NCL;
 using namespace NCL::CSC8503;
 
-GameWorld::GameWorld()	{
+GameWorld::GameWorld() {
 	mainCamera = new Camera();
+	shuffleConstraints = false;
+	shuffleObjects = false;
+	worldIDCounter = 0;
+}
 
+
+GameWorld::GameWorld(PhysicsSystem* physics)	{
+	mainCamera = new Camera();
+	this->physics = physics;
 	shuffleConstraints	= false;
 	shuffleObjects		= false;
 	worldIDCounter		= 0;
 }
+
+/*GameWorld::GameWorld(TutorialGame* game)	{
+	mainCamera = new Camera();
+	this->game = game;
+	shuffleConstraints	= false;
+	shuffleObjects		= false;
+	worldIDCounter		= 0;
+}*/
 
 GameWorld::~GameWorld()	{
 }
@@ -35,7 +52,7 @@ void GameWorld::ClearAndErase() {
 }
 
 void GameWorld::AddGameObject(GameObject* o) {
-	if (o->GetPhysicsObject()->IsStatic()) {
+	if (o->GetPhysicsObject() != nullptr && o->GetPhysicsObject()->IsStatic()) {
 		gameObjects.emplace_back(o);
 		staticObjects.emplace_back(o);
 	}
@@ -81,11 +98,8 @@ void GameWorld::UpdateWorld(float dt) {
 		std::random_shuffle(constraints.begin(), constraints.end());
 	}
 	OperateOnContents([&](GameObject* g) {
-		if (g->IsActive()) {
+		if (g->IsActive() && !g->IsAsleep()) {
 			g->UpdateObject(dt);
-		}
-		else {
-			RemoveGameObject(g, true);
 		}
 	});
 	
@@ -94,8 +108,29 @@ void GameWorld::UpdateWorld(float dt) {
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject) const {
 	//The simplest raycast just goes through each object and sees if there's a collision
 	RayCollision collision;
+	
+	vector<GameObject*> objects = physics->GetQuadTree()->BuildRayCollisonList(r);
+	for (auto& i : objects) {
+		if (!i->GetBoundingVolume()) {
+			continue;
+		}
+		RayCollision thisCollision;
+		if (CollisionDetection::RayIntersection(r, *i, thisCollision)) {
 
-	for (auto& i : gameObjects) {
+			if (!closestObject) {
+				closestCollision = collision;
+				closestCollision.node = i;
+				return true;
+			}
+			else {
+				if (thisCollision.rayDistance < collision.rayDistance) {
+					thisCollision.node = i;
+					collision = thisCollision;
+				}
+			}
+		}
+	}
+	/*for (auto& i : gameObjects) {
 		if (!i->GetBoundingVolume()) { //objects might not be collideable etc...
 			continue;
 		}
@@ -114,7 +149,7 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
 				}
 			}
 		}
-	}
+	}*/
 	if (collision.node) {
 		closestCollision		= collision;
 		closestCollision.node	= collision.node;

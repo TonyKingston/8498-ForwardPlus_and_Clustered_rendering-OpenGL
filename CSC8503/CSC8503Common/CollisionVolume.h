@@ -31,10 +31,7 @@ namespace NCL {
 		VolumeType type;
 
 		virtual void DrawVolume(const Vector3& position, const Vector4& colour = Debug::BLUE) {
-			if (mesh) {
-				mesh->SetPrimitiveType(Lines);
-				
-			}
+
 		};
 
 		bool IsTrigger() {
@@ -48,9 +45,10 @@ namespace NCL {
 		void SetVolumeMesh(MeshGeometry* m) { mesh = m; }
 		void SetObject(CSC8503::GameObject* object) { collisionObj = object; }
 		MeshGeometry* GetVolumeMesh() { return mesh; }
+	protected:
+		CSC8503::GameObject* collisionObj;
 	private:
 		MeshGeometry* mesh;
 		bool isTrigger;
-		CSC8503::GameObject* collisionObj;
 	};
 }

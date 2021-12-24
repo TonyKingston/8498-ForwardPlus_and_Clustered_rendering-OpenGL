@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <functional>
+#include "Ray.h"
+#include "Layer.h"
 
 using std::vector;
 
@@ -16,12 +18,6 @@ namespace NCL {
 		class GameObject	{
 		public:
 
-			enum Layer {
-				Default = 1,
-				IgnoreRaycast = 2,
-				Player = 4
-			};
-
 			GameObject(string name = "");
 			~GameObject();
 
@@ -30,6 +26,7 @@ namespace NCL {
 
 			void SetBoundingVolume(CollisionVolume* vol) {
 				boundingVolume = vol;
+				vol->SetObject(this);
 			}
 
 			const CollisionVolume* GetBoundingVolume() const {
@@ -38,6 +35,14 @@ namespace NCL {
 
 			bool IsActive() const {
 				return isActive;
+			}
+
+			bool IsSpring() const {
+				return isSpring;
+			}
+
+			void SetAsSpring() {
+				isSpring = true;
 			}
 
 			void Deactivate() {
@@ -51,6 +56,8 @@ namespace NCL {
 			bool IsTrigger() const {
 				return isTrigger;
 			}
+
+			void SetTrigger() { isTrigger = true; }
 
 			void PutToSleep() {
 				isAsleep = true;
@@ -101,6 +108,15 @@ namespace NCL {
 				triggerFunc(otherObject);
 			}
 
+			typedef std::function<void(Ray, RayCollision&, bool)> RayFunc;
+			void Raycast(Ray ray, RayCollision& c, bool closest = true) {
+				rayFunc(ray, c, closest);
+			}
+
+			void SetRayFunc(RayFunc function) {
+				rayFunc = function;
+			}
+
 			void SetTriggerFunc(TriggerFunc function) {
 				triggerFunc = function;
 			}
@@ -130,6 +146,8 @@ namespace NCL {
 			}
 			void PrintDebugInfo();
 
+			virtual void OnClick() {};
+
 		protected:
 			Transform			transform;
 
@@ -140,10 +158,12 @@ namespace NCL {
 			bool	isActive;
 			bool    isAsleep;
 			bool    isTrigger;
+			bool    isSpring;
 			int		worldID;
 			int layer;
 			string	name;
 			TriggerFunc triggerFunc;
+			RayFunc rayFunc;
 			Vector3 broadphaseAABB;
 			static TutorialGame* game;
 		};

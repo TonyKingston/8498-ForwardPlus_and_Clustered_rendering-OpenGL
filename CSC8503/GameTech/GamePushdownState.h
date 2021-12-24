@@ -40,7 +40,6 @@ namespace NCL {
 			PushdownResult OnUpdate(float dt,
 				PushdownState** newState) override;
 			void OnAwake() override;
-			//void OnSleep() override;
 		private:
 			TutorialGame* game;
 			int gameId;
@@ -57,6 +56,7 @@ namespace NCL {
 			void OnSleep() override;
 		private:
 			int score;
+			int enemyScore;
 			float time;
 			TutorialGame* game;
 		};

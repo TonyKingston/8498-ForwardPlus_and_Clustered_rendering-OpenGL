@@ -48,6 +48,7 @@ namespace NCL {
 			void AddForce(const Vector3& force);
 
 			void AddForceAtPosition(const Vector3& force, const Vector3& position);
+			void AddForceAtLocalPosition(const Vector3& force, const Vector3& localPos);
 
 			void AddTorque(const Vector3& torque);
 
@@ -76,6 +77,30 @@ namespace NCL {
 
 			void SetFriction(float f) {
 				friction = f;
+			}
+
+			float GetStiffness() {
+				return stiffness;
+			}
+
+			void SetStiffness(float s) {
+				stiffness = s;
+			}
+
+			float GetLinearDamping() {
+				return linearDamping;
+			}
+
+			void SetLinearDamping(float d) {
+				linearDamping = d;
+			}
+			
+			float GetAngularDamping() {
+				return angularDamping;
+			}
+
+			void SetAngularDamping(float d) {
+				angularDamping = d;
 			}
 
 			void UpdateWeightedAverageMotion() {
@@ -118,6 +143,10 @@ namespace NCL {
 			float inverseMass;
 			float elasticity;
 			float friction;
+			float stiffness;
+			float linearDamping;
+			float angularDamping;
+
 			bool isStatic;
 
 			//linear stuff

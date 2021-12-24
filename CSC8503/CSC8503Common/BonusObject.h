@@ -12,6 +12,7 @@ namespace NCL {
 
 			int GetScore() { return score; }
 			int SetScore(int val) { score = val; }
+			bool UpdateObject(float dt) override;
 		private:
 			void OnCollisionBegin(GameObject* otherObj) override;
 			int score;

@@ -138,6 +138,15 @@
     <ClInclude Include="EnemyObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PendulumObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JumpPadObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">
@@ -219,6 +228,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EnemyObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PendulumObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JumpPadObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

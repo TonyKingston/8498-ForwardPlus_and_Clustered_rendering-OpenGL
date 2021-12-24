@@ -29,6 +29,7 @@ namespace NCL {
 		static const Vector4 YELLOW;
 		static const Vector4 MAGENTA;
 		static const Vector4 CYAN;
+		static const Vector4 GRAY;
 
 	protected:
 		struct DebugStringEntry {
