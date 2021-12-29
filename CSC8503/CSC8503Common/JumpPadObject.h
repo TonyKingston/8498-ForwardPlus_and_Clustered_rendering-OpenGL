@@ -8,7 +8,7 @@ namespace NCL {
 			JumpPadObject(PlayerObject* player) : GameObject("jump pad"){
 				this->target = target;
 				this->player = player;
-				force = Vector3(150.0f, 200.0f, 150.0f);
+				force = Vector3(200.0f, 300.0f, 200.0f);
 			}
 			~JumpPadObject();
 			void OnClick() override;

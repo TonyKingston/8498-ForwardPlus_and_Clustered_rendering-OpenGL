@@ -379,7 +379,7 @@ void TutorialGame::InitMazeLevel() {
 	bonuses[0] = Vector3(10, 5, 130);
 	bonuses[1] = Vector3(130, 5, 10);
 	bonuses[2] = Vector3(100, 5, 50);
-	bonuses[3] = Vector3(110, 5, 50);
+	bonuses[3] = Vector3(100, 5, 60);
 	bonuses[4] = Vector3(10, 5, 70);
 	bonuses[5] = Vector3(130, 5, 70);
 	for (int i = 0; i < bonusNum; i++) {
@@ -1051,7 +1051,6 @@ bool TutorialGame::SelectObject() {
 				Debug::DrawLine(ray.GetPosition(), closestCollision.collidedAt, Debug::RED, 10.0f);
 				selectionObject = (GameObject*)closestCollision.node;
 				selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
-				selectionObject->OnClick();
 				ray = CollisionDetection::BuildRayFromObject(*selectionObject, 100);
 				if (world->Raycast(ray, c2, true)) {
 					Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 10.0f);

@@ -53,9 +53,13 @@ void NCL::CSC8503::EnemyObject::CreateBehaviourTree() {
 				if (obj->GetName() == "bonus") {
 					state = Ongoing;
 				}
-				return Failure;
+				else {
+					bonuses.erase(bonuses.begin());
+					return Failure;
+				}
 			}
 			else if (state == Ongoing) {
+				targetDir = (bonuses[0] - GetTransform().GetPosition()).Normalised();
 				GetPhysicsObject()->AddForce(targetDir * speed);
 				if (!getBonus) {
 					return Success;
@@ -112,6 +116,7 @@ bool NCL::CSC8503::EnemyObject::UpdateObject(float dt) {
 	}
 	else if (state == Failure) {
 		std::cout << "Fail!\n";
+		rootSequence->Reset();
 	}
 	DisplayPathfinding();
 	return true;
@@ -169,6 +174,6 @@ void NCL::CSC8503::EnemyObject::OnCollisionEnd(GameObject* otherObj) {
 	if (otherObj->GetName() == "bonus" && otherObj->GetTransform().GetPosition() == bonuses[0]) { // Don't reset if we collect a bonus on the way to the player
 		bonuses.erase(bonuses.begin());
 		getBonus = false;
-		rootSequence->Reset();
+		//rootSequence->Reset();
 	}
 }

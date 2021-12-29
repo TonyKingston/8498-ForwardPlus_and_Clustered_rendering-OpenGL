@@ -136,7 +136,7 @@ namespace NCL {
 
 			vector<GameObject*> allSeekers;
 
-			const int GAME_LENGTH = 90.0f;
+			const int GAME_LENGTH = 60.0f;
 
 		};
 	}

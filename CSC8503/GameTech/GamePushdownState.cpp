@@ -192,5 +192,5 @@ void Results::OnAwake() {
 }
 
 void Results::OnSleep() {
-	delete game;
+	//delete game;
 }
