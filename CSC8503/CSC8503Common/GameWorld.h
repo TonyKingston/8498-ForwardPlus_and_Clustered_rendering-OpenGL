@@ -18,7 +18,6 @@ namespace NCL {
 		public:
 			GameWorld();
 			GameWorld(PhysicsSystem* physics);
-			//GameWorld(TutorialGame* game);
 			~GameWorld();
 
 			void Clear();
