@@ -20,7 +20,7 @@ namespace NCL {
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
-			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type);
+			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0);
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
@@ -34,6 +34,11 @@ namespace NCL {
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
+
+			void RenderForward();
+			void RenderDeferred();
+			void RenderForwardPlus();
+			void RenderClustered();
 
 			Matrix4 SetupDebugLineMatrix()	const override;
 			Matrix4 SetupDebugStringMatrix()const override;
@@ -123,6 +128,8 @@ namespace NCL {
 			vector<GLuint> sceneTextures;
 			vector<GLuint> screenTextures;
 			vector<GLuint> sceneBuffers;
+
+			int renderMode;
 		};
 	}
 }
