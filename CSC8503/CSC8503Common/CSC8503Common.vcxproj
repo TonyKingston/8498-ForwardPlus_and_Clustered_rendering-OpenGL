@@ -101,6 +101,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -171,6 +172,7 @@
     <ClInclude Include="StateGameObject.h" />
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="StateTransition.h" />
+    <ClInclude Include="SystemDefines.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>

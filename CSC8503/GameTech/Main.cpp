@@ -153,10 +153,9 @@ int main() {
 	srand(time(0));
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
-
+	
 
 	PushdownMachine machine(new MainMenu());
-//	TestPathfinding();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();

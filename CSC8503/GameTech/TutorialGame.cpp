@@ -9,8 +9,6 @@
 #include "../../Common/Assets.h"
 #include <fstream>
 
-
-
 using namespace NCL;
 using namespace CSC8503;
 

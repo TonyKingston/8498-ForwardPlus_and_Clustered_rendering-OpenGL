@@ -1,0 +1,24 @@
+#pragma once
+#include "../../Common/ResourceManager.h"
+
+namespace NCL {
+	namespace Rendering {
+
+		using std::map;
+		using std::string;
+
+		class OGLResourceManager : public ResourceManager {
+		public:
+			OGLResourceManager() {}
+			~OGLResourceManager();
+			NCL::MeshGeometry* LoadMesh(string filename);
+			NCL::MeshMaterial* LoadMaterial(const string filename, vector<TextureBase*>& textureBuffer);
+			TextureBase* LoadTexture(string filename);
+			ShaderBase* LoadShader(string shaderVert, string shaderFrag, string shaderGeom = "");
+			NCL::MeshAnimation* LoadAnimation(string filename);
+
+		private:
+
+		};
+	}
+}

@@ -11,6 +11,7 @@ namespace NCL {
 
 	namespace Rendering {
 		class TextureBase;
+		class ResourceManager;
 	}
 	class MeshMaterialEntry {
 		friend class MeshMaterial;
@@ -31,18 +32,20 @@ namespace NCL {
 			return i->second.second;
 		}
 		void LoadTextures();
+		void LoadTextures(Rendering::ResourceManager* manager);
 
 	protected:
 		std::map<string, std::pair<string, Rendering::TextureBase*>> entries;
 	};
 
-	class MeshMaterial
-	{
+	class MeshMaterial {
+	public:
 		MeshMaterial(const std::string& filename);
 		~MeshMaterial() {}
 		const MeshMaterialEntry* GetMaterialForLayer(int i) const;
-
 		void LoadTextures();
+		std::vector<MeshMaterialEntry*> GetMeshLayers() { return meshLayers; }
+		int GetNumberOfLayers() { return meshLayers.size(); }
 
 	protected:
 		std::vector<MeshMaterialEntry>	materialLayers;

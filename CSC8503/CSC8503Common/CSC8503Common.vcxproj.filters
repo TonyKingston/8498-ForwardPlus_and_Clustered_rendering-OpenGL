@@ -147,6 +147,9 @@
     <ClInclude Include="JumpPadObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SystemDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">

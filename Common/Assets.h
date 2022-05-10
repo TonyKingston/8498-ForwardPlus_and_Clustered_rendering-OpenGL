@@ -14,6 +14,7 @@ namespace NCL {
 		const std::string SHADERDIR("../../Assets/Shaders/");
 		const std::string MESHDIR("../../Assets/Meshes/");
 		const std::string TEXTUREDIR("../../Assets/Textures/");
+		const std::string ANIMDIR("../../Assets/Animations/");
 		const std::string SOUNDSDIR("../../Assets/Sounds/");
 		const std::string FONTSSDIR("../../Assets/Fonts/");
 		const std::string DATADIR("../../Assets/Data/");

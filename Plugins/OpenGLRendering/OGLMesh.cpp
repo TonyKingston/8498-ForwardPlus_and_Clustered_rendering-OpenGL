@@ -174,3 +174,31 @@ void OGLMesh::RecalculateNormals() {
 
 	}
 }
+
+OGLMesh* OGLMesh::GenerateQuad() {
+	OGLMesh* m = new OGLMesh();
+
+	int numVertices = 4;
+
+	m->primType = TriangleStrip;
+
+	m->positions.emplace_back(NCLVector3(-1.0f, 1.0f, 0.0f));
+	m->positions.emplace_back(NCLVector3(-1.0f, -1.0f, 0.0f));
+	m->positions.emplace_back(NCLVector3(1.0f, 1.0f, 0.0f));
+	m->positions.emplace_back(NCLVector3(1.0f, -1.0f, 0.0f));
+
+	m->texCoords.emplace_back(NCLVector2(0.0f, 1.0f));
+	m->texCoords.emplace_back(NCLVector2(0.0f, 0.0f));
+	m->texCoords.emplace_back(NCLVector2(1.0f, 1.0f));
+	m->texCoords.emplace_back(NCLVector2(1.0f, 0.0f));
+
+	for (int i = 0; i < 4; ++i) {
+		m->colours.emplace_back(NCLVector4(1.0f, 1.0f, 1.0f, 1.0f));
+		m->normals.emplace_back(NCLVector3(0.0f, 0.0f, -1.0f));
+		m->tangents.emplace_back(NCLVector4(1.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	m->UploadToGPU();
+
+	return m;
+}

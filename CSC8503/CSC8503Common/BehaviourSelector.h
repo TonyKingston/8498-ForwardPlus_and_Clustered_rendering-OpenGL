@@ -19,6 +19,7 @@ public:
 			  }
 			}
 		}
-		return Failure;	}
+		return Failure;
+	}
 };
 
