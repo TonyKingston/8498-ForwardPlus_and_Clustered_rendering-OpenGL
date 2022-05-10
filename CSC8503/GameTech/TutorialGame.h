@@ -8,6 +8,7 @@
 #include "../CSC8503Common/NavigationGrid.h"
 #include "../CSC8503Common/PendulumObject.h"
 #include "../CSC8503Common/JumpPadObject.h"
+#include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
 
 
 
@@ -22,7 +23,6 @@ namespace NCL {
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
-			vector<GameObject*> GetSeekers();
 			GameWorld* GetWorld() {
 				return world;
 			}
@@ -89,12 +89,7 @@ namespace NCL {
 			PlayerObject* AddPlayerToWorld(const Vector3& position);
 			EnemyObject* AddEnemyToWorld(const Vector3& position);
 			JumpPadObject* AddJumpPadToWorld(const Vector3& position, Vector3 dimensions, Vector3 target);
-			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
-
-			//GameObject* AddPlayerToWorld(const Vector3& position);
-			//GameObject* AddEnemyToWorld(const Vector3& position);
-			BonusObject* AddBonusToWorld(const Vector3& position);
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
@@ -115,17 +110,11 @@ namespace NCL {
 			Vector3 playerSpawn;
 
 
-			OGLMesh*	capsuleMesh = nullptr;
-			OGLMesh*	cubeMesh	= nullptr;
-			OGLMesh*	sphereMesh	= nullptr;
+			MeshGeometry*	capsuleMesh = nullptr;
+			MeshGeometry*	cubeMesh	= nullptr;
+			MeshGeometry*	sphereMesh	= nullptr;
 			OGLTexture* basicTex	= nullptr;
 			OGLShader*	basicShader = nullptr;
-
-			//Coursework Meshes
-			OGLMesh*	charMeshA	= nullptr;
-			OGLMesh*	charMeshB	= nullptr;
-			OGLMesh*	enemyMesh	= nullptr;
-			OGLMesh*	bonusMesh	= nullptr;
 
 			//Coursework Additional functionality	
 			GameObject* lockedObject	= nullptr;
@@ -134,9 +123,9 @@ namespace NCL {
 				lockedObject = o;
 			}
 
-			vector<GameObject*> allSeekers;
+			ResourceManager* resourceManager;
 
-			const int GAME_LENGTH = 90.0f;
+			const int GAME_LENGTH = 180.0f;
 
 		};
 	}

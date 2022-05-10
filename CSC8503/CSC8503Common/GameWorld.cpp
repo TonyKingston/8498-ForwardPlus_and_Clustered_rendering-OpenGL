@@ -90,19 +90,17 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 }
 
 void GameWorld::UpdateWorld(float dt) {
-	if (shuffleObjects) {
-		std::random_shuffle(gameObjects.begin(), gameObjects.end());
-	}
-
-	if (shuffleConstraints) {
-		std::random_shuffle(constraints.begin(), constraints.end());
-	}
-	OperateOnContents([&](GameObject* g) {
-		if (g->IsActive() && !g->IsAsleep()) {
-			g->UpdateObject(dt);
+	OperateOnContents([&](GameObject* obj)->void
+		{
+			RenderObject* rend = obj->GetRenderObject();
+			if (rend) {
+				obj->GetRenderObject()->Update(dt);
+			}
+			if (obj->IsToDelete()) {
+				RemoveGameObject(obj, true);
+			}
 		}
-	});
-	
+	);
 }
 
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject) const {

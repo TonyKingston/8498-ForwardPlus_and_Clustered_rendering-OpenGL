@@ -2,6 +2,7 @@
 #include "../CSC8503Common/Debug.h"
 #include "GameState.h"
 #include "../../Common/Window.cpp"
+#include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
 
 
 using namespace NCL::CSC8503;
@@ -46,7 +47,7 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 
 void MainMenu::OnAwake() {
 	gameWorld = new GameWorld();
-	renderer = new GameTechRenderer(*gameWorld);
+	renderer = new GameTechRenderer(*gameWorld, new OGLResourceManager());
 	Debug::SetRenderer(renderer);
 	DrawMenu();
 }
@@ -83,7 +84,7 @@ void MainMenu::DrawMenu() {
 
 NCL::CSC8503::Game::Game(int gameId) {
 	this->gameId = gameId;
-	game = new TutorialGame(gameId);
+	//game = new TutorialGame(gameId);
 }
 
 PushdownState::PushdownResult Game::OnUpdate(float dt, PushdownState** newState) {

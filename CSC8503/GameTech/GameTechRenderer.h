@@ -16,15 +16,14 @@ namespace NCL {
 	class Maths::Vector4;
 	namespace CSC8503 {
 		class RenderObject;
-		class D_GUI;
+		//class D_GUI;
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
-			GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm);
+			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type);
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
-			bool ShowNavMesh = false;
 
 			void RenderStartView();
 			void ResizeSceneTextures(float width, float height);
@@ -32,13 +31,17 @@ namespace NCL {
 			void RenderFrame()	override;
 			void BeginFrame() override;
 
+			void InitDeferred();
+			void InitForwardPlus();
+			void InitClustered();
+
 			Matrix4 SetupDebugLineMatrix()	const override;
 			Matrix4 SetupDebugStringMatrix()const override;
 
 			OGLShader* defaultShader;
 
 			GameWorld& gameWorld;
-			D_GUI* gameUI;
+			//D_GUI* gameUI;
 
 			void BuildObjectList(Camera* current_camera);
 			void SortObjectList();
@@ -49,7 +52,7 @@ namespace NCL {
 
 			void FillBuffers(Camera* current_camera, float depth);
 			void DrawPointLights(Camera* current_camera);
-			void DrawPaintDecals(Camera* current_camera);
+		//	void DrawPaintDecals(Camera* current_camera);
 			void CombineBuffers(Camera* current_camera);
 
 			void GenerateScreenTexture(GLuint& into, bool depth = false);
@@ -85,9 +88,6 @@ namespace NCL {
 
 			GLuint bufferFinalTex;
 
-			GLuint decalFBO;
-			GLuint decalScoreTex;
-
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;
@@ -112,23 +112,6 @@ namespace NCL {
 			void PresentScene(bool split, GLfloat offset);
 			void SplitRender();
 
-			//NavMesh Related
-			OGLMesh* navMesh;
-			OGLMesh* centroidMesh;
-			OGLShader* NavMesh_shader;
-			void LoadNavMesh();
-			void RenderNavMesh(Camera* current_camera);
-
-			//NavMesh02 Related
-			OGLMesh* navMesh02;
-			OGLMesh* centroidMesh02;
-			void LoadNavMesh02();
-			void RenderNavMesh02(Camera* current_camera);
-
-			// Paint tech
-			std::vector<GameObject*> decalsToBeGenerated; // paint decals to be generated from cubes this frame
-			OGLTexture* paintTex;
-			OGLShader* decalShader;
 			OGLResourceManager* resourceManager;
 			//start image
 			void LoadStartImage();

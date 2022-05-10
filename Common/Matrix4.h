@@ -29,6 +29,7 @@ namespace NCL {
 
 			//Set all matrix values to zero
 			void	ToZero();
+			void    ToIdentity();
 
 			//Gets the OpenGL position vector (floats 12,13, and 14)
 			Vector3 GetPositionVector() const;

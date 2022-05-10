@@ -1,0 +1,52 @@
+#version 330 core
+
+uniform sampler2D mainTex; // Diffuse texture map
+uniform sampler2D bumpTex; // Bump map
+uniform sampler2DShadow shadowTex;
+
+uniform vec3	cameraPos;
+
+uniform bool hasTexture;
+uniform bool hasBump;
+
+uniform float isDepth;
+
+in Vertex {
+	vec4 colour;
+	vec2 texCoord;
+	vec4 shadowProj;
+	vec3 normal;
+	vec3 tangent;
+	vec3 binormal;
+	vec3 worldPos;
+	float depth;
+} IN ;
+
+out vec4 fragColour[3]; // Our final outputted colours !
+
+void main ( void ) {
+    vec2 inverse = IN.texCoord;
+	inverse.y = 1- inverse.y;
+	mat3 TBN = mat3 (normalize (IN.tangent), normalize (IN.binormal), normalize (IN.normal));
+
+	float shadow = 1.0;
+	if (IN.shadowProj.w > 0.0) {
+		shadow = textureProj(shadowTex, IN.shadowProj) * 2.0f - 1.0;
+	}
+
+	vec3 normal = IN.normal;
+	if (hasBump) {
+	  normal = texture2D(bumpTex, inverse).rgb * 2.0 - 1.0;
+	  normal = normalize(TBN * normalize(normal));
+	}
+
+	fragColour[0] = IN.colour;
+	if (hasTexture) {
+	  fragColour[0] *= texture2D(mainTex , inverse);
+	}
+	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 ,1.0);
+	fragColour[2].r = shadow;
+
+	if (isDepth == 1.0) 
+		fragColour[0].rgb = vec3(IN.depth, 0, 0);
+}

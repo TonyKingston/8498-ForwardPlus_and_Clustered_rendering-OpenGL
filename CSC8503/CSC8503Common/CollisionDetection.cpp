@@ -12,6 +12,8 @@
 
 using namespace NCL;
 
+const Vector3 worldUp = Vector3(0, 1, 0);
+
 bool CollisionDetection::RayPlaneIntersection(const Ray&r, const Plane&p, RayCollision& collisions) {
 	float ln = Vector3::Dot(p.GetNormal(), r.GetDirection());
 

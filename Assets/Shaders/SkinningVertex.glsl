@@ -10,12 +10,15 @@ layout(location = 1) in vec4 colour;
 layout(location = 2) in vec2 texCoord;
 layout(location = 3) in vec3 normal;
 layout(location = 4) in vec4 tangent;
+layout(location = 5) in vec4   jointWeights;
+layout(location = 6) in  vec4  jointIndices;
 
 
 uniform vec4 		objectColour = vec4(1,1,1,1);
 
 uniform bool hasVertexColours = false;
 
+uniform mat4 joints[128];
 out Vertex
 {
 	vec4 colour;
@@ -25,7 +28,6 @@ out Vertex
 	vec3 tangent;
 	vec3 binormal;
 	vec3 worldPos;
-
 	float depth;
 } OUT;
 
@@ -36,9 +38,17 @@ void main(void)
 
 	vec3 wNormal    = normalize ( normalMatrix * normalize ( normal ));
 	vec3 wTangent   = normalize(normalMatrix * normalize(tangent.xyz));
-	
-	OUT.shadowProj 	=  shadowMatrix * vec4 ( position.xyz,1);
-	OUT.worldPos 	= ( modelMatrix * vec4 ( position.xyz ,1)).xyz;
+
+	vec4  localPos   = vec4(position , 1.0f);
+	 vec4  skelPos    = vec4 (0,0,0,0);
+	  for(int i = 0; i < 4; ++i) {
+	    int    jointIndex   = int(jointIndices[i]);
+	    float  jointWeight = jointWeights[i];
+		 skelPos  +=  joints[jointIndex] * localPos * jointWeight;
+	  }
+
+	OUT.shadowProj 	=  shadowMatrix * vec4 ( skelPos.xyz,1);
+	OUT.worldPos 	= ( modelMatrix * vec4 ( skelPos.xyz ,1)).xyz;
 	OUT.normal 		= wNormal;
 	OUT.tangent     = wTangent;
 	OUT.binormal    = cross(wTangent, wNormal) * tangent.w;
@@ -48,9 +58,6 @@ void main(void)
 	if(hasVertexColours) {
 		OUT.colour		= objectColour * colour;
 	}
+	 gl_Position = mvp * vec4(skelPos.xyz , 1.0);
 
-	vec4 result_pos = mvp * vec4(position.xyz , 1.0);
-	OUT.depth = result_pos.z / result_pos.w;
-
-	gl_Position = result_pos;
 }

@@ -18,16 +18,14 @@ using namespace CSC8503;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
-GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
-	: OGLRenderer(*Window::GetWindow()), gameWorld(w), gameUI(UI) {
+GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
+	: OGLRenderer(*Window::GetWindow()), gameWorld(w) {
 	//	glEnable(GL_DEPTH_TEST);
 	resourceManager = (OGLResourceManager*)rm;
 
 	sphere = (OGLMesh*)resourceManager->LoadMesh("sphere.msh");
 
 	quad = OGLMesh::GenerateQuad();
-
-	paintTex = (OGLTexture*)resourceManager->LoadTexture("paintSplat2.png");
 
 	shadowShader = new OGLShader("GameTechShadowVert.glsl", "GameTechShadowFrag.glsl");
 
@@ -41,18 +39,30 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
 	//lightRadius = 350.0f;
 	lightPosition = Vector3(-50.0f, 50.0f, 200.0f);
 
+	switch (type) {
+	case 0:
+		break;
+	case 1:
+		InitDeferred();
+		break;
+	case 2:
+		InitForwardPlus();
+		break;
+	case 3:
+		InitClustered();
+		break;
+	}
+}
 
+void NCL::CSC8503::GameTechRenderer::InitDeferred() {
 	sceneShader = new OGLShader("GameTechVert.glsl", "bufferFragment.glsl");
-	decalShader = new OGLShader("decalVert.glsl", "decalFrag.glsl");
 	pointLightShader = new OGLShader("pointlightvertex.glsl", "pointlightfrag.glsl");
 	combineShader = new OGLShader("combinevert.glsl", "combinefrag.glsl");
 
 	glGenFramebuffers(1, &bufferFBO);
 	glGenFramebuffers(1, &pointLightFBO);
-	glGenFramebuffers(1, &decalFBO);
 	sceneBuffers.push_back(bufferFBO);
 	sceneBuffers.push_back(pointLightFBO);
-	sceneBuffers.push_back(decalFBO);
 
 
 	GLenum buffers[2] = {
@@ -66,8 +76,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
 		GL_COLOR_ATTACHMENT2
 	};
 
-	GLenum decalBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-
 	//Skybox!
 	skyboxShader = new OGLShader("skyboxVertex.glsl", "skyboxFragment.glsl");
 	skyboxMesh = new OGLMesh();
@@ -78,15 +86,12 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
 
 	LoadSkybox();
 	LoadPrinter();
-	LoadNavMesh();
-	LoadNavMesh02();
-	LoadStartImage();
+	//LoadStartImage();
 
 	GenerateScreenTexture(bufferDepthTex, true);
 	GenerateScreenTexture(bufferColourTex);
 	GenerateScreenTexture(bufferNormalTex);
 	GenerateScreenTexture(bufferShadowTex);
-	GenerateScreenTexture(decalScoreTex);
 	GenerateScreenTexture(lightDiffuseTex);
 	GenerateScreenTexture(lightSpecularTex);
 
@@ -100,12 +105,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
 	glDrawBuffers(3, buffers2);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, decalFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, decalScoreTex, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-	glDrawBuffers(2, buffers);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
 
@@ -124,6 +123,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, D_GUI* UI, ResourceManager* rm)
 
 	loading = true;
 }
+
 
 GameTechRenderer::~GameTechRenderer() {
 	for (GLuint buffer : sceneBuffers) {
@@ -318,17 +318,17 @@ void GameTechRenderer::RenderFrame() {
 
 	RenderSkybox(gameWorld.GetMainCamera());
 
-	DrawPaintDecals(gameWorld.GetMainCamera());
 	DrawPointLights(gameWorld.GetMainCamera());
 	CombineBuffers(gameWorld.GetMainCamera());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	inSplitScreen ? SplitRender() : PresentScene(false, 0);
+	//inSplitScreen ? SplitRender() : PresentScene(false, 0);
 
+	PresentScene(false, 0);
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 
-	gameUI->UI_Render();
+	//gameUI->UI_Render();
 }
 
 void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
@@ -429,86 +429,78 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 			}
 			DrawBoundMesh(i);
 		}
-
-	}
-
-	//Debug Information
-	if (ShowNavMesh) {
-		RenderNavMesh(gameWorld.GetMainCamera());
-		RenderNavMesh02(gameWorld.GetMainCamera());
 	}
 
 	glDisable(GL_CULL_FACE);
-	DrawDebugData(true);
+	DrawDebugData();
 	glEnable(GL_CULL_FACE);
 }
 
-// Reopen first buffer?
-void GameTechRenderer::DrawPaintDecals(Camera* current_camera) {
-	glBindFramebuffer(GL_FRAMEBUFFER, decalFBO);
-	glDepthMask(GL_FALSE);
-
-	BindShader(decalShader);
-
-	glUniform1i(glGetUniformLocation(decalShader->GetProgramID(), "depthTex"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
-
-	glUniform1i(glGetUniformLocation(decalShader->GetProgramID(), "normalTex"), 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
-
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
-	int cameraLocation = glGetUniformLocation(decalShader->GetProgramID(), "cameraPos");
-	glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
-
-	int projLocation = glGetUniformLocation(decalShader->GetProgramID(), "projMatrix");
-	int viewLocation = glGetUniformLocation(decalShader->GetProgramID(), "viewMatrix");
-	int modelLocation = glGetUniformLocation(decalShader->GetProgramID(), "modelMatrix");
-
-	Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
-	glUniformMatrix4fv(glGetUniformLocation(decalShader->GetProgramID(), "inverseProjView"), 1, false, invViewProj.array);
-	glUniform1f(glGetUniformLocation(decalShader->GetProgramID(), "aspect"), screenAspect);
-	glUniform2f(glGetUniformLocation(decalShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
-	glUniform1f(glGetUniformLocation(decalShader->GetProgramID(), "far"), current_camera->GetFarPlane());
-
-	int colourLocation = glGetUniformLocation(decalShader->GetProgramID(), "objectColour");
-
-	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
-
-	int hasTexLocation = glGetUniformLocation(decalShader->GetProgramID(), "hasTexture");
-	int hasBumpLocation = glGetUniformLocation(decalShader->GetProgramID(), "hasBump");
-	glUniform1i(hasTexLocation, 1);
-	glUniform1i(hasBumpLocation, 0);
-
-	for (const auto& d : decalsToBeGenerated) {
-		RenderObject* r = d->GetRenderObject();
-		BindMesh((*r).GetMesh());
-
-		glUniformMatrix4fv(modelLocation, 1, false, (float*)&d->GetTransform().GetMatrix());
-		colourLocation = glGetUniformLocation(decalShader->GetProgramID(), "objectColour");
-		glUniform4fv(colourLocation, 1, (float*)&r->GetColour());
-		int invModelLocation = glGetUniformLocation(decalShader->GetProgramID(), "inverseModel");
-		Matrix4 invModelMat = (*r).GetTransform()->GetMatrix().Inverse();
-		glUniformMatrix4fv(invModelLocation, 1, false, invModelMat.array);
-
-		Matrix4 modelMatrix = (*r).GetTransform()->GetMatrix();
-		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
-
-		int layerCount = (*r).GetMesh()->GetSubMeshCount();
-		BindTextureToShader(paintTex, "mainTex", 1);
-		for (int i = 0; i < layerCount; ++i) {
-			DrawBoundMesh(i);
-		}
-	}
-
-	glDepthMask(GL_TRUE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+//void GameTechRenderer::DrawPaintDecals(Camera* current_camera) {
+//	glBindFramebuffer(GL_FRAMEBUFFER, decalFBO);
+//	glDepthMask(GL_FALSE);
+//
+//	BindShader(decalShader);
+//
+//	glUniform1i(glGetUniformLocation(decalShader->GetProgramID(), "depthTex"), 0);
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+//
+//	glUniform1i(glGetUniformLocation(decalShader->GetProgramID(), "normalTex"), 2);
+//	glActiveTexture(GL_TEXTURE2);
+//	glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+//
+//	float screenAspect = (float)currentWidth / (float)currentHeight;
+//	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
+//	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
+//
+//	int cameraLocation = glGetUniformLocation(decalShader->GetProgramID(), "cameraPos");
+//	glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
+//
+//	int projLocation = glGetUniformLocation(decalShader->GetProgramID(), "projMatrix");
+//	int viewLocation = glGetUniformLocation(decalShader->GetProgramID(), "viewMatrix");
+//	int modelLocation = glGetUniformLocation(decalShader->GetProgramID(), "modelMatrix");
+//
+//	Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
+//	glUniformMatrix4fv(glGetUniformLocation(decalShader->GetProgramID(), "inverseProjView"), 1, false, invViewProj.array);
+//	glUniform1f(glGetUniformLocation(decalShader->GetProgramID(), "aspect"), screenAspect);
+//	glUniform2f(glGetUniformLocation(decalShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
+//	glUniform1f(glGetUniformLocation(decalShader->GetProgramID(), "far"), current_camera->GetFarPlane());
+//
+//	int colourLocation = glGetUniformLocation(decalShader->GetProgramID(), "objectColour");
+//
+//	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
+//	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+//
+//	int hasTexLocation = glGetUniformLocation(decalShader->GetProgramID(), "hasTexture");
+//	int hasBumpLocation = glGetUniformLocation(decalShader->GetProgramID(), "hasBump");
+//	glUniform1i(hasTexLocation, 1);
+//	glUniform1i(hasBumpLocation, 0);
+//
+//	for (const auto& d : decalsToBeGenerated) {
+//		RenderObject* r = d->GetRenderObject();
+//		BindMesh((*r).GetMesh());
+//
+//		glUniformMatrix4fv(modelLocation, 1, false, (float*)&d->GetTransform().GetMatrix());
+//		colourLocation = glGetUniformLocation(decalShader->GetProgramID(), "objectColour");
+//		glUniform4fv(colourLocation, 1, (float*)&r->GetColour());
+//		int invModelLocation = glGetUniformLocation(decalShader->GetProgramID(), "inverseModel");
+//		Matrix4 invModelMat = (*r).GetTransform()->GetMatrix().Inverse();
+//		glUniformMatrix4fv(invModelLocation, 1, false, invModelMat.array);
+//
+//		Matrix4 modelMatrix = (*r).GetTransform()->GetMatrix();
+//		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
+//
+//		int layerCount = (*r).GetMesh()->GetSubMeshCount();
+//		BindTextureToShader(paintTex, "mainTex", 1);
+//		for (int i = 0; i < layerCount; ++i) {
+//			DrawBoundMesh(i);
+//		}
+//	}
+//
+//	glDepthMask(GL_TRUE);
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//}
 
 void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	float screenAspect = (float)currentWidth / (float)currentHeight;
@@ -617,40 +609,41 @@ void GameTechRenderer::CombineBuffers(Camera* current) {
 	DrawBoundMesh();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-void GameTechRenderer::SplitRender() {
-	BuildObjectList(gameWorld.GetViceCamera());
-	SortObjectList();
 
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(0, 0, currentWidth / 2, currentHeight);
-	PresentScene(true, -0.5);
-
-	glDisable(GL_SCISSOR_TEST);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glDisable(GL_BLEND);
-	FillBuffers(gameWorld.GetViceCamera(), 0.0f);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glDisable(GL_BLEND);
-	FillBuffers(gameWorld.GetViceCamera(), 1.0f);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	RenderSkybox(gameWorld.GetViceCamera());
-
-	DrawPaintDecals(gameWorld.GetViceCamera());
-	DrawPointLights(gameWorld.GetViceCamera());
-	CombineBuffers(gameWorld.GetViceCamera());
-
-
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(currentWidth / 2, 0, currentWidth / 2, currentHeight);
-	PresentScene(true, 0.5);
-	glDisable(GL_SCISSOR_TEST);
-}
+//void GameTechRenderer::SplitRender() {
+//	BuildObjectList(gameWorld.GetViceCamera());
+//	SortObjectList();
+//
+//	glEnable(GL_SCISSOR_TEST);
+//	glScissor(0, 0, currentWidth / 2, currentHeight);
+//	PresentScene(true, -0.5);
+//
+//	glDisable(GL_SCISSOR_TEST);
+//
+//	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+//	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//	glDisable(GL_BLEND);
+//	FillBuffers(gameWorld.GetViceCamera(), 0.0f);
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//	glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
+//	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+//	glDisable(GL_BLEND);
+//	FillBuffers(gameWorld.GetViceCamera(), 1.0f);
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//	RenderSkybox(gameWorld.GetViceCamera());
+//
+//	DrawPaintDecals(gameWorld.GetViceCamera());
+//	DrawPointLights(gameWorld.GetViceCamera());
+//	CombineBuffers(gameWorld.GetViceCamera());
+//
+//
+//	glEnable(GL_SCISSOR_TEST);
+//	glScissor(currentWidth / 2, 0, currentWidth / 2, currentHeight);
+//	PresentScene(true, 0.5);
+//	glDisable(GL_SCISSOR_TEST);
+//}
 
 
 void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
@@ -676,8 +669,7 @@ void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
 
 
 void GameTechRenderer::BeginFrame() {
-	gameUI->UI_Frame();
-
+	//gameUI->UI_Frame();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	BindShader(nullptr);
 	BindMesh(nullptr);
@@ -685,7 +677,6 @@ void GameTechRenderer::BeginFrame() {
 
 void GameTechRenderer::BuildObjectList(Camera* currentCamera) {
 	activeObjects.clear();
-	decalsToBeGenerated.clear();
 	frameFrustum.FromMatrix(currentCamera->BuildProjectionMatrix((float)currentWidth / (float)currentHeight) * currentCamera->BuildViewMatrix());
 
 	gameWorld.OperateOnContents(
@@ -695,12 +686,7 @@ void GameTechRenderer::BuildObjectList(Camera* currentCamera) {
 				if (g && frameFrustum.InsideFrustum(*g)) {
 					Vector3 dir = g->GetTransform()->GetPosition() - currentCamera->GetPosition();
 					g->SetCameraDistance(dir.LengthSquared());
-					if (o->GOisPaintPlacingCube()) {
-						decalsToBeGenerated.push_back(o);
-					}
-					else {
-						activeObjects.emplace_back(g);
-					}
+					activeObjects.emplace_back(g);
 				}
 			}
 		}
@@ -920,236 +906,6 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 	}
 }
 
-
-
-void GameTechRenderer::RenderNavMesh(Camera* current_camera) {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	BindShader(NavMesh_shader);
-
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
-	Matrix4 vp = projMatrix * viewMatrix;
-
-	int vpLocation = glGetUniformLocation(NavMesh_shader->GetProgramID(), "viewProjMatrix");
-	glUniformMatrix4fv(vpLocation, 1, false, (float*)&vp);
-
-	BindMesh(navMesh);
-	DrawBoundMesh();
-
-	BindMesh(centroidMesh);
-	DrawBoundMesh();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void GameTechRenderer::LoadNavMesh() {
-	NavMesh_shader = new OGLShader("DebugVert.glsl", "DebugFrag.glsl");
-
-	navMesh = new OGLMesh();
-
-	std::ifstream mapFile(Assets::DATADIR + "Final01.navmesh");
-
-	int vCount = 0;
-	int iCount = 0;
-
-	mapFile >> vCount;
-	mapFile >> iCount;
-
-	vector<Vector3>			meshVerts;
-	vector<Vector4>			meshColours;
-	vector<unsigned int>	meshIndices;
-
-	for (int i = 0; i < vCount; ++i) {
-		Vector3 temp;
-		mapFile >> temp.x;
-		mapFile >> temp.y;
-		mapFile >> temp.z;
-		meshVerts.emplace_back(temp);
-		meshColours.emplace_back(Vector4(0, 1, 0, 1));
-	}
-
-	for (int i = 0; i < iCount; ++i) {
-		unsigned int temp = -1;
-		mapFile >> temp;
-		meshIndices.emplace_back(temp);
-	}
-
-	struct TriNeighbours {
-		int indices[3];
-	};
-
-	int numTris = iCount / 3;	//the indices describe n / 3 triangles
-	vector< TriNeighbours> allNeighbours;
-	//Each of these triangles will be sharing edges with some other triangles
-	//so it has a maximum of 3 'neighbours', desribed by an index into n / 3 tris
-	//if its a -1, then the edge is along the edge of the map...
-	for (int i = 0; i < numTris; ++i) {
-		TriNeighbours neighbours;
-		mapFile >> neighbours.indices[0];
-		mapFile >> neighbours.indices[1];
-		mapFile >> neighbours.indices[2];
-		allNeighbours.emplace_back(neighbours);
-	}
-
-	navMesh->SetVertexPositions(meshVerts);
-	navMesh->SetVertexColours(meshColours);
-	navMesh->SetVertexIndices(meshIndices);
-
-	navMesh->UploadToGPU();
-
-	vector<Vector3> centroids;
-	vector<Vector4> centreColours;
-	vector<unsigned int> lines;
-
-	for (int i = 0; i < iCount; i += 3) {
-		Vector3 a = meshVerts[meshIndices[i + 0]];
-		Vector3 b = meshVerts[meshIndices[i + 1]];
-		Vector3 c = meshVerts[meshIndices[i + 2]];
-
-		Vector3 middle = (a + b + c) / 3.0f;
-		centroids.emplace_back(middle);
-
-		centreColours.emplace_back(Vector4(1, 0, 0, 1));
-	}
-
-	for (int i = 0; i < numTris; ++i) {
-		TriNeighbours& n = allNeighbours[i];
-		for (int j = 0; j < 3; ++j) {
-			if (n.indices[j] != -1) {
-				TriNeighbours& nj = allNeighbours[n.indices[j]];
-
-				lines.emplace_back(i);
-				lines.emplace_back(n.indices[j]);
-			}
-		}
-	}
-	centroidMesh = new OGLMesh();
-	centroidMesh->SetVertexPositions(centroids);
-	centroidMesh->SetVertexColours(centreColours);
-	centroidMesh->SetVertexIndices(lines);
-	centroidMesh->SetPrimitiveType(NCL::GeometryPrimitive::Lines);
-	centroidMesh->UploadToGPU();
-}
-
-void GameTechRenderer::LoadNavMesh02() {
-	navMesh02 = new OGLMesh();
-
-	std::ifstream mapFile(Assets::DATADIR + "Final02.navmesh");
-
-	int vCount = 0;
-	int iCount = 0;
-
-	mapFile >> vCount;
-	mapFile >> iCount;
-
-	vector<Vector3>			meshVerts;
-	vector<Vector4>			meshColours;
-	vector<unsigned int>	meshIndices;
-
-	for (int i = 0; i < vCount; ++i) {
-		Vector3 temp;
-		mapFile >> temp.x;
-		mapFile >> temp.y;
-		mapFile >> temp.z;
-		meshVerts.emplace_back(temp);
-		meshColours.emplace_back(Vector4(0, 1, 0, 1));
-	}
-
-	for (int i = 0; i < iCount; ++i) {
-		unsigned int temp = -1;
-		mapFile >> temp;
-		meshIndices.emplace_back(temp);
-	}
-
-	struct TriNeighbours {
-		int indices[3];
-	};
-
-	int numTris = iCount / 3;	//the indices describe n / 3 triangles
-	vector< TriNeighbours> allNeighbours;
-	//Each of these triangles will be sharing edges with some other triangles
-	//so it has a maximum of 3 'neighbours', desribed by an index into n / 3 tris
-	//if its a -1, then the edge is along the edge of the map...
-	for (int i = 0; i < numTris; ++i) {
-		TriNeighbours neighbours;
-		mapFile >> neighbours.indices[0];
-		mapFile >> neighbours.indices[1];
-		mapFile >> neighbours.indices[2];
-		allNeighbours.emplace_back(neighbours);
-	}
-
-	navMesh02->SetVertexPositions(meshVerts);
-	navMesh02->SetVertexColours(meshColours);
-	navMesh02->SetVertexIndices(meshIndices);
-
-	navMesh02->UploadToGPU();
-
-	vector<Vector3> centroids;
-	vector<Vector4> centreColours;
-	vector<unsigned int> lines;
-
-	for (int i = 0; i < iCount; i += 3) {
-		Vector3 a = meshVerts[meshIndices[i + 0]];
-		Vector3 b = meshVerts[meshIndices[i + 1]];
-		Vector3 c = meshVerts[meshIndices[i + 2]];
-
-		Vector3 middle = (a + b + c) / 3.0f;
-		centroids.emplace_back(middle);
-
-		centreColours.emplace_back(Vector4(1, 0, 0, 1));
-	}
-
-	for (int i = 0; i < numTris; ++i) {
-		TriNeighbours& n = allNeighbours[i];
-		for (int j = 0; j < 3; ++j) {
-			if (n.indices[j] != -1) {
-				TriNeighbours& nj = allNeighbours[n.indices[j]];
-
-				lines.emplace_back(i);
-				lines.emplace_back(n.indices[j]);
-			}
-		}
-	}
-	centroidMesh02 = new OGLMesh();
-	centroidMesh02->SetVertexPositions(centroids);
-	centroidMesh02->SetVertexColours(centreColours);
-	centroidMesh02->SetVertexIndices(lines);
-	centroidMesh02->SetPrimitiveType(NCL::GeometryPrimitive::Lines);
-	centroidMesh02->UploadToGPU();
-}
-
-void GameTechRenderer::RenderNavMesh02(Camera* current_camera) {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	BindShader(NavMesh_shader);
-
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
-	Matrix4 vp = projMatrix * viewMatrix;
-
-	int vpLocation = glGetUniformLocation(NavMesh_shader->GetProgramID(), "viewProjMatrix");
-	glUniformMatrix4fv(vpLocation, 1, false, (float*)&vp);
-
-	BindMesh(navMesh02);
-	DrawBoundMesh();
-
-	BindMesh(centroidMesh02);
-	DrawBoundMesh();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
 Matrix4 GameTechRenderer::SetupDebugLineMatrix()	const {
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
@@ -1247,6 +1003,6 @@ void GameTechRenderer::RenderStartView() {
 	glBlendFunc(GL_ONE, GL_ZERO);
 	glDisable(GL_BLEND);
 
-	gameUI->UI_Render();
+	//gameUI->UI_Render();
 	OGLRenderer::SwapBuffers();
 }

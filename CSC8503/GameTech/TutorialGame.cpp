@@ -14,8 +14,10 @@ using namespace CSC8503;
 
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
-	renderer = new GameTechRenderer(*world);
-	physics = new PhysicsSystem(*world);
+	
+	resourceManager = new OGLResourceManager();
+	renderer = new GameTechRenderer(*world, resourceManager);
+	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
 	useGravity = false;
@@ -28,25 +30,25 @@ TutorialGame::TutorialGame() {
 	InitialiseAssets(1);
 }
 
-TutorialGame::TutorialGame(int level) {
-	world = new GameWorld();
-	renderer = new GameTechRenderer(*world);
-	physics = new PhysicsSystem(*world);
-	GameObject::InitObjects(this);
-
-	forceMagnitude = 10.0f;
-	useGravity = true;
-	physics->UseGravity(useGravity);
-	inSelectionMode = false;
-	inDebugMode = false;
-
-	Debug::SetRenderer(renderer);
-
-	//GameObject::InitObjects(this);
-	InitialiseAssets(level);
-}
-
-
+//TutorialGame::TutorialGame(int level) {
+//	world = new GameWorld();
+//	renderer = new GameTechRenderer(*world);
+//	physics = new PhysicsSystem(*world);
+//	GameObject::InitObjects(this);
+//
+//	forceMagnitude = 10.0f;
+//	useGravity = true;
+//	physics->UseGravity(useGravity);
+//	inSelectionMode = false;
+//	inDebugMode = false;
+//
+//	Debug::SetRenderer(renderer);
+//
+//	//GameObject::InitObjects(this);
+//	InitialiseAssets(level);
+//}
+//
+//
 
 /*
 
@@ -56,35 +58,14 @@ for this module, even in the coursework, but you can add it if you like!
 
 */
 void TutorialGame::InitialiseAssets(int level) {
-	auto loadFunc = [](const string& name, OGLMesh** into) {
-		*into = new OGLMesh(name);
-		(*into)->SetPrimitiveType(GeometryPrimitive::Triangles);
-		(*into)->UploadToGPU();
-	};
+	cubeMesh = resourceManager->LoadMesh("cube.msh");
+	sphereMesh = resourceManager->LoadMesh("sphere.msh");
+	capsuleMesh = resourceManager->LoadMesh("capsule.msh");
+	basicTex = (OGLTexture*)resourceManager->LoadTexture("checkerboard.png");
+	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	loadFunc("cube.msh", &cubeMesh);
-	loadFunc("sphere.msh", &sphereMesh);
-	loadFunc("Male1.msh", &charMeshA);
-	loadFunc("courier.msh", &charMeshB);
-	loadFunc("security.msh", &enemyMesh);
-	loadFunc("coin.msh", &bonusMesh);
-	loadFunc("capsule.msh", &capsuleMesh);
-
-	basicTex = (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
-	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
-
-	switch (level) {
-	case 1: // Physics Sim game
-		InitCamera();
-		InitPhysicsLevel();
-		break;
-	case 2: // Maze game
-		gameStatus = 2;
-		InitCamera();
-		InitMazeLevel();
-		break;
-	}
-
+	InitCamera();
+	InitPhysicsLevel();
 }
 
 NCL::CSC8503::TutorialGame::TutorialGame(GameWorld* gameWorld, GameTechRenderer* gameRenderer) {
@@ -102,16 +83,7 @@ NCL::CSC8503::TutorialGame::TutorialGame(GameWorld* gameWorld, GameTechRenderer*
 }
 
 TutorialGame::~TutorialGame() {
-	delete cubeMesh;
-	delete sphereMesh;
-	delete charMeshA;
-	delete charMeshB;
-	delete enemyMesh;
-	delete bonusMesh;
-
-	delete basicTex;
-	delete basicShader;
-
+	delete resourceManager;
 	delete physics;
 	delete renderer;
 	delete world;
@@ -120,23 +92,9 @@ TutorialGame::~TutorialGame() {
 
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
-	if (player->GetLives() == 0) {
-		EndGame(-1);
-	}
-	if (gameStatus == 2 && timeTaken >= GAME_LENGTH) {
-		if (player->GetScore() > enemy->GetScore()) {
-			EndGame(1);
-		}
-		else {
-			EndGame(-1);
-		}
-	}
+
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
-	}
-
-	if (testStateObject) {
-		testStateObject->Update(dt);
 	}
 
 	UpdateKeys();
@@ -147,9 +105,7 @@ void TutorialGame::UpdateGame(float dt) {
 	else {
 		Debug::Print("(G)ravity off", Vector2(5, 95));
 	}
-	ShowPlayerScore();
 
-	physics->Update(dt);
 	SelectObject();
 	MoveSelectedObject();
 
@@ -301,10 +257,6 @@ void NCL::CSC8503::TutorialGame::EndGame(int status) {
 	gameStatus = status;
 }
 
-vector<GameObject*> TutorialGame::GetSeekers() {
-	return allSeekers;
-}
-
 void TutorialGame::DebugObjectMovement() {
 	//If we've selected an object, we can manipulate it with some key presses
 	if (inSelectionMode && selectionObject) {
@@ -362,55 +314,22 @@ void TutorialGame::InitWorld() {
 	//BridgeConstraintTest();
 }
 
-void TutorialGame::InitMazeLevel() {
-	world->ClearAndErase();
-	physics->Clear();
-
-	grid = new NavigationGrid("MazeGrid.txt");
-	LoadWorldFromFile("MazeGrid.txt");
-	AddPlayerToWorld(Vector3(10, 5, 10));
-	//AddPlayerToWorld(Vector3(160, 5, 110));
-	enemy = AddEnemyToWorld(Vector3(160, 5, 130));
-	enemy->SetNavigationGrid(grid);
-	int bonusNum = 6;
-	vector<Vector3> bonuses(bonusNum);
-	bonuses[0] = Vector3(10, 5, 130);
-	bonuses[1] = Vector3(130, 5, 10);
-	bonuses[2] = Vector3(100, 5, 50);
-	bonuses[3] = Vector3(100, 5, 60);
-	bonuses[4] = Vector3(10, 5, 70);
-	bonuses[5] = Vector3(130, 5, 70);
-	for (int i = 0; i < bonusNum; i++) {
-		AddBonusToWorld(bonuses[i]);
-	}
-	enemy->SetBonusPositions(bonuses);
-	enemy->SetRayFunc([&](Ray ray, RayCollision& c, bool closest) {
-		if (world->Raycast(ray, c, closest)) {
-			Debug::DrawLine(ray.GetPosition(), c.collidedAt, Debug::RED, 10.0f);
-		}
-		});
-}
-
 void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {
 	world->ClearAndErase();
-	physics->Clear();
+	//physics->Clear();
 	LoadWorldFromFile("PhysicsGrid.txt");
 	playerSpawn = Vector3(15, 5, 15);
 	AddPlayerToWorld(playerSpawn);
-	for (int i = 1; i < 4; i++) {
-		AddBonusToWorld(playerSpawn + Vector3(20, 0, 0) * i);
-	}
+	
 	PendulumConstraint();
 	AddKillPlaneToWorld(Vector3(0, -200, 0));
 	AddVictoryTriggerToWorld(Vector3(165, -95, 420), Vector3(30, 1, 30));
 	GameObject* floor = AddCubeToWorld(Vector3(165, -15, 113), Vector3(20, 2, 50), Vector3(15, 0, 0), true, 0.0f, Debug::CYAN);
 	floor->GetPhysicsObject()->SetElasticity(0.9);
 	floor->GetPhysicsObject()->SetFriction(0.1);
-	AddBonusToWorld(floor->GetTransform().GetPosition() + Vector3(0, 5, 0));
 	GameObject* block = AddCubeToWorld(Vector3(170, -30, 200), Vector3(4, 4, 4), true, 0.8f, Debug::GRAY);
 	GameObject* block2 = AddCubeToWorld(Vector3(160, -30, 200), Vector3(4, 4, 4), true, 0.8f, Debug::GRAY);
 	GameObject* target = AddCubeToWorld(Vector3(165, -35, 300), Vector3(20, 5, 10), false, 0.0f, Debug::GRAY);
-	AddBonusToWorld(target->GetTransform().GetPosition() + Vector3(0, 8, 0));
 	JumpPadObject* pad = AddJumpPadToWorld(target->GetTransform().GetPosition() - Vector3(0, 10, 60), Vector3(10,5,5), target->GetTransform().GetPosition() + Vector3(0,20,0));
 	GameObject* sphere1 = AddSphereToWorld(Vector3(target->GetTransform().GetPosition() + Vector3(10,10,0)), 2, 5.0f, true);
 	sphere1->SetAsSpring();
@@ -748,26 +667,6 @@ JumpPadObject* NCL::CSC8503::TutorialGame::AddJumpPadToWorld(const Vector3& posi
 	return jumpPad;
 }
 
-StateGameObject* NCL::CSC8503::TutorialGame::AddStateObjectToWorld(const Vector3& position) {
-	StateGameObject* apple = new StateGameObject();
-
-	SphereVolume* volume = new SphereVolume(0.25f);
-	apple->SetBoundingVolume((CollisionVolume*)volume);
-	apple->GetTransform()
-		.SetScale(Vector3(0.25, 0.25, 0.25))
-		.SetPosition(position);
-
-	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
-	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
-
-	apple->GetPhysicsObject()->SetInverseMass(1.0f);
-	apple->GetPhysicsObject()->InitSphereInertia();
-
-	world->AddGameObject(apple);
-
-	return apple;
-}
-
 GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB, float inverseMass, Vector4 colour) {
 	GameObject* cube = new GameObject("cube");
 
@@ -987,27 +886,6 @@ void TutorialGame::InitGameExamples() {
 	//AddPlayerToWorld(Vector3(0, 5, 0));
 	//AddEnemyToWorld(Vector3(5, 5, 0));
 	//AddBonusToWorld(Vector3(10, 5, 0));
-}
-
-BonusObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
-	BonusObject* bonus = new BonusObject(100);
-
-	SphereVolume* volume = new SphereVolume(0.5f);
-	bonus->SetBoundingVolume((CollisionVolume*)volume);
-	bonus->GetTransform()
-		.SetScale(Vector3(0.25, 0.25, 0.25))
-		.SetPosition(position);
-
-	bonus->SetRenderObject(new RenderObject(&bonus->GetTransform(), bonusMesh, nullptr, basicShader, Debug::BLUE));
-	/*bonus->SetPhysicsObject(new PhysicsObject(&bonus->GetTransform(), bonus->GetBoundingVolume()));
-
-	bonus->GetPhysicsObject()->SetInverseMass(0.0);
-	bonus->GetPhysicsObject()->SetIsStatic(true);
-	bonus->GetPhysicsObject()->InitSphereInertia();*/
-
-	world->AddGameObject(bonus);
-
-	return bonus;
 }
 
 /*

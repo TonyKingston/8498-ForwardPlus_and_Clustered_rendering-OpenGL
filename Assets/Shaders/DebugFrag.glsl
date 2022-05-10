@@ -1,6 +1,6 @@
 #version 400 core
 
-uniform sampler2D 	mainTex;
+uniform sampler2D 	fontTex;
 uniform int useTexture;
 
 in Vertex
@@ -17,7 +17,7 @@ void main(void)
 		fragColor = IN.colour;
 	}
 	else {
-		float alpha = texture(mainTex, IN.texCoord).r;
+		float alpha = texture(fontTex, IN.texCoord).r;
 		
 		if(alpha < 0.00001f) {
 			discard;

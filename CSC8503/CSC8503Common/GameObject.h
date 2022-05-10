@@ -33,6 +33,9 @@ namespace NCL {
 				return boundingVolume;
 			}
 
+			bool IsToDelete() { return toDelete; }
+			void SetToDelete(bool b) { this->toDelete = b; }
+
 			bool IsActive() const {
 				return isActive;
 			}
@@ -80,7 +83,7 @@ namespace NCL {
 			}
 
 			Vector3 GetForwordDirection() {
-				return transform.GetOrientation() * worldForward;
+				return transform.GetOrientation() * Vector3(0, 0, 1);
 			}
 
 			void SetRenderObject(RenderObject* newObject) {
@@ -159,6 +162,7 @@ namespace NCL {
 			bool    isAsleep;
 			bool    isTrigger;
 			bool    isSpring;
+			bool    toDelete = false;
 			int		worldID;
 			int layer;
 			string	name;

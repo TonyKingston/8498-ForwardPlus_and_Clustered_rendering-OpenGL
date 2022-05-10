@@ -13,6 +13,7 @@
 #include "../CSC8503Common/PushdownMachine.h"
 #include "GamePushdownState.h"
 #include "GameState.h"
+#include "../GameTech/TutorialGame.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -144,9 +145,9 @@ void DisplayPathfinding() {
 }
 
 int main() {
-	GamePushdownState::InitGameState();
-	//Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-	Window* w = GamePushdownState::GetGameWindow();
+	//GamePushdownState::InitGameState();
+	Window* w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+	//Window* w = GamePushdownState::GetGameWindow();
 	if (!w->HasInitialised()) {
 		return -1;
 	}
@@ -154,8 +155,8 @@ int main() {
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 	
-
-	PushdownMachine machine(new MainMenu());
+	TutorialGame* g = new TutorialGame();
+	//PushdownMachine machine(new MainMenu());
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -176,9 +177,10 @@ int main() {
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-		if (!machine.Update(dt)) {
+		g->UpdateGame(dt);
+		/*if (!machine.Update(dt)) {
 			return -1;
-		}
+		}*/
 		//DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
