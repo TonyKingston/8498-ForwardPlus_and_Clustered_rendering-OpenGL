@@ -24,8 +24,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NavMeshVisualiser", "OtherP
 		{7A22CD41-A2EE-49F0-8B06-E01B4526CA41} = {7A22CD41-A2EE-49F0-8B06-E01B4526CA41}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VulkanRendering", "Plugins\VulkanRendering\VulkanRendering.vcxproj", "{D0E3E532-AB72-4A2F-AC71-517CE036195A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ORBIS = Debug|ORBIS
@@ -97,16 +95,6 @@ Global
 		{327A139A-B8E4-448B-9655-7FDC1812F9CE}.Release|Win32.Build.0 = Release|Win32
 		{327A139A-B8E4-448B-9655-7FDC1812F9CE}.Release|x64.ActiveCfg = Release|x64
 		{327A139A-B8E4-448B-9655-7FDC1812F9CE}.Release|x64.Build.0 = Release|x64
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Debug|ORBIS.ActiveCfg = Debug|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Debug|Win32.Build.0 = Debug|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Debug|x64.ActiveCfg = Debug|x64
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Debug|x64.Build.0 = Debug|x64
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Release|ORBIS.ActiveCfg = Release|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Release|Win32.ActiveCfg = Release|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Release|Win32.Build.0 = Release|Win32
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Release|x64.ActiveCfg = Release|x64
-		{D0E3E532-AB72-4A2F-AC71-517CE036195A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
