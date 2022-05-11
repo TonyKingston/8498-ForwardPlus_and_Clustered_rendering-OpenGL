@@ -1,12 +1,20 @@
-#version 400 core
+#version 430 core
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
 //uniform sampler2DShadow shadowTex;
 
-uniform vec3	lightPos;
-uniform float	lightRadius;
-uniform vec4	lightColour;
+struct PointLight {
+	vec3 pos;
+	float radius;
+	vec4 colour;
+};
+
+layout(std430, binding = 0) readonly buffer lightSSBO {
+	PointLight pointLights[];
+};
+
+uniform int noOfLights;
 
 uniform vec3	cameraPos;
 
@@ -43,33 +51,41 @@ void main(void)
 		normal = normalize(TBN * normalize(normal));
 	}
 
-	vec3 lightVec = lightPos - IN.worldPos;
-	vec3  incident = normalize (lightVec);
-	float lambert  = max (0.0 , dot ( incident , normal )) * 0.9; 
-	float distance = length(lightVec);
-	float attenuation = 1.0f - clamp(distance / lightRadius, 0.0, 1.0);
-	vec3 viewDir = normalize ( cameraPos - IN . worldPos );
-	vec3 halfDir = normalize ( incident + viewDir );
-
-	float rFactor = max (0.0 , dot ( halfDir , normal ));
-	float sFactor = pow ( rFactor , 80.0 );
-	
 	vec4 albedo = IN.colour;
-	
-	if(hasTexture) {
-	  albedo *= texture(mainTex, IN.texCoord);
+	if (hasTexture) {
+		albedo *= texture(mainTex, IN.texCoord);
+	}
+
+	if (albedo.a < 0.1) {
+		discard;
+	}
+
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+
+	fragColor.rgb = albedo.rgb * 0.005f; //ambient
+
+	vec3 viewDir = normalize(cameraPos - IN.worldPos);
+
+	for (int i = 0; i < noOfLights; i++) {
+		PointLight light = pointLights[i];
+		vec3 lightVec = light.pos - IN.worldPos;
+		vec3  incident = normalize(lightVec);
+		float lambert = max(0.0, dot(incident, normal)) * 0.9;
+		float distance = length(lightVec);
+		float attenuation = 1.0f - clamp(distance / pointLights[i].radius, 0.0, 1.0);
+		if (attenuation > 0.0f) {
+			vec3 halfDir = normalize(incident + viewDir);
+
+			float rFactor = max(0.0, dot(halfDir, normal));
+			float sFactor = pow(rFactor, 60.0);
+
+			fragColor.rgb += albedo.rgb * light.colour.rgb * lambert * attenuation; //diffuse light
+
+			fragColor.rgb += light.colour.rgb * sFactor * attenuation; //specular light
+		}
 	}
 	
-	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-	
-	fragColor.rgb = albedo.rgb * 0.04f; //ambient
-	
-	fragColor.rgb += albedo.rgb * lightColour.rgb * lambert * attenuation; //diffuse light
-	
-	fragColor.rgb += lightColour.rgb * sFactor * attenuation; //specular light
-	
 	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
-	
 	fragColor.a = 1;
 
 //fragColor.rgb = IN.normal;

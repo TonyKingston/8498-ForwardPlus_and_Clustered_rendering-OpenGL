@@ -93,6 +93,8 @@ namespace NCL {
 
 			GLuint bufferFinalTex;
 
+			GLuint lightSSBO;
+
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;

@@ -16,7 +16,15 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
+const unsigned int MAX_LIGHTS = 64;
+
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
+
+struct Light {
+	Vector3 position;
+	float radius;
+	Vector4 colour;
+};
 
 GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 	: OGLRenderer(*Window::GetWindow()), gameWorld(w), renderMode(type) {
@@ -33,12 +41,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	glClearColor(1, 1, 1, 1);
 
-	//Set up the light properties
-	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	lightRadius = 1.0f;
-	//lightRadius = 350.0f;
-	//lightPosition = Vector3(-50.0f, 50.0f, 200.0f);
-	lightPosition = Vector3(20.0f, 20.0f, 20.0f);
 	//Skybox!
 	skyboxShader = new OGLShader("skyboxVertex.glsl", "skyboxFragment.glsl");
 	skyboxMesh = new OGLMesh();
@@ -48,6 +50,20 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	LoadSkybox();
 
+	glGenBuffers(1, &lightSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_LIGHTS * sizeof(Light), 0, GL_DYNAMIC_DRAW);
+
+	Light* pointLights = (Light*) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	Light& light = pointLights[0];
+	light.position = Vector3(10.0f, 10.0f, 10.0f);
+	light.radius = 10.0f;
+	light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	sceneBuffers.push_back(lightSSBO);
+
+	
 	switch (type) {
 	case 0:
 		break;
@@ -61,6 +77,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 		InitClustered();
 		break;
 	}
+
 }
 
 void NCL::CSC8503::GameTechRenderer::InitDeferred() {
@@ -850,13 +867,13 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 	int hasBumpLocation = 0;
 	int shadowLocation = 0;
 
-	int lightPosLocation = 0;
-	int lightColourLocation = 0;
-	int lightRadiusLocation = 0;
+	int noOfLightsLocation = 0;
 
 	int cameraLocation = 0;
 	//glActiveTexture(GL_TEXTURE0 + 2);
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	for (const auto& i : activeObjects) {
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
@@ -874,9 +891,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
 			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
 
-			lightPosLocation = glGetUniformLocation(shader->GetProgramID(), "lightPos");
-			lightColourLocation = glGetUniformLocation(shader->GetProgramID(), "lightColour");
-			lightRadiusLocation = glGetUniformLocation(shader->GetProgramID(), "lightRadius");
+			noOfLightsLocation = glGetUniformLocation(shader->GetProgramID(), "noOfLights");
 
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
@@ -884,9 +899,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
 			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-			glUniform3fv(lightPosLocation, 1, (float*)&lightPosition);
-			glUniform4fv(lightColourLocation, 1, (float*)&lightColour);
-			glUniform1f(lightRadiusLocation, lightRadius);
+			glUniform1i(noOfLightsLocation, 1);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 1);*/
@@ -942,6 +955,8 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			DrawBoundMesh(i);
 		}
 	}
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+
 }
 
 Matrix4 GameTechRenderer::SetupDebugLineMatrix()	const {
