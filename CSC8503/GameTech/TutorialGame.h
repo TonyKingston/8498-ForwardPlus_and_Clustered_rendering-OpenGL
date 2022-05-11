@@ -9,6 +9,7 @@
 #include "../CSC8503Common/PendulumObject.h"
 #include "../CSC8503Common/JumpPadObject.h"
 #include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
+#include "../../Plugins/OpenGLRendering/Model.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -122,6 +123,7 @@ namespace NCL {
 			}
 
 			ResourceManager* resourceManager;
+			Model* sponza;
 
 			const int GAME_LENGTH = 180.0f;
 

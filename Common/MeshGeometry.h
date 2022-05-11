@@ -14,6 +14,7 @@ namespace NCL {
 	}
 	namespace Rendering {
 		class RendererBase;
+		class Model;
 	}
 	using namespace Maths;
 
@@ -46,6 +47,8 @@ namespace NCL {
 	class MeshGeometry
 	{
 	public:		
+		friend class NCL::Rendering::Model;
+
 		virtual ~MeshGeometry();
 
 		GeometryPrimitive GetPrimitiveType() const {

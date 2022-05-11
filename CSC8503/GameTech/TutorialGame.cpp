@@ -8,7 +8,6 @@
 #include "..//CSC8503Common/PositionOrientationConstraint.h"
 #include "../../Common/Assets.h"
 #include <fstream>
-#include "../../Plugins/OpenGLRendering/Model.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -298,7 +297,8 @@ void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetFarPlane(500.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
-	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
 	lockedObject = nullptr;
 }
 
@@ -316,7 +316,10 @@ void TutorialGame::InitWorld() {
 }
 
 void TutorialGame::InitSponza() {
-	Model sponza = Model("sponza.obj", resourceManager);
+	sponza =  new Model("backpack.obj", resourceManager);
+	for (auto obj : sponza->objects) {
+		world->AddGameObject(obj);
+	}
 }
 
 void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {

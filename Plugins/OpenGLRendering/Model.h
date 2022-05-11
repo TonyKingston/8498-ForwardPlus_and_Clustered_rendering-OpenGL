@@ -4,16 +4,17 @@
 #include "OGLMesh.h"
 #include "OGLShader.h"
 #include "OGLTexture.h"
+#include "../CSC8503/CSC8503Common/SystemDefines.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 namespace NCL {
-    class RenderObject;
 
     namespace CSC8503 {
         class GameObject;
+        class RenderObject;
     }
 
 	namespace Rendering {
@@ -29,11 +30,16 @@ namespace NCL {
                 LoadModel(path);
             }
 
+            ~Model() {
+                DeleteVector(meshes);
+                DeleteVector(objects);
+            }
+
             vector<CSC8503::GameObject*> objects;
 
         private:
             // model data
-            //vector<OGLMesh> meshes;
+            vector<MeshGeometry*> meshes;
             string directory;
 
             void LoadModel(string path);

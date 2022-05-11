@@ -4,6 +4,7 @@
 #include "../Common/Assets.h"
 #include "../CSC8503/CSC8503Common/Transform.h"
 #include "../CSC8503/CSC8503Common/GameObject.h"
+#include "../CSC8503/CSC8503Common/RenderObject.h"
 
 using namespace NCL;
 using namespace NCL::Rendering;
@@ -17,9 +18,11 @@ struct Vertex {
 	Vector3 tangent;
 };
 
+
 void Model::LoadModel(string path) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate |
+		aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
@@ -35,6 +38,10 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 	for (GLuint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		GameObject* obj = this->ProcessMesh(mesh, scene);
+		obj->GetTransform().SetPosition(Vector3(0, 0, 0))
+			.SetScale(Vector3(10, 10, 10));
+		//obj->GetTransform().SetPosition();
+		//node->mTransformation.
 		this->objects.push_back(obj);
 	}
 
@@ -46,9 +53,12 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 
 GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	// Data to fill
-	vector<Vertex> vertices;
+	vector<Vector3> positions;
+	vector<Vector3> normals;
+	vector<Vector2> texCoords;
+	vector<Vector4> tangents;
 	vector<GLuint> indices;
-	vector<OGLTexture*> textures;
+	vector<TextureBase*> textures;
 
 	// Walk through each of the mesh's vertices
 	for (GLuint i = 0; i < mesh->mNumVertices; i++) {
@@ -60,12 +70,13 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		vector.y = mesh->mVertices[i].y;
 		vector.z = mesh->mVertices[i].z;
 		vertex.position = vector;
+		positions.push_back(vector);
 
 		// Normals
 		vector.x = mesh->mNormals[i].x;
 		vector.y = mesh->mNormals[i].y;
 		vector.z = mesh->mNormals[i].z;
-		vertex.normal = vector;
+		normals.push_back(vector);
 
 		// Texture Coordinates
 		if (mesh->mTextureCoords[0]) {
@@ -73,20 +84,19 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			Vector2 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.texCoords = vec;
+			texCoords.push_back(vec);
 		}
 		else {
-			vertex.texCoords = Vector2();
+			texCoords.push_back(Vector2());
 		}
 
 		// Tangent
-		vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
-		vertex.tangent = vector;
-
-		// Push onto the vector of vertices
-		vertices.push_back(vertex);
+		Vector4 tangent;
+		tangent.x = mesh->mTangents[i].x;
+		tangent.y = mesh->mTangents[i].y;
+		tangent.z = mesh->mTangents[i].z;
+		tangent.w = -1;
+		tangents.push_back(vector);
 	}
 
 	// Loop through each of the mesh's faces and get its vertex indices
@@ -108,9 +118,28 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		// Normal maps
 		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+		if (textures.size() == 0) {
+			textures.push_back(resourceManager->LoadTexture("checkerboad.png"));
+		}
 	}
 
 	GameObject* obj = new GameObject();
+	MeshGeometry* oglMesh = new OGLMesh();
+	oglMesh->SetVertexPositions(positions);
+	oglMesh->SetVertexNormals(normals);
+	oglMesh->SetVertexTangents(tangents);
+	oglMesh->SetVertexTextureCoords(texCoords);
+	oglMesh->SetVertexIndices(indices);
+	SubMesh m;
+	m.start = 0;
+	m.count = indices.size();
+	oglMesh->subMeshes.push_back(m);
+	oglMesh->SetPrimitiveType(GeometryPrimitive::Triangles);
+	oglMesh->UploadToGPU();
+
+	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl")));
+	meshes.push_back(oglMesh);
 	return obj;
 	//return OGLMesh(vertices, indices, textures);
 	//return new RenderObject(Transform(),);
@@ -121,6 +150,7 @@ vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType t
 
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
+		mat->GetTexture(type, i, &str);
 
 		textures.push_back((OGLTexture*)resourceManager->LoadTexture(str.C_Str()));
 		
