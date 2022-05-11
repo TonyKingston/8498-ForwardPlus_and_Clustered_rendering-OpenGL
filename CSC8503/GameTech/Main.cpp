@@ -152,7 +152,7 @@ int main() {
 		return -1;
 	}
 	srand(time(0));
-	w->ShowOSPointer(false);
+	w->ShowOSPointer(true);
 	w->LockMouseToWindow(true);
 	
 	TutorialGame* g = new TutorialGame();

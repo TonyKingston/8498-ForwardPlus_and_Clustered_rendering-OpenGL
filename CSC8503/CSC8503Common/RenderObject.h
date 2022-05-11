@@ -25,17 +25,8 @@ namespace NCL {
 			static void InitManager(ResourceManager* resourceManager) {
 				manager = resourceManager;
 			}
-			void Update(float dt) {
-				if (animation) {
-					frameTime -= dt;
-					while (frameTime < 0.0f) {
-						for (int i = 0; i < 1; i++) {
-							currentFrame = (currentFrame + 1) % animation->GetFrameCount();
-							frameTime += 1.0f / animation->GetFrameRate();
-						}
-					}
-				}
-			}
+
+			void Update(float dt);
 
 			void SetDefaultTexture(TextureBase* t) {
 				texture = t;
@@ -147,6 +138,7 @@ namespace NCL {
 			vector<TextureBase*> bumpTextures;
 			ShaderBase* shader;
 			Transform* transform;
+			Transform* localTransform;
 			Maths::Vector4			colour;
 			Maths::Vector4          dColour = Vector4();
 

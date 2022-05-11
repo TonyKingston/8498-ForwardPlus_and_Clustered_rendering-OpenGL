@@ -8,6 +8,7 @@
 #include "..//CSC8503Common/PositionOrientationConstraint.h"
 #include "../../Common/Assets.h"
 #include <fstream>
+#include "../../Plugins/OpenGLRendering/Model.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -65,7 +66,7 @@ void TutorialGame::InitialiseAssets(int level) {
 	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
-	InitPhysicsLevel();
+	InitSponza();
 }
 
 NCL::CSC8503::TutorialGame::TutorialGame(GameWorld* gameWorld, GameTechRenderer* gameRenderer) {
@@ -312,6 +313,10 @@ void TutorialGame::InitWorld() {
 	testStateObject = nullptr;
 
 	//BridgeConstraintTest();
+}
+
+void TutorialGame::InitSponza() {
+	Model sponza = Model("sponza.obj", resourceManager);
 }
 
 void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {

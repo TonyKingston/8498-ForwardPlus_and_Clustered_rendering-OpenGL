@@ -1,5 +1,6 @@
 #include "RenderObject.h"
 #include "../../Common/MeshGeometry.h"
+#include "../CSC8503Common/Transform.h"
 
 using namespace NCL::CSC8503;
 using namespace NCL;
@@ -39,4 +40,23 @@ RenderObject::RenderObject(Transform* parentTransform, MeshGeometry* mesh, strin
 
 RenderObject::~RenderObject() {
 
+}
+
+void RenderObject::Update(float dt) {
+	/*if (parent) {
+		transform = Transform(parent->GetTransform()->GetMatrix() * localTransform->GetMatrix());
+	}
+	else {
+		transform = transform;
+	}*/
+
+	if (animation) {
+		frameTime -= dt;
+		while (frameTime < 0.0f) {
+			for (int i = 0; i < 1; i++) {
+				currentFrame = (currentFrame + 1) % animation->GetFrameCount();
+				frameTime += 1.0f / animation->GetFrameRate();
+			}
+		}
+	}
 }

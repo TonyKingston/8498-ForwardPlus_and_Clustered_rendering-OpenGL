@@ -10,8 +10,6 @@
 #include "../CSC8503Common/JumpPadObject.h"
 #include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
 
-
-
 namespace NCL {
 	namespace CSC8503 {
 		class GameObject;
@@ -50,7 +48,7 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
-			void InitMazeLevel();
+			void InitSponza();
 			void InitPhysicsLevel();
 			void InitCapsuleTest();
 			void InitOBBTest();
