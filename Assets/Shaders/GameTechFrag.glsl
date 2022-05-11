@@ -43,9 +43,11 @@ void main(void)
 		normal = normalize(TBN * normalize(normal));
 	}
 
-	vec3  incident = normalize ( lightPos - IN.worldPos );
+	vec3 lightVec = lightPos - IN.worldPos;
+	vec3  incident = normalize (lightVec);
 	float lambert  = max (0.0 , dot ( incident , normal )) * 0.9; 
-	
+	float distance = length(lightVec);
+	float attenuation = 1.0f - clamp(distance / lightRadius, 0.0, 1.0);
 	vec3 viewDir = normalize ( cameraPos - IN . worldPos );
 	vec3 halfDir = normalize ( incident + viewDir );
 
@@ -60,11 +62,11 @@ void main(void)
 	
 	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	
-	fragColor.rgb = albedo.rgb * 0.05f; //ambient
+	fragColor.rgb = albedo.rgb * 0.04f; //ambient
 	
-	fragColor.rgb += albedo.rgb * lightColour.rgb * lambert; //diffuse light
+	fragColor.rgb += albedo.rgb * lightColour.rgb * lambert * attenuation; //diffuse light
 	
-	fragColor.rgb += lightColour.rgb * sFactor; //specular light
+	fragColor.rgb += lightColour.rgb * sFactor * attenuation; //specular light
 	
 	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
 	

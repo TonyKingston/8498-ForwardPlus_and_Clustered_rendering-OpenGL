@@ -35,10 +35,10 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	//Set up the light properties
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	lightRadius = 1000.0f;
+	lightRadius = 1.0f;
 	//lightRadius = 350.0f;
 	//lightPosition = Vector3(-50.0f, 50.0f, 200.0f);
-	lightPosition = Vector3(0.0f, 0.0f, 0.0f);
+	lightPosition = Vector3(20.0f, 20.0f, 20.0f);
 	//Skybox!
 	skyboxShader = new OGLShader("skyboxVertex.glsl", "skyboxFragment.glsl");
 	skyboxMesh = new OGLMesh();
