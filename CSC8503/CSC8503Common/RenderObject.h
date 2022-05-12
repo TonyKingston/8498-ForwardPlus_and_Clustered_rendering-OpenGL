@@ -151,7 +151,6 @@ namespace NCL {
 			vector<RenderObject*> children;
 
 			float distanceFromCamera;
-			// TODO: Fix frustum culling for both cameras
 			float boundingRadius = 200;
 
 			static ResourceManager* manager;

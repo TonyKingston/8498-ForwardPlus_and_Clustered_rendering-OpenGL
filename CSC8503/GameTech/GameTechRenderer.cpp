@@ -676,11 +676,11 @@ void GameTechRenderer::BuildObjectList(Camera* currentCamera) {
 		[&](GameObject* o) {
 			if (o->IsActive()) {
 				RenderObject* g = o->GetRenderObject();
-				if (g && frameFrustum.InsideFrustum(*g)) {
+			//	if (g && frameFrustum.InsideFrustum(*g)) {
 					Vector3 dir = g->GetTransform()->GetPosition() - currentCamera->GetPosition();
 					g->SetCameraDistance(dir.LengthSquared());
 					activeObjects.emplace_back(g);
-				}
+			//	}
 			}
 		}
 	);

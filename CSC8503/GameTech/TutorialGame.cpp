@@ -269,7 +269,7 @@ void TutorialGame::DebugObjectMovement() {
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(500.0f);
+	world->GetMainCamera()->SetFarPlane(1800.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
 	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
@@ -291,7 +291,7 @@ void TutorialGame::InitWorld() {
 }
 
 void TutorialGame::InitSponza() {
-	sponza =  new Model("backpack.obj", resourceManager);
+	sponza =  new Model("sponza.obj", resourceManager);
 	for (auto obj : sponza->objects) {
 		world->AddGameObject(obj);
 	}

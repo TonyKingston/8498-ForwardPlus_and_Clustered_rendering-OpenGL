@@ -38,8 +38,8 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 	for (GLuint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		GameObject* obj = this->ProcessMesh(mesh, scene);
-		obj->GetTransform().SetPosition(Vector3(0, 0, 0))
-			.SetScale(Vector3(10, 10, 10));
+		obj->GetTransform().SetPosition(Vector3(0, 0, 0));
+			//.SetScale(Vector3(10, 10, 10));
 		//obj->GetTransform().SetPosition();
 		//node->mTransformation.
 		this->objects.push_back(obj);
