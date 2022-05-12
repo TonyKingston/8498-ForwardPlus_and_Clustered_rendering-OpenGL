@@ -49,6 +49,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 
 	currentWidth	= (int)w.GetScreenSize().x;
 	currentHeight	= (int)w.GetScreenSize().y;
+	currentHeight	= (int)w.GetScreenSize().y;
 
 	if (initState) {
 		TextureLoader::RegisterAPILoadFunction(OGLTexture::RGBATextureFromFilename);

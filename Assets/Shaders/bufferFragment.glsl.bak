@@ -47,6 +47,6 @@ void main ( void ) {
 	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 ,1.0);
 	//fragColour[2].r = shadow;
 
-	// if (isDepth == 1.0) 
-		// fragColour[0].rgb = vec3(IN.depth, 0, 0);
+	if (isDepth == 1.0) 
+		fragColour[0].rgb = vec3(IN.depth, 0, 0);
 }

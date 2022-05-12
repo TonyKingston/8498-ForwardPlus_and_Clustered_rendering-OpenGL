@@ -60,33 +60,42 @@ void main(void)
 		discard;
 	}
 
-	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+//	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
-	fragColor.rgb = albedo.rgb * 0.005f; //ambient
+	fragColor.rgb = albedo.rgb * 0.1f; //ambient
 
 	vec3 viewDir = normalize(cameraPos - IN.worldPos);
-
+	vec3 diffuseLight;
+	vec3 specularLight;
 	for (int i = 0; i < noOfLights; i++) {
 		PointLight light = pointLights[i];
 		vec3 lightVec = light.pos - IN.worldPos;
 		vec3  incident = normalize(lightVec);
-		float lambert = max(0.0, dot(incident, normal)) * 0.9;
+		//float lambert = max(0.0, dot(incident, normal)) * 0.9;
+
 		float distance = length(lightVec);
 		float attenuation = 1.0f - clamp(distance / pointLights[i].radius, 0.0, 1.0);
 		if (attenuation > 0.0f) {
 			vec3 halfDir = normalize(incident + viewDir);
 
-			float rFactor = max(0.0, dot(halfDir, normal));
+			float lambert = clamp(dot(incident, normal), 0.0, 1.0);
+
+			//float rFactor = max(0.0, dot(halfDir, normal));
+			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
 			float sFactor = pow(rFactor, 60.0);
 
-			fragColor.rgb += albedo.rgb * light.colour.rgb * lambert * attenuation; //diffuse light
+			vec3 attenuated = light.colour.rgb * attenuation;
+			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light
+			diffuseLight.rgb += attenuated * lambert; //diffuse light
 
-			fragColor.rgb += light.colour.rgb * sFactor * attenuation; //specular light
+			specularLight.rgb += attenuated * sFactor * 0.33; //specular light
 		}
 	}
 	
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
-	fragColor.a = 1;
+//	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
+	fragColor.rgb += albedo.rgb * diffuseLight;
+	fragColor.rgb += specularLight.rgb;
+	fragColor.a = 1.0;
 
 //fragColor.rgb = IN.normal;
 
