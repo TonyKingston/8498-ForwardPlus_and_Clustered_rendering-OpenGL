@@ -16,7 +16,7 @@ TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	renderer = new GameTechRenderer(*world, resourceManager, 2);
+	renderer = new GameTechRenderer(*world, resourceManager, 0);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;

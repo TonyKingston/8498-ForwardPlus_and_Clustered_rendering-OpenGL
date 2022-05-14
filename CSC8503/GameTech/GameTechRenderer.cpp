@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 64;
+const unsigned int MAX_LIGHTS = 128;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -46,7 +46,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 	LoadSkybox();
 
 	InitLights();
-	
+	//glEnable(GL_MULTISAMPLE);
+	glEnable(GL_DEPTH_TEST);
+
 	switch (type) {
 	case 0:
 		break;
@@ -76,7 +78,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 	Light& light = pointLights[0];
 	light.position = Vector3(10.0f, 10.0f, 10.0f);
-	light.radius = 20.0f;
+	light.radius = 500.0f;
 	light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -94,7 +96,6 @@ void NCL::CSC8503::GameTechRenderer::InitDeferred() {
 	glGenFramebuffers(1, &pointLightFBO);
 	sceneBuffers.push_back(bufferFBO);
 	sceneBuffers.push_back(pointLightFBO);
-
 
 	GLenum buffers[2] = {
 		GL_COLOR_ATTACHMENT0 ,
@@ -164,10 +165,14 @@ void GameTechRenderer::InitForwardPlus() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), 0, GL_STATIC_COPY);
 
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+
 	ComputeTileGrid();
+
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 }
 
 void GameTechRenderer::InitClustered() {
@@ -201,11 +206,12 @@ void GameTechRenderer::AddLights(int n) {
 	for (int i = numLights; i < numLights + n; i++) {
 		Light& light = pointLights[i];
 		for (int j = 0; j < 3; j++) {
-			float min = 0.0f;
-			float max = 40.0f;
+			float min = -300.0f;
+			float max = 300.0f;
 			lightPos[j] = lightDis(lightGen) * (max - min) + min;
 		}
 		light.position = lightPos;
+		light.position.y = 10.0f;
 		light.radius = 20.0f;
 		light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	}
@@ -222,8 +228,6 @@ GameTechRenderer::~GameTechRenderer() {
 	for (GLuint tex : sceneTextures) {
 		glDeleteTextures(1, &tex);
 	}
-	delete forwardPlusShader;
-	delete forwardPlusGridShader;
 }
 
 void GameTechRenderer::ComputeTileGrid() {
@@ -231,6 +235,7 @@ void GameTechRenderer::ComputeTileGrid() {
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 projMatrix = current->BuildProjectionMatrix(screenAspect);
 
+	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 	BindShader(forwardPlusGridShader);
 
@@ -239,7 +244,7 @@ void GameTechRenderer::ComputeTileGrid() {
 	glUniform2f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 	glDispatchCompute(tilesX, tilesY, 1);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void GameTechRenderer::ComputeClusterGrid() {
@@ -348,8 +353,10 @@ void GameTechRenderer::GenerateScreenTexture(GLuint& into, bool depth) {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	GLuint filter = depth ? GL_NEAREST : GL_LINEAR;
 	GLuint format = depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8;
 	GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
+
 
 	glTexImage2D(GL_TEXTURE_2D, 0, format, currentWidth, currentHeight, 0, type, GL_UNSIGNED_BYTE, NULL);
 
@@ -401,9 +408,6 @@ void GameTechRenderer::ResizeSceneTextures(float width, float height) {
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, currentWidth, currentHeight, GL_DEPTH_COMPONENT, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-
-
 }
 
 void GameTechRenderer::RenderFrame() {
@@ -472,7 +476,7 @@ void GameTechRenderer::RenderDeferred() {
 void GameTechRenderer::RenderForwardPlus() {
 	RenderSkybox(gameWorld.GetMainCamera());
 	glDisable(GL_BLEND);
-	RenderCamera(gameWorld.GetMainCamera());
+	RenderCameraPlus(gameWorld.GetMainCamera());
 	glEnable(GL_BLEND);
 }
 
@@ -1009,8 +1013,8 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 	//glActiveTexture(GL_TEXTURE0 + 2);
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 
 	for (const auto& i : activeObjects) {
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
@@ -1092,8 +1096,8 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 			DrawBoundMesh(i);
 		}
 	}
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 }
 
 Matrix4 GameTechRenderer::SetupDebugLineMatrix()	const {

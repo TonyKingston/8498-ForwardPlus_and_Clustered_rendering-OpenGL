@@ -3,6 +3,7 @@
 #define TILE_SIZE 16
 layout(local_size_x = 1, local_size_y = 1) in;
 
+// Using vec4 for better alignment on the GPU
 struct TileAABB {
 	vec4 min;
 	vec4 max;
@@ -21,6 +22,8 @@ void main() {
 	const vec3 eyePos = vec3(0, 0, 0);
 
 	uint tileIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
+	// Approximating the frustum of each tile with an AABB. A recommended optimization from Advancements in Tiled-Based
+	// Compute Rendering by Gareth Thomas
 	
 	// screen space
 	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
