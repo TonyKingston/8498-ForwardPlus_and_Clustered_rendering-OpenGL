@@ -27,8 +27,18 @@ out vec4 fragColour[2];
 void main ( void ) {
     // vec2 inverse = IN.texCoord;
 	// inverse.y = 1- inverse.y;
+	
+	fragColour[0] = IN.colour;
+	if (hasTexture) {
+	  fragColour[0] *= texture2D(mainTex , IN.texCoord);
+	}
+	
+	if (fragColour[0].a < 0.1) {
+		discard;
+	}
+	fragColour[0].a = 1;
+	
 	mat3 TBN = mat3 (normalize (IN.tangent), normalize (IN.binormal), normalize (IN.normal));
-
 	// float shadow = 1.0;
 	// if (IN.shadowProj.w > 0.0) {
 		// shadow = textureProj(shadowTex, IN.shadowProj) * 2.0f - 1.0;
@@ -39,11 +49,7 @@ void main ( void ) {
 	  normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
 	  normal = normalize(TBN * normalize(normal));
 	}
-
-	fragColour[0] = IN.colour;
-	if (hasTexture) {
-	  fragColour[0] *= texture2D(mainTex , IN.texCoord);
-	}
+	
 	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 ,1.0);
 	//fragColour[2].r = shadow;
 

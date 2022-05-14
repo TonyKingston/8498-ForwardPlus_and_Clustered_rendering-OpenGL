@@ -16,7 +16,7 @@ layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
-uniform int lightIndex = 0;
+uniform int lightIndex;
 
 void main (void) {
     PointLight light = pointLights[lightIndex];

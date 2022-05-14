@@ -10,6 +10,7 @@
 #include "../CSC8503Common/NavigationMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
 #include <fstream>
+#include <random>
 
 namespace NCL {
 	class Maths::Vector3;
@@ -17,6 +18,12 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 		//class D_GUI;
+
+		struct Light {
+			Vector3 position;
+			float radius;
+			Vector4 colour;
+		};
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
@@ -27,6 +34,10 @@ namespace NCL {
 
 			void RenderStartView();
 			void ResizeSceneTextures(float width, float height);
+
+			void UpdateLights(float dt);
+			void AddLights(int n);
+
 		protected:
 			void RenderFrame()	override;
 			void BeginFrame() override;
@@ -34,6 +45,7 @@ namespace NCL {
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
+			void InitLights();
 
 			void RenderForward();
 			void RenderDeferred();
@@ -132,6 +144,11 @@ namespace NCL {
 			vector<GLuint> sceneBuffers;
 
 			int renderMode;
+			int numLights = 0;
+			float lightDt = 0.2f;
+
+			std::mt19937 lightGen;
+			std::uniform_real_distribution<> lightDis;
 		};
 	}
 }

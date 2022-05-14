@@ -9,6 +9,7 @@
 #include "..//..//Common/Assets.h"
 
 #include "../../Common/stb/stb_image.h"
+#include <random>
 
 using namespace NCL;
 using namespace Rendering;
@@ -19,12 +20,6 @@ using namespace CSC8503;
 const unsigned int MAX_LIGHTS = 64;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
-
-struct Light {
-	Vector3 position;
-	float radius;
-	Vector4 colour;
-};
 
 GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 	: OGLRenderer(*Window::GetWindow()), gameWorld(w), renderMode(type) {
@@ -50,19 +45,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	LoadSkybox();
 
-	glGenBuffers(1, &lightSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_LIGHTS * sizeof(Light), 0, GL_DYNAMIC_DRAW);
-
-	Light* pointLights = (Light*) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-	Light& light = pointLights[0];
-	light.position = Vector3(10.0f, 10.0f, 10.0f);
-	light.radius = 20.0f;
-	light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-	sceneBuffers.push_back(lightSSBO);
-
+	InitLights();
 	
 	switch (type) {
 	case 0:
@@ -78,6 +61,28 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 		break;
 	}
 
+}
+
+void NCL::CSC8503::GameTechRenderer::InitLights() {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dis(0, 1);
+
+
+	glGenBuffers(1, &lightSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_LIGHTS * sizeof(Light), 0, GL_DYNAMIC_DRAW);
+
+	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	Light& light = pointLights[0];
+	light.position = Vector3(10.0f, 10.0f, 10.0f);
+	light.radius = 20.0f;
+	light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	sceneBuffers.push_back(lightSSBO);
+
+	numLights++;
 }
 
 void NCL::CSC8503::GameTechRenderer::InitDeferred() {
@@ -148,6 +153,47 @@ void GameTechRenderer::InitForwardPlus() {
 
 void GameTechRenderer::InitClustered() {
 
+}
+
+void GameTechRenderer::UpdateLights(float dt) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	Light* pointLights = (Light*) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+	for (int i = 0; i < numLights; i++) {
+		Light& light = pointLights[i];
+		//light.position.x = fmod((light.position.y + (-4.5f * lightDt) - min + max), max) + min;
+		light.position.x += 2 * dt;
+	}
+
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void GameTechRenderer::AddLights(int n) {
+	if (numLights + n > MAX_LIGHTS) {
+		n = MAX_LIGHTS - numLights;
+	}
+	if (n == 0) return;
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+	Vector3 lightPos;
+	for (int i = numLights; i < numLights + n; i++) {
+		Light& light = pointLights[i];
+		for (int j = 0; j < 3; j++) {
+			float min = 0.0f;
+			float max = 40.0f;
+			lightPos[j] = lightDis(lightGen) * (max - min) + min;
+		}
+		light.position = lightPos;
+		light.radius = 20.0f;
+		light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+	}
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	numLights += n;
 }
 
 GameTechRenderer::~GameTechRenderer() {
@@ -357,7 +403,7 @@ void GameTechRenderer::RenderForward() {
 void GameTechRenderer::RenderDeferred() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 	FillBuffers(gameWorld.GetMainCamera(), 0.0f);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -409,6 +455,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 	int shadowLocation = 0;
 
 	int cameraLocation = 0;
+	int noOfLightsLocation = 0;
 	/*glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);*/
 
@@ -545,7 +592,11 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	glUniformMatrix4fv(glGetUniformLocation(pointLightShader->GetProgramID(), "inverseProjView"), 1, false, invViewProj.array);
 
 	BindMesh(sphere);
-	DrawBoundMesh();
+
+	for (int i = 0; i < numLights; i++) {
+		glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "lightIndex"), i);
+		DrawBoundMesh();
+	}
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glCullFace(GL_BACK);
@@ -833,7 +884,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
 			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-			glUniform1i(noOfLightsLocation, 1);
+			glUniform1i(noOfLightsLocation, numLights);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 1);*/

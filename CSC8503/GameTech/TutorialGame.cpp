@@ -16,7 +16,7 @@ TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	renderer = new GameTechRenderer(*world, resourceManager, 0);
+	renderer = new GameTechRenderer(*world, resourceManager, 1);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -104,6 +104,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
+	renderer->UpdateLights(dt);
 
 	Debug::FlushRenderables(dt);
 	if (inDebugMode) {
@@ -122,9 +123,7 @@ void TutorialGame::UpdateKeys() {
 		lockedObject = nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		InitCapsuleTest();
-		selectionObject = nullptr;
-		lockedObject = nullptr;
+		renderer->AddLights(5);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM2)) {
 		InitOBBTest();
