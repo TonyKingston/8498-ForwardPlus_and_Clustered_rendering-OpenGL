@@ -25,6 +25,13 @@ namespace NCL {
 			Vector4 colour;
 		};
 
+		struct TileAABB {
+			Vector4 min;
+			Vector4 max;
+		};
+
+#define TILE_SIZE 16 // 16x16 tiles
+
 		class GameTechRenderer : public OGLRenderer {
 		public:
 			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0);
@@ -47,6 +54,9 @@ namespace NCL {
 			void InitClustered();
 			void InitLights();
 
+			void ComputeTileGrid();
+			void ComputeClusterGrid();
+
 			void RenderForward();
 			void RenderDeferred();
 			void RenderForwardPlus();
@@ -64,6 +74,7 @@ namespace NCL {
 			void SortObjectList();
 			void RenderShadowMap();
 			void RenderCamera(Camera* current_camera);
+			void RenderCameraPlus(Camera* current_camera);
 			void RenderSkybox(Camera* current_camera);
 			void LoadSkybox();
 
@@ -93,6 +104,8 @@ namespace NCL {
 			OGLShader* sceneShader;
 			OGLShader* pointLightShader;
 			OGLShader* combineShader;
+			OGLShader* forwardPlusShader;
+			OGLShader* forwardPlusGridShader;
 
 			GLuint bufferFBO;
 			GLuint bufferColourTex;
@@ -106,6 +119,10 @@ namespace NCL {
 			GLuint bufferFinalTex;
 
 			GLuint lightSSBO;
+			GLuint lightGridSSBO;
+			GLuint aabbGridSSBO;
+			int tilesX;
+			int tilesY;
 
 			Vector4		lightColour;
 			float		lightRadius;
