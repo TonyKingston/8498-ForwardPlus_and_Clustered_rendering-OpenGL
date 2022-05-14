@@ -86,6 +86,8 @@ namespace NCL {
 			void GenerateScreenTexture(GLuint& into, bool depth = false);
 			void GenerateShadowBuffer(GLuint& into);
 
+			void BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump);
+
 			vector<RenderObject*> activeObjects;
 			RenderObject* root;
 			Frustum      frameFrustum;

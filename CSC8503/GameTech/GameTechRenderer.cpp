@@ -78,7 +78,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 	Light& light = pointLights[0];
 	light.position = Vector3(10.0f, 10.0f, 10.0f);
-	light.radius = 500.0f;
+	light.radius = 40.0f;
 	light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -388,6 +388,26 @@ void GameTechRenderer::GenerateShadowBuffer(GLuint& into) {
 	sceneBuffers.push_back(into);
 }
 
+void GameTechRenderer::BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump) {
+	vector<TextureBase*> textures = (*obj).GetTextures();
+	int layerCount = (*obj).GetMesh()->GetSubMeshCount();
+
+	BindMesh((*obj).GetMesh());
+	int activeDiffuse = -1;
+	int activeBump = -1;
+	for (int i = 0; i < layerCount; ++i) {
+		if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
+			BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
+			activeDiffuse = ((OGLTexture*)textures[i])->GetObjectID();
+		}
+		if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
+			BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
+			activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
+		}
+		DrawBoundMesh(i);
+	}
+}
+
 void GameTechRenderer::ResizeSceneTextures(float width, float height) {
 	glBindTexture(GL_TEXTURE_2D, print_depth_Tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, currentWidth, currentHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
@@ -571,20 +591,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 
 		}
 
-		BindMesh((*i).GetMesh());
-		int activeDiffuse = -1;
-		int activeBump = -1;
-		for (int i = 0; i < layerCount; ++i) {
-			if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
-				activeDiffuse = ((OGLTexture*)textures[i])->GetObjectID();
-			}
-			if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
-				activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
-			}
-			DrawBoundMesh(i);
-		}
+		BindAndDraw(i, hasDiff, hasBump);
 	}
 
 	glDisable(GL_CULL_FACE);
@@ -973,20 +980,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 
 		}
 
-		BindMesh((*i).GetMesh());
-		int activeDiffuse = -1;
-		int activeBump = -1;
-		for (int i = 0; i < layerCount; ++i) {
-			if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
-				activeDiffuse = ((OGLTexture*)textures[i])->GetObjectID();
-			}
-			if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
-				activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
-			}
-			DrawBoundMesh(i);
-		}
+		BindAndDraw(i, hasDiff, hasBump);
 	}
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 
@@ -1081,20 +1075,7 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 
 		}
 
-		BindMesh((*i).GetMesh());
-		int activeDiffuse = -1;
-		int activeBump = -1;
-		for (int i = 0; i < layerCount; ++i) {
-			if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
-				activeDiffuse = ((OGLTexture*)textures[i])->GetObjectID();
-			}
-			if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
-				BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
-				activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
-			}
-			DrawBoundMesh(i);
-		}
+		BindAndDraw(i, hasDiff, hasBump);
 	}
 //	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
