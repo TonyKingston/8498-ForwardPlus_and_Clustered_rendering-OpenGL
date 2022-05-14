@@ -9,6 +9,7 @@ namespace NCL {
 			SHADER_GEOMETRY,
 			SHADER_DOMAIN,
 			SHADER_HULL,
+			SHADER_COMPUTE,
 			SHADER_MAX
 		};
 
@@ -17,6 +18,7 @@ namespace NCL {
 			ShaderBase() {
 			}
 			ShaderBase(const string& vertex, const string& fragment, const string& geometry = "", const string& domain = "", const string& hull = "");
+			ShaderBase(const string& compute);
 			virtual ~ShaderBase();
 
 			virtual void ReloadShader() = 0;

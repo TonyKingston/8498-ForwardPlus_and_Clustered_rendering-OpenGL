@@ -110,6 +110,22 @@ ShaderBase* OGLResourceManager::LoadShader(string shaderVert, string shaderFrag,
 	return newShader;
 }
 
+ShaderBase* OGLResourceManager::LoadShader(string shaderCompute) {
+	std::filesystem::path computePath = Assets::SHADERDIR + shaderCompute;
+	if (!std::filesystem::exists(computePath)) {
+		return nullptr;
+	}
+	string name = shaderCompute;
+	if (shaders.find(name) != shaders.end()) {
+		return shaders[name];
+	}
+
+	ShaderBase* newShader = new OGLShader(shaderCompute);
+	shaders.emplace(name, newShader);
+
+	return newShader;
+}
+
 NCL::MeshAnimation* OGLResourceManager::LoadAnimation(string filename) {
 	std::filesystem::path path = Assets::ANIMDIR + filename;
 	if (!std::filesystem::exists(path)) {

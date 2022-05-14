@@ -11,6 +11,10 @@ ShaderBase::ShaderBase(const string& vertex, const string& fragment, const strin
 	shaderFiles[(int)ShaderStages::SHADER_HULL]		= hull;
 }
 
+ShaderBase::ShaderBase(const string& compute) {
+	shaderFiles[(int)ShaderStages::SHADER_COMPUTE] = compute;
+}
+
 ShaderBase::~ShaderBase()
 {
 }

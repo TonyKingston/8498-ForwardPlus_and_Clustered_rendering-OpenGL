@@ -17,6 +17,7 @@ namespace NCL {
 		public:
 			friend class OGLRenderer;
 			OGLShader(const string& vertex, const string& fragment, const string& geometry = "", const string& domain = "", const string& hull = "");
+			OGLShader(const string& compute);
 			~OGLShader();
 
 			void ReloadShader() override;

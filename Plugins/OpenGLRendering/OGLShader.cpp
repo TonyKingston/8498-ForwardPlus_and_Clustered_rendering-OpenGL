@@ -18,7 +18,8 @@ GLuint shaderTypes[(int)ShaderStages::SHADER_MAX] = {
 	GL_FRAGMENT_SHADER,
 	GL_GEOMETRY_SHADER,
 	GL_TESS_CONTROL_SHADER,
-	GL_TESS_EVALUATION_SHADER
+	GL_TESS_EVALUATION_SHADER,
+	GL_COMPUTE_SHADER,
 };
 
 string ShaderNames[(int)ShaderStages::SHADER_MAX] = {
@@ -35,6 +36,16 @@ OGLShader::OGLShader(const string& vertex, const string& fragment, const string&
 	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
 		shaderIDs[i]	= 0;
 		shaderValid[i]	= 0;
+	}
+	programID = 0;
+
+	ReloadShader();
+}
+
+OGLShader::OGLShader(const string& compute) : ShaderBase(compute) {
+	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
+		shaderIDs[i] = 0;
+		shaderValid[i] = 0;
 	}
 	programID = 0;
 
