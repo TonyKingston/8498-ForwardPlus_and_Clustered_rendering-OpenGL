@@ -138,12 +138,11 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	oglMesh->SetPrimitiveType(GeometryPrimitive::Triangles);
 	oglMesh->UploadToGPU();
 
-	//obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "bufferFragment.glsl")));
 	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl")));
+//	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl")));
 	meshes.push_back(oglMesh);
 	return obj;
-	//return OGLMesh(vertices, indices, textures);
-	//return new RenderObject(Transform(),);
+
 }
 
 vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {

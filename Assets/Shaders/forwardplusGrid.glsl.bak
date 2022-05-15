@@ -1,0 +1,62 @@
+#version 430 core
+
+#define TILE_SIZE 16
+layout(local_size_x = 1, local_size_y = 1) in;
+
+// Using vec4 for better alignment on the GPU
+struct TileAABB {
+	vec4 min;
+	vec4 max;
+};
+
+layout(std430, binding = 1) buffer tileGrid {
+	TileAABB tile[];
+};
+
+uniform mat4 inverseProj;
+uniform vec2 pixelSize;
+uniform int tilePxX;
+
+vec4 screenToView(vec4 screenSpace);
+vec3 AABBExtent(vec3 min, vec3 max);
+
+void main() {
+	const vec3 eyePos = vec3(0, 0, 0);
+
+	uint tileIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
+	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
+
+	// Approximating the frustum of each tile with an AABB. A recommended optimization from Advancements in Tiled-Based
+	// Compute Rendering by Gareth Thomas
+	
+	vec3 viewSpace[8];
+	// screen space
+	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
+	vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);
+
+	//vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0, 1.0);
+	//vec4 minPoint = vec4(gl_WorkGroupID.xy * tilePxX, -1.0, 1.0);
+
+	// view space
+	vec3 maxPointV = screenToView(maxPoint).xyz;
+	vec3 minPointV = screenToView(minPoint).xyz;
+
+	tile[tileIndex].min = vec4(minPointV, 0.0);
+	tile[tileIndex].max = vec4(maxPointV, 0.0);
+
+	//tile[tileIndex].min = vec4(1, 2, 3, 0.0);
+	//tile[tileIndex].max = vec4(1, 2, 3, 0.0);
+}
+
+vec4 screenToView(vec4 screenSpace) {
+	vec2 texCoord = screenSpace.xy * pixelSize;
+	vec4 clipSpace = vec4(texCoord * 2.0 - 1.0, screenSpace.z, screenSpace.w);
+	vec4 view = inverseProj * clipSpace;
+	view = view / view.w;
+	return view;
+}
+
+vec3 AABBExtent(vec3 min, vec3 max) {
+  vec3 centre = (min + max) * 0.5;
+  return abs(max - centre);
+}

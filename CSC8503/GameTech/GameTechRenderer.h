@@ -20,14 +20,22 @@ namespace NCL {
 		//class D_GUI;
 
 		struct Light {
+			Vector4 colour;
+			Vector4 position;
+			Vector4 radius;
+		};
+
+		/*struct Light {
 			Vector3 position;
 			float radius;
 			Vector4 colour;
-		};
+		};*/
+
 
 		struct TileAABB {
 			Vector4 min;
 			Vector4 max;
+			Vector4 extent;
 		};
 
 #define TILE_SIZE 16 // 16x16 tiles
@@ -61,6 +69,11 @@ namespace NCL {
 			void RenderDeferred();
 			void RenderForwardPlus();
 			void RenderClustered();
+
+			void DepthPrePass();
+
+			void ForwardPlusCullLights();
+			void ClusteredCullLights();
 
 			Matrix4 SetupDebugLineMatrix()	const override;
 			Matrix4 SetupDebugStringMatrix()const override;
@@ -108,21 +121,25 @@ namespace NCL {
 			OGLShader* combineShader;
 			OGLShader* forwardPlusShader;
 			OGLShader* forwardPlusGridShader;
+			OGLShader* forwardPlusCullShader;
+			OGLShader* depthPrepassShader;
 
 			GLuint bufferFBO;
-			GLuint bufferColourTex;
-			GLuint bufferNormalTex;
-			GLuint bufferShadowTex;
-			GLuint bufferDepthTex;
+			GLuint bufferColourTex, bufferNormalTex, bufferDepthTex;
+			GLuint bufferShadowTex; 
 			GLuint pointLightFBO;
-			GLuint lightDiffuseTex;
-			GLuint lightSpecularTex;
+			GLuint lightDiffuseTex, lightSpecularTex;
 
 			GLuint bufferFinalTex;
 
+			GLuint forwardPlusFBO;
+
+			
 			GLuint lightSSBO;
 			GLuint lightGridSSBO;
 			GLuint aabbGridSSBO;
+			GLuint globalListSSBO;
+			GLuint globalCountSSBO;
 			int tilesX;
 			int tilesY;
 
@@ -148,7 +165,6 @@ namespace NCL {
 
 			void LoadPrinter();
 			void PresentScene(bool split, GLfloat offset);
-			void SplitRender();
 
 			OGLResourceManager* resourceManager;
 			//start image
@@ -167,7 +183,7 @@ namespace NCL {
 			float lightDt = 0.2f;
 
 			std::mt19937 lightGen;
-			std::uniform_real_distribution<> lightDis;
+			std::uniform_real_distribution<> lightDist;
 		};
 	}
 }

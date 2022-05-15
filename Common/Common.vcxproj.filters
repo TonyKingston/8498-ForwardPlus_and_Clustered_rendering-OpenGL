@@ -114,9 +114,6 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -204,9 +201,6 @@
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
-      <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
       <Filter>Rendering</Filter>
     </ClInclude>
   </ItemGroup>
