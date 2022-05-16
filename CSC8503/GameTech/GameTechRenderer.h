@@ -125,6 +125,7 @@ namespace NCL {
 			OGLShader* depthPrepassShader;
 
 			GLuint bufferFBO;
+			GLuint depthColourTex;
 			GLuint bufferColourTex, bufferNormalTex, bufferDepthTex;
 			GLuint bufferShadowTex; 
 			GLuint pointLightFBO;
@@ -142,13 +143,14 @@ namespace NCL {
 			GLuint globalCountSSBO;
 			int tilesX;
 			int tilesY;
+			unsigned int totalNumLights;
 
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;
 
 			//vice camera things
-			OGLShader* print_shader;
+			OGLShader* printShader;
 			OGLShader* split_shader;
 			OGLMesh* printer;
 			GLuint printFBO;

@@ -2,19 +2,15 @@
 
 uniform sampler2D 	mainTex;
 
-uniform vec3	cameraPos;
-
 in Vertex
 {
 	vec2 texCoord;
 } IN;
 
-out vec4 fragColor;
-
 void main(void)
 {
-	//float alpha = texture(mainTex, IN.texCoord).a;
-	//if (alpha < 0.5) {
-	//    discard;
-	//}
+	float alpha = texture(mainTex, IN.texCoord).a;
+	if (alpha < 0.5) {
+	    discard;
+	}
 }

@@ -31,6 +31,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 	quad = OGLMesh::GenerateQuad();
 
 	shadowShader = new OGLShader("GameTechShadowVert.glsl", "GameTechShadowFrag.glsl");
+	printShader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
 
 	GenerateShadowBuffer(shadowFBO);
 
@@ -92,7 +93,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 
 	Light& light3 = pointLights[2];
 	light3.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	light3.position = Vector4(-40.0f, 10.0f, 10.0f, 0.0f);
+	light3.position = Vector4(-60.0f, 10.0f, 10.0f, 0.0f);
 	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
 	//light3.radius = 40.0f;
 	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
@@ -166,38 +167,40 @@ void NCL::CSC8503::GameTechRenderer::InitDeferred() {
 }
 
 void GameTechRenderer::InitForwardPlus() {
-//	glGenFramebuffers(1, &bufferFBO);
-//	glGenFramebuffers(1, &forwardPlusFBO);
+	glGenFramebuffers(1, &bufferFBO);
+	glGenFramebuffers(1, &forwardPlusFBO);
 //
-//	GLenum buffers[1] = {
-//		GL_COLOR_ATTACHMENT0
-//	};
-//
-//	GenerateScreenTexture(bufferDepthTex, true);
-//	//GenerateScreenTexture(bufferColourTex);
-//
-//	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-//	glDrawBuffers(1, buffers);
-//
-//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
-//
-//	sceneBuffers.push_back(bufferFBO);
-//
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//	glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
-//	glGenRenderbuffers(1, &bufferColourTex);
-//	glBindRenderbuffer(GL_RENDERBUFFER, bufferColourTex);
-//	glRenderbufferStorage(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, currentWidth, currentHeight);
-//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, bufferColourTex);
-//
-//	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, , bufferColourTex, 0);
-////	glDrawBuffers(1, buffers);
-//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
-//
-//	sceneBuffers.push_back(forwardPlusFBO);
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	GLenum buffers[1] = {
+		GL_COLOR_ATTACHMENT0
+	};
+
+	GenerateScreenTexture(bufferDepthTex, true);
+	GenerateScreenTexture(depthColourTex);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthColourTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	glDrawBuffers(1, buffers);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
+
+	sceneBuffers.push_back(bufferFBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GenerateScreenTexture(bufferColourTex);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, currentWidth, currentHeight);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, bufferColourTex);
+
+	glDrawBuffers(1, buffers);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
+
+	sceneBuffers.push_back(forwardPlusFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl");
 	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("forwardplusGrid.glsl");
@@ -218,13 +221,13 @@ void GameTechRenderer::InitForwardPlus() {
 
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_STATIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 //	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	glGenBuffers(1, &globalListSSBO);
-	unsigned int totalNumLights = numTiles * 50; //50 lights per tile max
+	totalNumLights = numTiles * 50; //50 lights per tile max
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, globalListSSBO);
 
 	glBufferData(GL_SHADER_STORAGE_BUFFER, totalNumLights * sizeof(unsigned int), NULL, GL_STATIC_COPY);
@@ -244,7 +247,7 @@ void GameTechRenderer::InitForwardPlus() {
 	sceneBuffers.push_back(globalListSSBO);
 	sceneBuffers.push_back(globalCountSSBO);
 
-	ComputeTileGrid();
+//	ComputeTileGrid();
 
 //	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 }
@@ -280,14 +283,14 @@ void GameTechRenderer::AddLights(int n) {
 	for (int i = numLights; i < numLights + n; i++) {
 		Light& light = pointLights[i];
 		for (int j = 0; j < 3; j++) {
-			float min = -300.0f;
-			float max = 300.0f;
+			float min = -200.0f;
+			float max = 200.0f;
 			lightPos[j] = lightDist(lightGen) * (max - min) + min;
 		}
 		light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 		lightPos.y = 10.0f;
 		light.position = lightPos;
-		//light.radius = 50.0f;
+		light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER,0, lightSSBO);
@@ -335,9 +338,8 @@ void GameTechRenderer::ComputeClusterGrid() {
 
 void GameTechRenderer::DepthPrePass() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
 	glDepthMask(1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColorMask(0, 0, 0, 0);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
@@ -372,7 +374,6 @@ void GameTechRenderer::DepthPrePass() {
 	}
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 void GameTechRenderer::ForwardPlusCullLights() {
@@ -387,6 +388,7 @@ void GameTechRenderer::ForwardPlusCullLights() {
 
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
+	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
 	glDispatchCompute(tilesX, tilesY, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
@@ -396,7 +398,7 @@ void GameTechRenderer::ClusteredCullLights() {
 }
 
 void GameTechRenderer::LoadPrinter() {
-	print_shader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
+	printShader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
 	split_shader = new OGLShader("SplitVertex.glsl", "PrinterFragment.glsl");
 	printer = OGLMesh::GenerateQuad();
 
@@ -497,7 +499,6 @@ void GameTechRenderer::GenerateScreenTexture(GLuint& into, bool depth) {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	GLuint filter = depth ? GL_NEAREST : GL_LINEAR;
 	GLuint format = depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8;
 	GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
 
@@ -638,21 +639,37 @@ void GameTechRenderer::RenderDeferred() {
 }
 
 void GameTechRenderer::RenderForwardPlus() {
-	//glDisable(GL_BLEND);
-	//DepthPrePass();
-	//glEnable(GL_BLEND);
+	glDisable(GL_BLEND);
+	DepthPrePass();
+	glEnable(GL_BLEND);
 
-	ForwardPlusCullLights();
+	//ForwardPlusCullLights();
 	//glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, bufferFBO);
 	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, forwardPlusFBO);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	//glBlitFramebuffer(0, 0, currentWidth, currentHeight, 0, 0, currentWidth, currentHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
 
-	//glClear(GL_COLOR_BUFFER_BIT);
 	//RenderSkybox(gameWorld.GetMainCamera());
+
+	//glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 	RenderCameraPlus(gameWorld.GetMainCamera());
 	glEnable(GL_BLEND);
+	//glEnable(GL_CULL_FACE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	BindShader(printShader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+	quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
+
+	BindMesh(quad);
+	DrawBoundMesh();
 
 }
 
@@ -874,8 +891,8 @@ void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
 		activeShader = split_shader;
 	}
 	else {
-		BindShader(print_shader);
-		activeShader = print_shader;
+		BindShader(printShader);
+		activeShader = printShader;
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -1107,9 +1124,12 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 }
 
 void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
-	/*glDepthMask(0);
+	glDepthMask(GL_FALSE);
 	glColorMask(1, 1, 1, 1);
-	glDepthFunc(GL_EQUAL);*/
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
 
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
@@ -1188,23 +1208,6 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 		bool hasBump = textures.size() == layerCount * 2;
 		glUniform1i(hasBumpLocation, hasBump);
 
-		if (i->GetAnimation()) {
-			MeshGeometry* mesh = i->GetMesh();
-			vector <Matrix4> frameMatrices;
-			const vector<Matrix4> invBindPose = mesh->GetInverseBindPose();
-			const Matrix4* frameData = i->GetAnimation()->GetJointData(i->GetCurrentFrame());
-
-			for (unsigned int i = 0; i < mesh->GetJointCount(); ++i) {
-				auto matrix = invBindPose[i];
-				frameMatrices.emplace_back(frameData[i] * matrix);
-			}
-
-			int j = glGetUniformLocation(((OGLShader*)(*i).GetShader())->GetProgramID(), "joints");
-			glUniformMatrix4fv(j, frameMatrices.size(), false,
-				(float*)frameMatrices.data());
-
-		}
-
 		BindAndDraw(i, hasDiff, hasBump);
 	}
 //	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
@@ -1281,11 +1284,11 @@ void GameTechRenderer::RenderStartView() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	///////////
-	BindShader(print_shader);
+	BindShader(printShader);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, background_tex);
-	glUniform1i(glGetUniformLocation(print_shader->GetProgramID(), "diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
 	BindMesh(printer);
 	DrawBoundMesh();
 	glBindTexture(GL_TEXTURE_2D, 0);

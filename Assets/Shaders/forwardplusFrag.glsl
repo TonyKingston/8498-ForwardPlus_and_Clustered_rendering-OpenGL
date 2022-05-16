@@ -70,8 +70,10 @@ void main(void)
 	int tileIndex = tileID.y * numTilesX + tileID.x;
 	
     //uvec2 tiles = uvec2( gl_FragCoord.xy / tilePxX);
-   //uint tileIndex = tiles.x + TILE_SIZE * tiles.y;
+    //uint tileIndex = tiles.x + TILE_SIZE * tiles.y + (TILE_SIZE * TILE_SIZE);
 	
+	//uint tileIndex = 0;
+
 	uint lightCount = lightGrid[tileIndex].count;
     uint lightIndexOffset = lightGrid[tileIndex].offset;
 //	lightIndexOffset = tileIndex * noOfLights;
@@ -132,9 +134,10 @@ void main(void)
 	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
 	fragColor.rgb += albedo.rgb * diffuseLight;
 	fragColor.rgb += specularLight.rgb;
-	// if (tileIndex == 0) {
-	  // fragColor.rgb = vec3(1,0,0);
-	// }
+	fragColor.rgb = albedo.rgb;
+	 //if (tileIndex == 0 && lightCount > 0) {
+	 //  fragColor.rgb = vec3(1,0,0);
+	 //}
 	// if (tileIndex == 2) {
 	  // fragColor.rgb = vec3(0,1,0);
 	// }
@@ -146,13 +149,8 @@ void main(void)
 	    // fragColor.rgb = vec3(1,1,0);
 	   // }
 	// }
-	// uint count = 0;
-	// for (uint i = 0; i < 50; i++) {
-	    // if (globalLightIndexList[lightIndexOffset + i] != -1) {
-			// count++;
-	    // }
-	// }
-	// float shade = float(count) / float(50 * 2); 
-	// fragColor.rgb = vec3(shade);
+
+	 /*float shade = float(lightCount) / float(5); 
+	 fragColor.rgb *= vec3(shade);*/
 	fragColor.a = 1.0;
 }
