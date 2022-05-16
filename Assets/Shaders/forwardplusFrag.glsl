@@ -1,6 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
+#define MAX_LIGHTS_PER_TILE 16
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -18,22 +19,32 @@ uniform sampler2D   bumpTex;
 //  vec4 colour;
 //};
 
-struct LightGrid {
-	uint offset;
-	uint count;
-};
+//struct LightGrid {
+//	uint offset;
+//	uint count;
+//};
+
+ struct LightGrid {
+	 uint count;
+	 uint lightIndices[MAX_LIGHTS_PER_TILE];
+ };
+
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
+//layout(std430, binding = 2) buffer lightGridSSBO {
+//	LightGrid lightGrid[];
+//};
+
 layout(std430, binding = 2) buffer lightGridSSBO {
-	LightGrid lightGrid[];
+	int lightIndices[];
 };
 
-layout(std430, binding = 3) buffer globalLightIndexListSSBO {
-	uint globalLightIndexList[];
-};
+//layout(std430, binding = 3) buffer globalLightIndexListSSBO {
+//	uint globalLightIndexList[];
+//};
 
 uniform int noOfLights;
 uniform int numTilesX;
@@ -74,13 +85,17 @@ void main(void)
 	
 	//uint tileIndex = 0;
 
-	uint lightCount = lightGrid[tileIndex].count;
-    uint lightIndexOffset = lightGrid[tileIndex].offset;
+//	uint lightCount = lightGrid[tileIndex].count;
+ //   uint lightIndexOffset = lightGrid[tileIndex].offset;
 //	lightIndexOffset = tileIndex * noOfLights;
+	uint lightCount = 0;
+	uint lightIndexOffset = tileIndex * MAX_LIGHTS_PER_TILE;
 
 	mat3 TBN = mat3(normalize(IN.tangent), normalize(IN.binormal), normalize(IN.normal));
 
 	vec3 normal = IN.normal;
+//	normal = normalize(TBN * normalize(normal));
+
 	if (hasBump) {
 		normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
 		normal = normalize(TBN * normalize(normal));
@@ -100,11 +115,12 @@ void main(void)
 	fragColor.rgb = albedo.rgb * 0.1f; //ambient
 
 	vec3 viewDir = normalize(cameraPos - IN.worldPos);
-	vec3 diffuseLight;
-	vec3 specularLight;
-	for (uint i = 0; i < lightCount; i++) {
-//	for (int i = 0; i < noOfLights && globalLightIndexList[lightIndexOffset + i] != -1; i++
-	    uint lightIndex = globalLightIndexList[lightIndexOffset + i];
+	vec3 diffuseLight = vec3(0);
+	vec3 specularLight = vec3(0);
+//	for (uint i = 0; i < lightCount; i++) {
+	for (int i = 0; i < MAX_LIGHTS_PER_TILE && lightIndices[lightIndexOffset + i] != -1; i++) {
+	//	uint lightIndex = globalLightIndexList[lightIndexOffset + i];
+		uint lightIndex = lightIndices[lightIndexOffset + i];
 		PointLight light = pointLights[lightIndex];
 		vec3 lightVec = light.pos.xyz - IN.worldPos;
 		//vec3 lightVec = light.pos - IN.worldPos;
@@ -134,13 +150,13 @@ void main(void)
 	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
 	fragColor.rgb += albedo.rgb * diffuseLight;
 	fragColor.rgb += specularLight.rgb;
-	fragColor.rgb = albedo.rgb;
-	 //if (tileIndex == 0 && lightCount > 0) {
-	 //  fragColor.rgb = vec3(1,0,0);
-	 //}
-	// if (tileIndex == 2) {
-	  // fragColor.rgb = vec3(0,1,0);
-	// }
+	//fragColor.rgb = albedo.rgb;
+	/* if (tileIndex == 0 && lightCount > 0) {
+	   fragColor.rgb = vec3(1,0,0);
+	 }*/
+	 if (tileIndex == 78) {
+	   fragColor.rgb = vec3(0,1,0);
+	 }
 	// if (tileIndex == 20) {
 	  // fragColor.rgb = vec3(0,1,0);
 	// }

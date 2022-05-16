@@ -18,6 +18,8 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 		//class D_GUI;
+#define TILE_SIZE 16 // 16x16 tiles
+#define MAX_LIGHTS_PER_TILE 16
 
 		struct Light {
 			Vector4 colour;
@@ -38,7 +40,17 @@ namespace NCL {
 			Vector4 extent;
 		};
 
-#define TILE_SIZE 16 // 16x16 tiles
+		struct TileAABB {
+			Vector4 min;
+			Vector4 max;
+			Vector4 extent;
+		};
+
+		struct LightGrid {
+			unsigned int count;
+			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
+		};
+
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
