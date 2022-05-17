@@ -46,7 +46,7 @@ namespace NCL {
 		};
 	
 		struct TileFrustum {
-			Plane plane[4];
+			TilePlane plane[4];
 		};
 
 		struct LightGrid {

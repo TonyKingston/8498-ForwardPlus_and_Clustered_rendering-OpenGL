@@ -6,7 +6,7 @@ layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
-uniform mat4 modelMatrix;
+//uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
 
@@ -48,11 +48,11 @@ struct Frustum {
 //	uint count;
 //	uint lightIndices[MAX_LIGHTS_PER_TILE];
 //};
-
-struct ViewFrustum {
-	vec4 planes[6];
-	vec4 points[8]; // 0-3 near 4-7 far
-};
+//
+//struct ViewFrustum {
+//	vec4 planes[6];
+//	vec4 points[8]; // 0-3 near 4-7 far
+//};
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
@@ -85,18 +85,18 @@ layout(std430, binding = 4) buffer globalIndexCountSSBO {
 
 uniform int noOfLights;
 uniform uint totalNumLights;
+uniform ivec2 screenSize;
+uniform vec2 pixelSize;
 //shared PointLight sharedLights[TILE_SIZE * TILE_SIZE];
 //shared uint globalIndexLightCount;
 
-shared vec4 frustumPlanes[6];
+//shared vec4 frustumPlanes[6];
 shared uint minDepthInt;
 shared uint maxDepthInt;
 shared uint visibleLightCount;
 shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 shared Frustum tileFrustum;
 
-uniform ivec2 screenSize;
-uniform vec2 pixelSize;
 shared mat4 viewProjMatrix;
 shared mat4 invViewProj;
 shared mat4 invProj;
@@ -116,9 +116,16 @@ void main() {
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
 
 	uint tileIndex = tileId.y * tileNumber.x + tileId.x;
-	vec2 texCoord = (vec2(location)) / screenSize;
+
+	if (gl_LocalInvocationIndex == 0) {
+		vec2 test = vec2(location) * pixelSize;
+		testDepth[tileIndex] = test.y;
+	}
+	//vec2 texCoord = (vec2(location)) / screenSize;
+	//vec2 texCoord = vec2(location) / ivec2(1264, 681);
+	vec2 texCoord = vec2(location) * pixelSize;
 	float depth = texture(depthTex, texCoord).r;
-	//depth = depth * 2.0 - 1.0;
+	depth = depth * 2.0 - 1.0;
 	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
 
 	uint depthInt = floatBitsToUint(depth);
@@ -146,10 +153,11 @@ void main() {
 	float minDepth = uintBitsToFloat(minDepthInt);
 	float maxDepth = uintBitsToFloat(maxDepthInt);
 
-	float minDepthVS = ClipToView(vec4(0, 0, minDepth, 1)).z;
-	float maxDepthVS = ClipToView(vec4(0, 0, maxDepth, 1)).z;
+	float minDepthVS = ClipToView(vec4(0, 0, minDepth, 1.0)).z;
+	float maxDepthVS = ClipToView(vec4(0, 0, maxDepth, 1.0)).z;
 	float nearClipVS = ClipToView(vec4(0, 0, 0, 1)).z;
 
+	//Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
 	Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
 
 	//if (gl_LocalInvocationIndex == 0) {
@@ -223,6 +231,7 @@ void main() {
 
 		vec4 position = pointLights[lightIndex].pos;
 		float radius = pointLights[lightIndex].radius.x;
+	//	vec4 vPos = viewMatrix * vec4(position.xyz, 1.0);
 		vec4 vPos = viewMatrix * position;
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {

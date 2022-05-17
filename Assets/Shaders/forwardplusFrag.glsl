@@ -159,7 +159,7 @@ void main(void)
 	/* if (tileIndex == 0 && lightCount > 0) {
 	   fragColor.rgb = vec3(1,0,0);
 	 }*/
-	 if (tileIndex == 78) {
+	 if (tileIndex == 3386) {
 	   fragColor.rgb = vec3(0,1,0);
 	 }
 	// if (tileIndex == 20) {

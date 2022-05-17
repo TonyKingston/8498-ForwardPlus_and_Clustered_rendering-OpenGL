@@ -227,7 +227,7 @@ void GameTechRenderer::InitForwardPlus() {
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
 	//glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_DYNAMIC_DRAW);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileFrustum), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(struct TileFrustum), NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 //	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -397,16 +397,20 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "depthTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	int ss[]{ 1280, 720 };
 
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
 	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
+	//glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, ss);
 	glUniform2f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 
 	glDispatchCompute(tilesX, tilesY, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void GameTechRenderer::ClusteredCullLights() {
