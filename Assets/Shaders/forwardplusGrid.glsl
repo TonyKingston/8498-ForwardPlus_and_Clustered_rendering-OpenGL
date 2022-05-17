@@ -85,8 +85,9 @@ void main() {
 	/*vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
 	vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);*/
 
+	// Compute screen space position of frustum points on the far plane.
 	vec4 screenSpace[4];
-
+	// -1 for z as the co-ordinate system is right-handed i.e. camera points towards -1
 	// Top left
 	screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
 	// Top right point
@@ -96,12 +97,14 @@ void main() {
 	// Bottom right point
 	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
 
-	vec3 viewSpace[4];
 
+	// Convert these to view space positions;
+	vec3 viewSpace[4];
 	for (int i = 0; i < 4; i++) {
 		viewSpace[i] = screenToView(screenSpace[i]).xyz;
 	}
 
+	// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
 	Frustum frustum;
 	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);
 	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);

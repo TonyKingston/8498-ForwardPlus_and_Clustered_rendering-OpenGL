@@ -123,13 +123,17 @@ void main() {
 	}
 	//vec2 texCoord = (vec2(location)) / screenSize;
 	//vec2 texCoord = vec2(location) / ivec2(1264, 681);
+
 	vec2 texCoord = vec2(location) * pixelSize;
 	float depth = texture(depthTex, texCoord).r;
+	// Convert sampled depth into viewspace -1 to 1 range
 	depth = depth * 2.0 - 1.0;
 	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
 
 	uint depthInt = floatBitsToUint(depth);
 
+    // One thread to init values and get the group's tile frustum.
+	// Could also reset everything in the indices buffer to 0 if so desired
 	if (gl_LocalInvocationIndex == 0) {
 		minDepthInt = 0xFFFFFFFF;
 		maxDepthInt = 0;
@@ -157,16 +161,18 @@ void main() {
 	Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
 
 	barrier();
+
+	// Each batch will handle 256 lights with a tile size of 16
 	uint threadCount = TILE_SIZE * TILE_SIZE;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
 	for (uint i = 0; i < batchCount; i++) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-		//if (lightIndex >= noOfLights) {
-		//	break;
-		//}
+		if (lightIndex >= noOfLights) {
+			break;
+		}
 
-		lightIndex = min(lightIndex, noOfLights);
+	//	lightIndex = min(lightIndex, noOfLights);
 
 		vec4 position = pointLights[lightIndex].pos;
 		float radius = pointLights[lightIndex].radius.x;
