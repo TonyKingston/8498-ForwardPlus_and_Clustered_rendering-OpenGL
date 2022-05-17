@@ -141,9 +141,6 @@ void main() {
 	}
 
 	barrier();
-	
-
-	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
 
 	atomicMin(minDepthInt, depthInt);
 	atomicMax(maxDepthInt, depthInt);
@@ -157,65 +154,7 @@ void main() {
 	float maxDepthVS = ClipToView(vec4(0, 0, maxDepth, 1.0)).z;
 	float nearClipVS = ClipToView(vec4(0, 0, 0, 1)).z;
 
-	//Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
 	Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
-
-	//if (gl_LocalInvocationIndex == 0) {
-	//	// Convert the min and max across the entire tile back to float
-	//	float minDepth = uintBitsToFloat(minDepthInt);
-	//	float maxDepth = uintBitsToFloat(maxDepthInt);
-
-	//	/*vec4 vsMinDepth = (invProj * vec4(0.0, 0.0, (2.0 * minDepth - 1.0), 1.0));
-	//	vec4 vsMaxDepth = (invProj * vec4(0.0, 0.0, (2.0 * maxDepth - 1.0), 1.0));
-	//	vsMinDepth /= vsMinDepth.w;
-	//	vsMaxDepth /= vsMaxDepth.w;
-
-	//	minDepth = vsMinDepth.z;
-	//	maxDepth = vsMaxDepth.z;
-
-	//	vec2 tileScale = screenSize * (1.0 / float(2 * TILE_SIZE));
-	//	vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
-	//	
-
-	//	vec4 col1 = vec4(-projMatrix[0][0] * tileScale.x, projMatrix[0][1], tileBias.x, projMatrix[0][3]);
-	//	vec4 col2 = vec4(projMatrix[1][0], -projMatrix[1][1] * tileScale.y, tileBias.y, projMatrix[1][3]);
-	//	vec4 col4 = vec4(projMatrix[3][0], projMatrix[3][1], -1.0, projMatrix[3][3]);
-
-	//	frustumPlanes[0] = col4 + col1;
-	//	frustumPlanes[1] = col4 - col1;
-	//	frustumPlanes[2] = col4 - col2;
-	//	frustumPlanes[3] = col4 + col2;
-	//	frustumPlanes[4] = vec4(0.0, 0.0, 1.0, -minDepth);
-	//	frustumPlanes[5] = vec4(0.0, 0.0, -1.0, maxDepth);
-	//	for (uint i = 0; i < 4; i++) {
-	//		frustumPlanes[i] *= 1.0f / length(frustumPlanes[i].xyz);
-	//	}*/
-
-
-
-
-	//	////// Steps based on tile sale
-	//	//vec2 negativeStep = (2.0 * vec2(tileId)) / vec2(tileNumber);
-	//	//vec2 positiveStep = (2.0 * vec2(tileId + ivec2(1, 1))) / vec2(tileNumber);
-
-	//	//// Set up starting values for planes using steps and min and max z values
-	//	//frustumPlanes[0] = vec4(1.0, 0.0, 0.0, 1.0 - negativeStep.x); // Left
-	//	//frustumPlanes[1] = vec4(-1.0, 0.0, 0.0, -1.0 + positiveStep.x); // Right
-	//	//frustumPlanes[2] = vec4(0.0, 1.0, 0.0, 1.0 - negativeStep.y); // Bottom
-	//	//frustumPlanes[3] = vec4(0.0, -1.0, 0.0, -1.0 + positiveStep.y); // Top
-	//	//frustumPlanes[4] = vec4(0.0, 0.0, -1.0, -minDepth); // Near
-	//	//frustumPlanes[5] = vec4(0.0, 0.0, 1.0, maxDepth); // Far
-
-	//	//for (uint i = 0; i < 4; i++) {
-	//	//	frustumPlanes[i] *= viewProjMatrix;
-	//	//	frustumPlanes[i] /= length(frustumPlanes[i].xyz);
-	//	//}
-
-	//	//frustumPlanes[4] *= viewMatrix;
-	//	//frustumPlanes[4] /= length(frustumPlanes[4].xyz);
-	//	//frustumPlanes[5] *= viewMatrix;
-	//	//frustumPlanes[5] /= length(frustumPlanes[5].xyz);
-	//}
 
 	barrier();
 	uint threadCount = TILE_SIZE * TILE_SIZE;
@@ -231,7 +170,6 @@ void main() {
 
 		vec4 position = pointLights[lightIndex].pos;
 		float radius = pointLights[lightIndex].radius.x;
-	//	vec4 vPos = viewMatrix * vec4(position.xyz, 1.0);
 		vec4 vPos = viewMatrix * position;
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
@@ -240,30 +178,6 @@ void main() {
 				visibleLightIndices[offset] = int(lightIndex);
 			}
 		}
-
-
-	//	float distance = 0.0;
-	//	bool inFrustum = true;
-	//	for (uint j = 0; j < 6 && inFrustum; j++) {
-	//	   //distance = dot(position, frustumPlanes[j]) + radius;
-	//		distance = dot(vPos, frustumPlanes[j]);
-	//		inFrustum = (distance >= -radius);
-	//		/*if (distance >= -radius) {
-	//			break;
-	//		}*/
-	//	//	 If one of the tests fails, then there is no intersection
-	//		/*if (distance <= 0.0) {
-	//			break;
-	//		}*/
-	//	}
-
-	//	// If greater than zero, then it is a visible light
-	//	//if (distance > 0.0) {
-	////	if (inFrustum) {
-	//		// Add index to the shared array of visible indices
-	//		uint offset = atomicAdd(visibleLightCount, 1);
-	//		visibleLightIndices[offset] = int(lightIndex);
-	//	}
 	}
 
 	barrier();
@@ -271,24 +185,14 @@ void main() {
 	// One thread should fill the global light buffer
 	if (gl_LocalInvocationIndex == 0) {
 		uint offset = tileIndex * MAX_LIGHTS_PER_TILE; // Determine position in global buffer
-		//uint _count = min(MAX_LIGHTS_PER_TILE, visibleLightCount);
-		//lightVisibilities[tileIndex].count = _count;
-	/*	
-		for (uint i = 0; i < _count; i++) {
-			lightVisibilities[tileIndex].lightIndices[i] = visibleLightIndices[i];
-		}*/
+
 		for (uint i = 0; i < visibleLightCount; i++) {
 			lightIndices[offset + i] = visibleLightIndices[i];
 		}
 
 		if (visibleLightCount != MAX_LIGHTS_PER_TILE) {
 			lightIndices[offset + visibleLightCount] = -1;
-		//	lightVisibilities[tileIndex].lightIndices[visibleLightCount] = -1;
-			// Unless we have totally filled the entire array, mark it's end with -1
-			// Final shader step will use this to determine where to stop (without having to pass the light count)
-			//lightGrid.data[offset + visibleLightCount].index = -1;
 		}
-	//	testDepth[tileIndex] = depth;
 
 	}
 }
