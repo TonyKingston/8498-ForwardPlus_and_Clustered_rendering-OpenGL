@@ -226,7 +226,8 @@ void GameTechRenderer::InitForwardPlus() {
 
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_DYNAMIC_DRAW);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileFrustum), NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 //	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -243,7 +244,7 @@ void GameTechRenderer::InitForwardPlus() {
 	glGenBuffers(1, &globalCountSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, globalCountSSBO);
 
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(float) , NULL, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, globalCountSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -253,7 +254,7 @@ void GameTechRenderer::InitForwardPlus() {
 	sceneBuffers.push_back(globalListSSBO);
 	sceneBuffers.push_back(globalCountSSBO);
 
-//	ComputeTileGrid();
+	ComputeTileGrid();
 
 //	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 }
@@ -402,6 +403,8 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
 	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
+	glUniform2f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
+
 	glDispatchCompute(tilesX, tilesY, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
@@ -516,6 +519,7 @@ void GameTechRenderer::GenerateScreenTexture(GLuint& into, bool depth) {
 	GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
 
 
+	glTexImage2D(GL_TEXTURE_2D, 0, format, currentWidth, currentHeight, 0, type, GL_UNSIGNED_BYTE, NULL);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, currentWidth, currentHeight, 0, type, GL_UNSIGNED_BYTE, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, 0);

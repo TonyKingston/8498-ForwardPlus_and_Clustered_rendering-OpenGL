@@ -11,8 +11,8 @@ struct TileAABB {
 };
 
 struct Plane {
-	vec3 normal;
-	float distance;
+	vec4 normal;
+	vec4 distance;
 };
 
 struct Frustum {
@@ -38,6 +38,7 @@ uniform float far;
 vec4 screenToView(vec4 screenSpace);
 vec3 AABBExtent(vec3 min, vec3 max);
 vec3 ConstructPlane(vec3 A, vec3 B, float zDistance);
+Plane ComputePlane(vec3 A, vec3 B, vec3 C);
 
 void main() {
 	const vec3 eyePos = vec3(0, 0, 0);
@@ -84,39 +85,54 @@ void main() {
 	/*vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
 	vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);*/
 
-	//float4 screenSpace[4];
-	// Top left point
-	//screenSpace[0] = vec4(IN.dispatchThreadID.xy * BLOCK_SIZE, -1.0f, 1.0f);
-	//// Top right point
-	//screenSpace[1] = vec4(vec2(IN.dispatchThreadID.x + 1, IN.dispatchThreadID.y) * BLOCK_SIZE, -1.0f, 1.0f);
-	//// Bottom left point
-	//screenSpace[2] = vec4(vec2(IN.dispatchThreadID.x, IN.dispatchThreadID.y + 1) * BLOCK_SIZE, -1.0f, 1.0f);
-	//// Bottom right point
-	//screenSpace[3] = vec4(vec2(IN.dispatchThreadID.x + 1, IN.dispatchThreadID.y + 1) * BLOCK_SIZE, -1.0f, 1.0f);
+	vec4 screenSpace[4];
 
-	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0, 1.0);
-	vec4 minPoint = vec4(gl_WorkGroupID.xy * tilePxX, -1.0, 1.0);
+	// Top left
+	screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
+	// Top right point
+	screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0f, 1.0f);
+	// Bottom left point
+	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
+	// Bottom right point
+	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
 
-	float tileNear = -near * pow(far / near, gl_WorkGroupID.z / float(gl_NumWorkGroups.z));
-	float tileFar = -near * pow(far / near, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
+	vec3 viewSpace[4];
+
+	for (int i = 0; i < 4; i++) {
+		viewSpace[i] = screenToView(screenSpace[i]).xyz;
+	}
+
+	Frustum frustum;
+	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);
+	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);
+	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);
+	frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);
+
+	tile[tileIndex] = frustum;
+
+//	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0, 1.0);
+	//vec4 minPoint = vec4(gl_WorkGroupID.xy * tilePxX, -1.0, 1.0);
+
+	//float tileNear = -near * pow(far / near, gl_WorkGroupID.z / float(gl_NumWorkGroups.z));
+	//float tileFar = -near * pow(far / near, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
+	////
+	////// view space
+	////maxPoint.w = 1.0;
+	////minPoint.w = 1.0;
+	//vec3 maxPointV = screenToView(maxPoint).xyz;
+	//vec3 minPointV = screenToView(minPoint).xyz;
+
+	//vec3 minPointNear = ConstructPlane(eyePos, minPointV, tileNear);
+	//vec3 minPointFar = ConstructPlane(eyePos, minPointV, tileFar);
+	//vec3 maxPointNear = ConstructPlane(eyePos, maxPointV, tileNear);
+	//vec3 maxPointFar = ConstructPlane(eyePos, maxPointV, tileFar);
+
+	//vec3 minPointAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
+	//vec3 maxPointAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
 	//
-	//// view space
-	//maxPoint.w = 1.0;
-	//minPoint.w = 1.0;
-	vec3 maxPointV = screenToView(maxPoint).xyz;
-	vec3 minPointV = screenToView(minPoint).xyz;
-
-	vec3 minPointNear = ConstructPlane(eyePos, minPointV, tileNear);
-	vec3 minPointFar = ConstructPlane(eyePos, minPointV, tileFar);
-	vec3 maxPointNear = ConstructPlane(eyePos, maxPointV, tileNear);
-	vec3 maxPointFar = ConstructPlane(eyePos, maxPointV, tileFar);
-
-	vec3 minPointAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
-	vec3 maxPointAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
-	
-	tile[tileIndex].min = vec4(minPointAABB, 1.0);
-	tile[tileIndex].max = vec4(maxPointAABB, 1.0);
-	tile[tileIndex].extent = vec4(AABBExtent(minPointAABB, maxPointAABB), 0.0);
+	//tile[tileIndex].min = vec4(minPointAABB, 1.0);
+	//tile[tileIndex].max = vec4(maxPointAABB, 1.0);
+	//tile[tileIndex].extent = vec4(AABBExtent(minPointAABB, maxPointAABB), 0.0);
 
 	//vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
 	//vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);
@@ -161,4 +177,16 @@ vec3 ConstructPlane(vec3 A, vec3 B, float zDistance) {
 	vec3 result = A + t * ab;
 
 	return result;
+}
+
+Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
+	Plane plane;
+
+	vec3 AB = B - A;
+	vec3 AC = C - A;
+
+	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
+	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0);
+
+	return plane;
 }

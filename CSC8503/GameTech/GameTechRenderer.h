@@ -40,10 +40,13 @@ namespace NCL {
 			Vector4 extent;
 		};
 
-		struct TileAABB {
-			Vector4 min;
-			Vector4 max;
-			Vector4 extent;
+		struct TilePlane {
+			Vector4 normal;
+			Vector4 distance;
+		};
+	
+		struct TileFrustum {
+			Plane plane[4];
 		};
 
 		struct LightGrid {

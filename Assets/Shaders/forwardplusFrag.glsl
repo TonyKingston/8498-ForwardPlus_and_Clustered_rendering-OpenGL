@@ -46,6 +46,11 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 //	uint globalLightIndexList[];
 //};
 
+
+//layout(std430, binding = 4) buffer globalIndexCountSSBO {
+//	float testDepth[];
+//};
+
 uniform int noOfLights;
 uniform int numTilesX;
 uniform int tilePxX;
@@ -76,7 +81,7 @@ void main(void)
 	/*if( IN . shadowProj . w > 0.0) {
 		shadow = textureProj ( shadowTex , IN . shadowProj ) * 0.5f;
 	}*/
-	
+
 	ivec2 tileID = ivec2(gl_FragCoord.xy) / ivec2(TILE_SIZE, TILE_SIZE); 
 	int tileIndex = tileID.y * numTilesX + tileID.x;
 	
