@@ -10,10 +10,15 @@ uniform sampler2D   bumpTex;
 //	float radius;
 //};
 
+// struct PointLight {
+	// vec3 pos;
+	// float radius;
+	// vec4 colour;
+// };
 struct PointLight {
-	vec3 pos;
-	float radius;
-	vec4 colour;
+    vec4 colour;
+	vec4 pos;
+	vec4 radius;
 };
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
@@ -76,11 +81,11 @@ void main(void)
 	for (int i = 0; i < noOfLights; i++) {
 		PointLight light = pointLights[i];
 		//vec3 lightVec = light.pos.xyz - IN.worldPos;
-		vec3 lightVec = light.pos - IN.worldPos;
+		vec3 lightVec = light.pos.xyz - IN.worldPos;
 		//float lambert = max(0.0, dot(incident, normal)) * 0.9;
 
 		float distance = length(lightVec);
-		float attenuation = 1.0f - clamp(distance / light.radius, 0.0, 1.0);
+		float attenuation = 1.0f - clamp(distance / light.radius.x, 0.0, 1.0);
 		if (attenuation > 0.0f) {
 			vec3  incident = normalize(lightVec);
 			vec3 halfDir = normalize(incident + viewDir);

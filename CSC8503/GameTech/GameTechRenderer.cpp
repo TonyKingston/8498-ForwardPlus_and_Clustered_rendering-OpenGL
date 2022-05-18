@@ -99,11 +99,18 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	//light3.radius = 40.0f;
 	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
+	Light& light4 = pointLights[3];
+	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
+	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
+	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	//light3.radius = 40.0f;
+	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
 
-	numLights += 3;
+	numLights += 4;
 }
 
 void NCL::CSC8503::GameTechRenderer::InitDeferred() {
@@ -207,6 +214,7 @@ void GameTechRenderer::InitForwardPlus() {
 	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("forwardplusGrid.glsl");
 	forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("forwardplusCull.glsl");
 	depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
+	debugShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusDebugFrag.glsl");
 
 	tilesX = (currentWidth + (currentWidth % TILE_SIZE)) / TILE_SIZE;
 	tilesY = (currentHeight + (currentHeight % TILE_SIZE)) / TILE_SIZE;
@@ -255,7 +263,6 @@ void GameTechRenderer::InitForwardPlus() {
 	sceneBuffers.push_back(globalCountSSBO);
 
 	ComputeTileGrid();
-
 //	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 }
 
@@ -278,23 +285,24 @@ void GameTechRenderer::UpdateLights(float dt) {
 }
 
 void GameTechRenderer::AddLights(int n) {
-	if (numLights + n > MAX_LIGHTS) {
-		n = MAX_LIGHTS - numLights;
+	if (numLights + n >= MAX_LIGHTS) {
+		//n = MAX_LIGHTS - numLights;
+		n = 0;
 	}
 	if (n == 0) return;
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
 	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 
-	Vector4 lightPos;
+	Vector4 lightPos = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 	for (int i = numLights; i < numLights + n; i++) {
 		Light& light = pointLights[i];
 		for (int j = 0; j < 3; j++) {
-			float min = -200.0f;
-			float max = 200.0f;
+			float min = -150.0f;
+			float max = 150.0f;
 			lightPos[j] = lightDist(lightGen) * (max - min) + min;
 		}
-		light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+		light.colour = Vector4(1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0f);
 		lightPos.y = 10.0f;
 		light.position = lightPos;
 		light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
@@ -333,7 +341,14 @@ void GameTechRenderer::ComputeTileGrid() {
 	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), sizeX);
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
+	unsigned int query;
+	GLuint64 timer;
+	glGenQueries(1, &query);
+	glBeginQuery(GL_TIME_ELAPSED, query);
 	glDispatchCompute(tilesX, tilesY, 1);
+	glEndQuery(GL_TIME_ELAPSED);
+	glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timer);
+	std::printf("Time spent on the GPU: %f ms\n", timer / 1000000.0);
 
 	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
@@ -384,8 +399,6 @@ void GameTechRenderer::DepthPrePass() {
 }
 
 void GameTechRenderer::ForwardPlusCullLights() {
-	//OGLShader* shader = forwardPlusCullShader;
-	//ComputeTileGrid();
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	BindShader(forwardPlusCullShader);

@@ -74,6 +74,12 @@ in Vertex
 
 out vec4 fragColor;
 
+
+float remap(float minval, float maxval, float curval) {
+	return (curval - minval) / (maxval - minval);
+}
+
+
 void main(void)
 {
 	float shadow = 1.0;
@@ -124,6 +130,7 @@ void main(void)
 	vec3 specularLight = vec3(0);
 //	for (uint i = 0; i < lightCount; i++) {
 	for (int i = 0; i < MAX_LIGHTS_PER_TILE && lightIndices[lightIndexOffset + i] != -1; i++) {
+		lightCount++;
 	//	uint lightIndex = globalLightIndexList[lightIndexOffset + i];
 		uint lightIndex = lightIndices[lightIndexOffset + i];
 		PointLight light = pointLights[lightIndex];
@@ -159,9 +166,9 @@ void main(void)
 	/* if (tileIndex == 0 && lightCount > 0) {
 	   fragColor.rgb = vec3(1,0,0);
 	 }*/
-	 if (tileIndex == 3386) {
+	 /*if (tileIndex == 3386) {
 	   fragColor.rgb = vec3(0,1,0);
-	 }
+	 }*/
 	// if (tileIndex == 20) {
 	  // fragColor.rgb = vec3(0,1,0);
 	// }
@@ -171,7 +178,32 @@ void main(void)
 	   // }
 	// }
 
-	 /*float shade = float(lightCount) / float(5); 
-	 fragColor.rgb *= vec3(shade);*/
+	//fragColor.rgb = vec3(0.1, 0.1, 0.2);
+	/*float shade = float(lightCount) / float(noOfLights);
+
+	if (shade < 0.2) {
+		fragColor.rgb = mix(vec3(0, 0, 1), vec3(1), remap(0.0, 0.2, shade));
+	}
+	else if (shade < 0.5) {
+		fragColor.rgb = mix(vec3(0, 1, 0), vec3(1), remap(0.0, 0.5, shade));
+	}
+	else {
+		fragColor.rgb = mix(vec3(1), vec3(1, 0, 0), remap(0.5, 1.0, shade));
+	}*/
+	/*if (lightCount == 1) {
+		fragColor.rgb = vec3(0, 0, 1);
+	}
+	else if (lightCount == 2) {
+		fragColor.rgb = vec3(0, 1, 0);
+	}
+	else if (lightCount == 3) {
+		fragColor.rgb = vec3(1, 0, 0);
+	}
+	vec3 _min = vec3(0.0);
+	vec3 _max = vec3(1.0);*/
+	//fragColor.r = mix(1.0, 0.0, max(0.8, shade));
+	//fragColor.rgb = mix(max, min, 1.0 - shade);
+
+//	fragColor.rgb += albedo.rgb * shade;
 	fragColor.a = 1.0;
 }

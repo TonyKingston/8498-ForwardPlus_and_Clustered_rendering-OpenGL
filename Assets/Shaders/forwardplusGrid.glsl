@@ -44,7 +44,7 @@ void main() {
 	const vec3 eyePos = vec3(0, 0, 0);
 
 	uint tileIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
-	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
+//	uint tileIndex = gl_LocalInvocationIndex;
 
 	// Approximating the frustum of each tile with an AABB. A recommended optimization from Advancements in Tiled-Based
 	// Compute Rendering by Gareth Thomas
@@ -104,13 +104,37 @@ void main() {
 		viewSpace[i] = screenToView(screenSpace[i]).xyz;
 	}
 
-	// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
-	Frustum frustum;
-	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);
-	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);
-	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);
-	frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);
+	//Frustum frustum;
+	//Plane plane = { vec4(0), vec4(0) };
+	//frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);  // Left
+	//frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
+	//frustum.planes[1] = plane;
+	//frustum.planes[2] = plane;
 
+	//if (gl_WorkGroupID.x == gl_NumWorkGroups.x - 1) {
+	//	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
+	//}
+
+	//if (gl_WorkGroupID.y == 42) {
+	//	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);  // Top
+	//}
+	
+
+
+	////// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
+	Frustum frustum;
+	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);  // Left
+	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
+	//frustum.planes[1] = frustum.planes[0];  // Right
+	//frustum.planes[1].normal = -frustum.planes[1].normal;
+	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);  // Top
+	frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
+	//frustum.planes[3] = frustum.planes[2];
+	//frustum.planes[3].normal = -frustum.planes[3].normal;
+
+	//frustum.planes[0].distance.y = gl_WorkGroupID.x;
+	//frustum.planes[0].distance.z = gl_WorkGroupID.y;
+	//frustum.planes[0].distance.w = gl_GlobalInvocationID.x;
 	tile[tileIndex] = frustum;
 
 //	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0, 1.0);
@@ -189,7 +213,8 @@ Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
 	vec3 AC = C - A;
 
 	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
-	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0);
+///	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0); // Doesn't cause error?
+	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
 
 	return plane;
 }

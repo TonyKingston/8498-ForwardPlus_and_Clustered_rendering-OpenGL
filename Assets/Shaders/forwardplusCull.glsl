@@ -142,8 +142,18 @@ void main() {
 		invProj = inverse(projMatrix);
 		invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
-	}
 
+		//if (tileId.x < 78) {
+		//	tileFrustum.planes[1] = tile[tileIndex + 1].planes[0];
+		//	tileFrustum.planes[1].normal = -tileFrustum.planes[1].normal;
+		//}
+		//if (tileId.y < 42) {
+		//	tileFrustum.planes[2] = tile[tileIndex + (tileId.y * tileNumber.x)].planes[3];
+		//	tileFrustum.planes[2].normal = -tileFrustum.planes[2].normal;
+		//}
+
+	} 
+	
 	barrier();
 
 	atomicMin(minDepthInt, depthInt);
@@ -154,25 +164,25 @@ void main() {
 	float minDepth = uintBitsToFloat(minDepthInt);
 	float maxDepth = uintBitsToFloat(maxDepthInt);
 
-	float minDepthVS = ClipToView(vec4(0, 0, minDepth, 1.0)).z;
-	float maxDepthVS = ClipToView(vec4(0, 0, maxDepth, 1.0)).z;
-	float nearClipVS = ClipToView(vec4(0, 0, 0, 1)).z;
+	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
+	float maxDepthVS = ClipToView(vec4(0.0, 0.0, maxDepth, 1.0)).z;
+	float nearClipVS = ClipToView(vec4(0.0, 0.0, 0.0, 1.0)).z;
 
-	Plane minPlane = { vec4(0, 0, -1, 0), vec4(-minDepthVS, 0,0,0) };
+	Plane minPlane = { vec4(0.0, 0.0, -1.0, 0.0), vec4(-minDepthVS, 0.0,0.0,0.0) };
 
 	barrier();
 
 	// Each batch will handle 256 lights with a tile size of 16
 	uint threadCount = TILE_SIZE * TILE_SIZE;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
-	for (uint i = 0; i < batchCount; i++) {
+	for (uint i = 0; i < batchCount; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
 		if (lightIndex >= noOfLights) {
 			break;
 		}
 
-	//	lightIndex = min(lightIndex, noOfLights);
+		/*lightIndex = min(lightIndex, noOfLights);*/
 
 		vec4 position = pointLights[lightIndex].pos;
 		float radius = pointLights[lightIndex].radius.x;
@@ -188,15 +198,14 @@ void main() {
 
 	barrier();
 
-	// One thread should fill the global light buffer
 	if (gl_LocalInvocationIndex == 0) {
-		uint offset = tileIndex * MAX_LIGHTS_PER_TILE; // Determine position in global buffer
+		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
 
-		for (uint i = 0; i < visibleLightCount; i++) {
+		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
 			lightIndices[offset + i] = visibleLightIndices[i];
 		}
 
-		if (visibleLightCount != MAX_LIGHTS_PER_TILE) {
+		if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
 			lightIndices[offset + visibleLightCount] = -1;
 		}
 

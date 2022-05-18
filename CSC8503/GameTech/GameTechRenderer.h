@@ -138,6 +138,7 @@ namespace NCL {
 			OGLShader* forwardPlusGridShader;
 			OGLShader* forwardPlusCullShader;
 			OGLShader* depthPrepassShader;
+			OGLShader* debugShader;
 
 			GLuint bufferFBO;
 			GLuint depthColourTex;
