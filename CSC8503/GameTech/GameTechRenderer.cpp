@@ -374,25 +374,37 @@ void GameTechRenderer::DepthPrePass() {
 	int projLocation = 0;
 	int viewLocation = 0;
 	int modelLocation = 0;
-	
+
+	OGLShader* shader = depthPrepassShader;
+
+	projLocation = glGetUniformLocation(shader->GetProgramID(), "projMatrix");
+	viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
+	modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
+
+	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
+	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+
 	for (const auto& i : activeObjects) {
-		OGLShader* shader = depthPrepassShader;
-
-		projLocation = glGetUniformLocation(shader->GetProgramID(), "projMatrix");
-		viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
-		modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
-
-		glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-		glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
-
 
 		Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
 		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
 
 		//glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
+		bool hasMask = (*i).HasMask();
+		int layerCount = (*i).GetMesh()->GetSubMeshCount();
 
-		BindAndDraw(i, hasDiff, 0);
+		glUniform1i(glGetUniformLocation(shader->GetProgramID(), "hasMask"), hasMask);
+
+		BindMesh((*i).GetMesh());
+
+		if (hasDiff && hasMask) {
+			BindTextureToShader((OGLTexture*)(*i).GetDefaultTexture(), "mainTex", 0);
+		}
+
+		for (int i = 0; i < layerCount; ++i) {
+			DrawBoundMesh(i);
+		}
 	}
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

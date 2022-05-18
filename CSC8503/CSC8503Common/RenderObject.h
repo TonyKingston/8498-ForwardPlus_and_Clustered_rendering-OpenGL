@@ -129,6 +129,13 @@ namespace NCL {
 				dColour = defaultColour;
 			}
 
+			void SetHasMask(bool val) {
+				hasMask = val;
+			}
+
+			bool HasMask() {
+				return hasMask;
+			}
 
 		protected:
 			MeshGeometry* mesh;
@@ -141,6 +148,8 @@ namespace NCL {
 			Transform* localTransform;
 			Maths::Vector4			colour;
 			Maths::Vector4          dColour = Vector4();
+
+			bool hasMask = false;
 
 
 			MeshAnimation* animation;
