@@ -93,27 +93,16 @@ TutorialGame::~TutorialGame() {
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
 
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
+	world->GetMainCamera()->UpdateCamera(dt);
 
 	UpdateKeys();
 
-//	SelectObject();
-//	MoveSelectedObject();
-
-	world->UpdateWorld(dt);
+	//world->UpdateWorld(dt);
 	renderer->Update(dt);
 	//renderer->UpdateLights(dt);
 
 	Debug::FlushRenderables(dt);
-	if (inDebugMode) {
-		world->DrawBoundingVolumes();
-		renderer->Render();
-	}
-	else {
-		renderer->Render();
-	}
+	renderer->Render();
 }
 
 void TutorialGame::UpdateKeys() {

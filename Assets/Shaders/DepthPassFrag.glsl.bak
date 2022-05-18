@@ -10,15 +10,11 @@ in Vertex
 
 void main(void)
 {
-    if (hasMask) {
-	    float alpha = texture(mainTex, IN.texCoord).a;
+    // if (hasMask) {
+	    // float alpha = texture(mainTex, IN.texCoord).a;
 		
-		if (alpha < 0.5) {
-		    discard;
-		}
-	}
-	//float alpha = texture(mainTex, IN.texCoord).a;
-	//if (alpha < 0.5) {
-	//    discard;
-	//}
+		// if (alpha < 0.5) {
+		    // discard;
+		// }
+	// }
 }

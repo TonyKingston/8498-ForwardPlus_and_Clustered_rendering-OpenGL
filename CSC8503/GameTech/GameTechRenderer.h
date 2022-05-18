@@ -19,7 +19,7 @@ namespace NCL {
 		class RenderObject;
 		//class D_GUI;
 #define TILE_SIZE 16 // 16x16 tiles
-#define MAX_LIGHTS_PER_TILE 16
+#define MAX_LIGHTS_PER_TILE 64
 
 		struct Light {
 			Vector4 colour;
