@@ -72,6 +72,7 @@ namespace NCL {
 			void RenderFrame()	override;
 			void BeginFrame() override;
 
+			void InitForward(bool withPrepass = false);
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
@@ -80,7 +81,7 @@ namespace NCL {
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
 
-			void RenderForward();
+			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
 			void RenderForwardPlus();
 			void RenderClustered();

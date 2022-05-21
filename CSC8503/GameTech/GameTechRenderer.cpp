@@ -52,6 +52,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	switch (type) {
 	case 0:
+		InitForward(true);
 		break;
 	case 1:
 		InitDeferred();
@@ -113,7 +114,46 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	numLights += 4;
 }
 
-void NCL::CSC8503::GameTechRenderer::InitDeferred() {
+void GameTechRenderer::InitForward(bool withPrepass) {
+	if (withPrepass) {
+		glGenFramebuffers(1, &bufferFBO);
+		glGenFramebuffers(1, &forwardPlusFBO);
+		//
+		GLenum buffers[1] = {
+			GL_COLOR_ATTACHMENT0
+		};
+
+		GenerateScreenTexture(bufferDepthTex, true);
+		GenerateScreenTexture(depthColourTex);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthColourTex, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+		glDrawBuffers(1, buffers);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
+
+		sceneBuffers.push_back(bufferFBO);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		GenerateScreenTexture(bufferColourTex);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+
+		glDrawBuffers(1, buffers);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
+
+		sceneBuffers.push_back(forwardPlusFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
+	}
+}
+
+void GameTechRenderer::InitDeferred() {
 	sceneShader = (OGLShader*) resourceManager->LoadShader("GameTechVert.glsl", "bufferFragment.glsl");
 	pointLightShader = new OGLShader("pointlightvertex.glsl", "pointlightfrag.glsl");
 	combineShader = new OGLShader("combinevert.glsl", "combinefrag.glsl");
@@ -633,7 +673,7 @@ void GameTechRenderer::RenderFrame() {
 
 	switch (renderMode) {
 	case 0:
-		RenderForward();
+		RenderForward(true);
 		break;
 	case 1:
 		RenderDeferred();
@@ -649,11 +689,40 @@ void GameTechRenderer::RenderFrame() {
 	glDisable(GL_CULL_FACE);
 }
 
-void GameTechRenderer::RenderForward() {
-	RenderSkybox(gameWorld.GetMainCamera());
-	glDisable(GL_BLEND);
-	RenderCamera(gameWorld.GetMainCamera());
-	glEnable(GL_BLEND);
+void GameTechRenderer::RenderForward(bool withPrepass) {
+	if (!withPrepass) {
+		RenderSkybox(gameWorld.GetMainCamera());
+		glDisable(GL_BLEND);
+		RenderCamera(gameWorld.GetMainCamera());
+		glEnable(GL_BLEND);
+	}
+	else {
+		glDisable(GL_BLEND);
+		DepthPrePass();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
+
+		//RenderSkybox(gameWorld.GetMainCamera());s
+		glDepthMask(GL_FALSE);
+		glColorMask(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glDepthFunc(GL_LEQUAL);
+		glEnable(GL_DEPTH_TEST);
+		RenderCamera(gameWorld.GetMainCamera());
+		glEnable(GL_BLEND);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		BindShader(printShader);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+		glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+		quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
+
+		BindMesh(quad);
+		DrawBoundMesh();
+	}
 }
 
 void GameTechRenderer::RenderDeferred() {

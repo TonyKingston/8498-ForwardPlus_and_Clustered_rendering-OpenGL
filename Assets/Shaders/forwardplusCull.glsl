@@ -127,7 +127,7 @@ void main() {
 	vec2 texCoord = vec2(location) * pixelSize;
 	float depth = texture(depthTex, texCoord).r;
 	// Convert sampled depth into viewspace -1 to 1 range
-	depth = depth * 2.0 - 1.0;
+//	depth = depth * 2.0 - 1.0;
 	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
 
 	uint depthInt = floatBitsToUint(depth);
@@ -162,7 +162,9 @@ void main() {
 	barrier();
 
 	float minDepth = uintBitsToFloat(minDepthInt);
+	minDepth = minDepth * 2.0 - 1.0;
 	float maxDepth = uintBitsToFloat(maxDepthInt);
+	maxDepth = maxDepth * 2.0 - 1.0;
 
 	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
 	float maxDepthVS = ClipToView(vec4(0.0, 0.0, maxDepth, 1.0)).z;
