@@ -51,7 +51,7 @@ int main() {
 			w->SetWindowPosition(0, 0);
 		}
 
-		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
+		w->SetTitle("FPS:" + std::to_string(1 / dt));
 
 		g->UpdateGame(dt);
 		/*if (!machine.Update(dt)) {

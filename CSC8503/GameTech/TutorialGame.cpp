@@ -12,11 +12,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
+using std::cout;
+using std::endl;
+using std::cin;
+
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	renderer = new GameTechRenderer(*world, resourceManager, 2);
+	
+	int mode = AskRenderingMode();
+	renderer = new GameTechRenderer(*world, resourceManager, mode);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -89,6 +95,47 @@ TutorialGame::~TutorialGame() {
 	delete world;
 	delete grid;
 }
+
+int TutorialGame::AskRenderingMode() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nPlease select a rendering mode from the following:\n" << endl;
+	cout << "0. Forward" << endl;
+	cout << "1. Deferred" << endl;
+	cout << "2. Forward+" << endl;
+	cout << "3. Clustered" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskRenderingMode();
+	}
+
+	switch (input) {
+	case 0:
+		cout << "Forward rendering selected." << endl;
+		break;
+	case 1:
+		cout << "Deferred rendering selected." << endl;
+		break;
+	case 2:
+		cout << "Forward+ rendering selected." << endl;
+		break;
+	case 3:
+		cout << "Clustered rendering selected." << endl;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskRenderingMode();
+		break;
+	}
+
+	return input;
+}
+
 
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;

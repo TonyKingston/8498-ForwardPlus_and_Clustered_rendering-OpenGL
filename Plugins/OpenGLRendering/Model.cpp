@@ -39,7 +39,7 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		GameObject* obj = this->ProcessMesh(mesh, scene);
 		obj->GetTransform().SetPosition(Vector3(0, 0, 0))
-			.SetScale(Vector3(0.5, 0.5, 0.5));
+			.SetScale(Vector3(0.4, 0.4, 0.4));
 		//obj->GetTransform().SetPosition();
 		//node->mTransformation.
 		this->objects.push_back(obj);

@@ -42,6 +42,8 @@ namespace NCL {
 			float GetGameTime() { return timeTaken;}
 			int GetGameStatus() { return gameStatus; }
 
+			int AskRenderingMode();
+
 		protected:
 			void InitialiseAssets(int level = 1);
 

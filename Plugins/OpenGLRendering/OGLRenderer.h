@@ -15,6 +15,7 @@ https://research.ncl.ac.uk/game/
 
 #ifdef _WIN32
 #include "windows.h"
+//extern "C" _declspec(dllexport) DWORD NvOptimusEnablement = 1;
 #endif
 
 #ifdef _DEBUG
@@ -40,9 +41,11 @@ namespace NCL {
 		class OGLShader;
 
 		class SimpleFont;
-		
+
+
 		class OGLRenderer : public RendererBase
 		{
+
 		public:
 			friend class OGLRenderer;
 			OGLRenderer(Window& w);
