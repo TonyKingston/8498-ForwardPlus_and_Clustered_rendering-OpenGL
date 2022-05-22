@@ -18,19 +18,42 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 		//class D_GUI;
+#define TILE_SIZE 16 // 16x16 tiles
+#define MAX_LIGHTS_PER_TILE 64
 
 		struct Light {
+			Vector4 colour;
+			Vector4 position;
+			Vector4 radius;
+		};
+
+		/*struct Light {
 			Vector3 position;
 			float radius;
 			Vector4 colour;
-		};
+		};*/
+
 
 		struct TileAABB {
 			Vector4 min;
 			Vector4 max;
+			Vector4 extent;
 		};
 
-#define TILE_SIZE 16 // 16x16 tiles
+		struct TilePlane {
+			Vector4 normal;
+			Vector4 distance;
+		};
+	
+		struct TileFrustum {
+			TilePlane plane[4];
+		};
+
+		struct LightGrid {
+			unsigned int count;
+			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
+		};
+
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
@@ -49,6 +72,7 @@ namespace NCL {
 			void RenderFrame()	override;
 			void BeginFrame() override;
 
+			void InitForward(bool withPrepass = false);
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
@@ -57,10 +81,15 @@ namespace NCL {
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
 
-			void RenderForward();
+			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
 			void RenderForwardPlus();
 			void RenderClustered();
+
+			void DepthPrePass();
+
+			void ForwardPlusCullLights();
+			void ClusteredCullLights();
 
 			Matrix4 SetupDebugLineMatrix()	const override;
 			Matrix4 SetupDebugStringMatrix()const override;
@@ -108,30 +137,37 @@ namespace NCL {
 			OGLShader* combineShader;
 			OGLShader* forwardPlusShader;
 			OGLShader* forwardPlusGridShader;
+			OGLShader* forwardPlusCullShader;
+			OGLShader* depthPrepassShader;
+			OGLShader* debugShader;
 
 			GLuint bufferFBO;
-			GLuint bufferColourTex;
-			GLuint bufferNormalTex;
-			GLuint bufferShadowTex;
-			GLuint bufferDepthTex;
+			GLuint depthColourTex;
+			GLuint bufferColourTex, bufferNormalTex, bufferDepthTex;
+			GLuint bufferShadowTex; 
 			GLuint pointLightFBO;
-			GLuint lightDiffuseTex;
-			GLuint lightSpecularTex;
+			GLuint lightDiffuseTex, lightSpecularTex;
 
 			GLuint bufferFinalTex;
 
+			GLuint forwardPlusFBO;
+
+			
 			GLuint lightSSBO;
 			GLuint lightGridSSBO;
 			GLuint aabbGridSSBO;
+			GLuint globalListSSBO;
+			GLuint globalCountSSBO;
 			int tilesX;
 			int tilesY;
+			unsigned int totalNumLights;
 
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;
 
 			//vice camera things
-			OGLShader* print_shader;
+			OGLShader* printShader;
 			OGLShader* split_shader;
 			OGLMesh* printer;
 			GLuint printFBO;
@@ -148,7 +184,6 @@ namespace NCL {
 
 			void LoadPrinter();
 			void PresentScene(bool split, GLfloat offset);
-			void SplitRender();
 
 			OGLResourceManager* resourceManager;
 			//start image
@@ -166,8 +201,13 @@ namespace NCL {
 			int numLights = 0;
 			float lightDt = 0.2f;
 
+			Matrix4 viewMat;
+			Matrix4 projMat;
+			float aspect;
+
+
 			std::mt19937 lightGen;
-			std::uniform_real_distribution<> lightDis;
+			std::uniform_real_distribution<> lightDist;
 		};
 	}
 }

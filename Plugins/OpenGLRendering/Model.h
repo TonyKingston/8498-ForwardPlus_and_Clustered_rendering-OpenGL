@@ -12,6 +12,8 @@
 
 namespace NCL {
 
+// Adapted from https://learnopengl.com/Model-Loading/Model
+
     namespace CSC8503 {
         class GameObject;
         class RenderObject;

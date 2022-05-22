@@ -1,0 +1,121 @@
+#version 430 core
+
+uniform sampler2D 	mainTex;
+uniform sampler2D   bumpTex;
+uniform sampler2D   specTex;
+//uniform sampler2DShadow shadowTex;
+//
+//struct PointLight {
+//	vec4 colour;
+//	vec4 pos;
+//	float radius;
+//};
+
+// struct PointLight {
+	// vec3 pos;
+	// float radius;
+	// vec4 colour;
+// };
+struct PointLight {
+    vec4 colour;
+	vec4 pos;
+	vec4 radius;
+};
+
+layout(std430, binding = 0) readonly buffer lightSSBO {
+	PointLight pointLights[];
+};
+
+uniform int noOfLights;
+
+uniform vec3	cameraPos;
+
+uniform bool hasTexture;
+uniform bool hasBump;
+uniform bool hasSpec;
+
+in Vertex
+{
+	vec4 colour;
+	vec2 texCoord;
+//	vec4 shadowProj;
+	vec3 normal;
+	vec3 tangent;
+	vec3 binormal;
+	vec3 worldPos;
+	float depth;
+} IN;
+
+out vec4 fragColor;
+
+void main(void)
+{
+	float shadow = 1.0;
+	
+	/*if( IN . shadowProj . w > 0.0) {
+		shadow = textureProj ( shadowTex , IN . shadowProj ) * 0.5f;
+	}*/
+
+	mat3 TBN = mat3(normalize(IN.tangent), normalize(IN.binormal), normalize(IN.normal));
+
+	vec3 normal = IN.normal;
+	if (hasBump) {
+		normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
+		normal = normalize(TBN * normalize(normal));
+	}
+	
+	float specSample = 1;
+	if (hasSpec) {
+	    specSample = texture2D(specTex, IN.texCoord).r;
+	}
+
+	vec4 albedo = IN.colour;
+	if (hasTexture) {
+		albedo *= texture(mainTex, IN.texCoord);
+	}
+
+	if (albedo.a < 0.1) {
+		discard;
+	}
+
+	//albedo.rgb = pow(albedo.rgb, vec3(2.2));
+
+	fragColor.rgb = albedo.rgb * 0.1f; //ambient
+
+	vec3 viewDir = normalize(cameraPos - IN.worldPos);
+	vec3 diffuseLight;
+	vec3 specularLight;
+	for (int i = 0; i < noOfLights; i++) {
+		PointLight light = pointLights[i];
+		//vec3 lightVec = light.pos.xyz - IN.worldPos;
+		vec3 lightVec = light.pos.xyz - IN.worldPos;
+		//float lambert = max(0.0, dot(incident, normal)) * 0.9;
+
+		float distance = length(lightVec);
+		float attenuation = 1.0f - clamp(distance / light.radius.x, 0.0, 1.0);
+		if (attenuation > 0.0f) {
+			vec3  incident = normalize(lightVec);
+			vec3 halfDir = normalize(incident + viewDir);
+
+			float lambert = clamp(dot(incident, normal), 0.0, 1.0);
+
+			//float rFactor = max(0.0, dot(halfDir, normal));
+			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
+			float sFactor = pow(rFactor, 120.0) * specSample;
+			
+			
+
+			vec3 attenuated = light.colour.rgb * attenuation;
+			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light
+			//fragColor.rgb += albedo.rgb * attenuated * lambert;
+			//fragColor.rgb += light.colour.rgb * attenuated * sFactor * 0.33;
+			diffuseLight.rgb += attenuated * lambert; //diffuse light
+			specularLight.rgb += attenuated * sFactor * 0.33; //specular light
+		}
+	}
+	
+	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
+	fragColor.rgb += albedo.rgb * diffuseLight;
+	fragColor.rgb += specularLight.rgb;
+	fragColor.a = 1.0;
+}
