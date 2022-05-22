@@ -90,33 +90,33 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 //	light.radius = 40.0f;
 	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
 
-	//Light& light2 = pointLights[1];
-	//light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	//light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
-	////light2.position = Vector3(80.0f, 10.0f, 10.0f);
-	////light2.radius = 40.0f;
-	//light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	Light& light2 = pointLights[1];
+	light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
+	//light2.position = Vector3(80.0f, 10.0f, 10.0f);
+	//light2.radius = 40.0f;
+	light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 
-	//Light& light3 = pointLights[2];
-	//light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
-	//light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
-	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	////light3.radius = 40.0f;
-	//light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	Light& light3 = pointLights[2];
+	light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
+	light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
+	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	//light3.radius = 40.0f;
+	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
-	//Light& light4 = pointLights[3];
-	//light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
-	//light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
-	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	////light3.radius = 40.0f;
-	//light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	Light& light4 = pointLights[3];
+	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
+	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
+	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	//light3.radius = 40.0f;
+	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
 
-	numLights += 1;
+	numLights += 4;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -899,7 +899,7 @@ void GameTechRenderer::RenderClustered() {
 	BindShader(forwardPlusShader);
 
 	for (const auto& i : activeObjects) {
-		OGLShader* shader = (OGLShader*)(*i).GetShader();
+		OGLShader* shader = forwardPlusShader;
 
 		vector<TextureBase*> textures = (*i).GetTextures();
 
@@ -935,6 +935,8 @@ void GameTechRenderer::RenderClustered() {
 
 		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), scaleFactor);
 		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), biasFactor);
+		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "near"), gameWorld.GetMainCamera()->GetNearPlane());
+		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "far"), gameWorld.GetMainCamera()->GetFarPlane());
 
 		//Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
 		//glUniformMatrix4fv(shadowLocation, 1, false, (float*)&fullShadowMat);

@@ -64,6 +64,8 @@ uniform bool hasSpec;
 
 uniform float scale;
 uniform float bias;
+uniform float near;
+uniform float far;
 
 in Vertex
 {
@@ -86,11 +88,12 @@ float remap(float minval, float maxval, float curval) {
 
 float linearDepth(float depthSample){
     float depthRange = 2.0 * depthSample - 1.0;
-    float linear = 2.0 * zNear * zFar / (zFar + zNear - depthRange * (zFar - zNear));
-    return l
+    float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
+    return linear;
 }
 
-vec3 tileSize(16, 9, 24);
+// Doom values
+const uvec3 tileSizes = uvec3(16, 8, 24);
 
 void main(void)
 {

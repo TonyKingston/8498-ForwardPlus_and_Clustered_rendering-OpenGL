@@ -19,9 +19,12 @@ namespace NCL {
 		class RenderObject;
 		//class D_GUI;
 #define TILE_SIZE 16 // 16x16 tiles
+
+// Using the same values as Doom 2016
 #define CLUSTER_GRID_X 16
-#define CLUSTER_GRID_Y 9
+#define CLUSTER_GRID_Y 8
 #define CLUSTER_GRID_Z 24
+
 #define MAX_LIGHTS_PER_TILE 64
 
 		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
