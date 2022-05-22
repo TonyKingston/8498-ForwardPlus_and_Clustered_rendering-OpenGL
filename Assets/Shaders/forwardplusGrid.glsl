@@ -32,8 +32,8 @@ uniform mat4 inverseProj;
 uniform vec2 pixelSize;
 uniform int tilePxX;
 
-uniform float near;
-uniform float far;
+//uniform float near;
+//uniform float far;
 
 vec4 screenToView(vec4 screenSpace);
 vec3 AABBExtent(vec3 min, vec3 max);

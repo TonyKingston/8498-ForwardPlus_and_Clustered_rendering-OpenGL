@@ -22,6 +22,8 @@ TutorialGame::TutorialGame() {
 	resourceManager = new OGLResourceManager();
 	
 	int mode = AskRenderingMode();
+	InitCamera();
+
 	renderer = new GameTechRenderer(*world, resourceManager, mode);
 	//physics = new PhysicsSystem(*world);
 
@@ -70,7 +72,6 @@ void TutorialGame::InitialiseAssets(int level) {
 	basicTex = (OGLTexture*)resourceManager->LoadTexture("checkerboard.png");
 	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	InitCamera();
 	InitSponza();
 }
 

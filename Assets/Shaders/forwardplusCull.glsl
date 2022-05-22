@@ -164,9 +164,9 @@ void main() {
 	barrier();
 
 	float minDepth = uintBitsToFloat(minDepthInt);
-	minDepth = minDepth * 2.0 - 1.0;
+	minDepth = minDepth * 2.0f - 1.0f;
 	float maxDepth = uintBitsToFloat(maxDepthInt);
-	maxDepth = maxDepth * 2.0 - 1.0;
+	maxDepth = maxDepth * 2.0f - 1.0f;
 
 
 	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
@@ -188,9 +188,10 @@ void main() {
 		}
 
 		/*lightIndex = min(lightIndex, noOfLights);*/
-
-		vec4 position = pointLights[lightIndex].pos;
-		float radius = pointLights[lightIndex].radius.x;
+		PointLight light = pointLights[lightIndex];
+		vec4 position = light.pos;
+		position.w = 1.0;
+		float radius = light.radius.x;
 		vec4 vPos = viewMatrix * position;
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {

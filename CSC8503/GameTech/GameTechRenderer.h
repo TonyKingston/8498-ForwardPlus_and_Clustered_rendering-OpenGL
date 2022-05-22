@@ -201,6 +201,11 @@ namespace NCL {
 			int numLights = 0;
 			float lightDt = 0.2f;
 
+			Matrix4 viewMat;
+			Matrix4 projMat;
+			float aspect;
+
+
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
 		};

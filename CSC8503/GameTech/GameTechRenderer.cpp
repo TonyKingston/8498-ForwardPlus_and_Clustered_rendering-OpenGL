@@ -46,6 +46,11 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	LoadSkybox();
 
+
+	aspect = (float)currentWidth / (float)currentHeight;
+	viewMat = gameWorld.GetMainCamera()->BuildViewMatrix();
+	projMat = gameWorld.GetMainCamera()->BuildProjectionMatrix(aspect);
+
 	InitLights();
 	//glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
@@ -83,35 +88,35 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	light.position = Vector4(10.0f, 10.0f, 10.0f, 1.0f);
 	//light.position = Vector3(10.0f, 10.0f, 10.0f);
 //	light.radius = 40.0f;
-	light.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
 
-	Light& light2 = pointLights[1];
-	light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
-	//light2.position = Vector3(80.0f, 10.0f, 10.0f);
-	//light2.radius = 40.0f;
-	light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light2 = pointLights[1];
+	//light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	//light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
+	////light2.position = Vector3(80.0f, 10.0f, 10.0f);
+	////light2.radius = 40.0f;
+	//light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 
-	Light& light3 = pointLights[2];
-	light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
-	light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
-	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	//light3.radius = 40.0f;
-	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light3 = pointLights[2];
+	//light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
+	//light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
+	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	////light3.radius = 40.0f;
+	//light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
-	Light& light4 = pointLights[3];
-	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
-	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
-	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	//light3.radius = 40.0f;
-	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light4 = pointLights[3];
+	//light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
+	//light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
+	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	////light3.radius = 40.0f;
+	//light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
 
-	numLights += 4;
+	numLights += 1;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -367,20 +372,17 @@ void GameTechRenderer::ComputeTileGrid() {
 	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)TILE_SIZE);
 
 	Camera* current = gameWorld.GetMainCamera();
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 projMatrix = current->BuildProjectionMatrix(screenAspect);
-
 	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 	BindShader(forwardPlusGridShader);
 
-	Matrix4 invProj = (projMatrix).Inverse();
+	Matrix4 invProj = (projMat).Inverse();
 
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "inverseProj"), 1, false, invProj.array);
 	glUniform2f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), sizeX);
-	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
-	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
+//	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
+//	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
 	unsigned int query;
 	GLuint64 timer;
 	glGenQueries(1, &query);
@@ -407,10 +409,6 @@ void GameTechRenderer::DepthPrePass() {
 	glEnable(GL_DEPTH_TEST);
 	BindShader(depthPrepassShader);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
-	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
-
 	int projLocation = 0;
 	int viewLocation = 0;
 	int modelLocation = 0;
@@ -421,8 +419,8 @@ void GameTechRenderer::DepthPrePass() {
 	viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
 	modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
 
-	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 	for (const auto& i : activeObjects) {
 
@@ -455,10 +453,6 @@ void GameTechRenderer::ForwardPlusCullLights() {
 
 	BindShader(forwardPlusCullShader);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
-	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
-
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "depthTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
@@ -466,9 +460,9 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	int ss[]{ 1280, 720 };
 
-	Matrix4 invProj = (projMatrix).Inverse();
-	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
+	Matrix4 invProj = (projMat).Inverse();
+	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMat);
+	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMat);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "invProj"), 1, false, (float*)&invProj);
 
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
@@ -676,6 +670,9 @@ void GameTechRenderer::RenderFrame() {
 	BuildObjectList(gameWorld.GetMainCamera());
 	SortObjectList();
 
+	viewMat = gameWorld.GetMainCamera()->BuildViewMatrix();
+
+
 	//RenderShadowMap();
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -801,10 +798,6 @@ void GameTechRenderer::RenderClustered() {
 void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 	BindShader(sceneShader);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
 	OGLShader* activeShader = nullptr;
 	int projLocation = 0;
 	int viewLocation = 0;
@@ -842,8 +835,8 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
 
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 2);*/
@@ -897,10 +890,6 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 }
 
 void GameTechRenderer::DrawPointLights(Camera* current_camera) {
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
@@ -933,13 +922,13 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 
 	glUniform2f(glGetUniformLocation(pointLightShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 
-	Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
+	Matrix4 invViewProj = (projMat * viewMat).Inverse();
 
 	int projLocation = glGetUniformLocation(pointLightShader->GetProgramID(), "projMatrix");
 	int viewLocation = glGetUniformLocation(pointLightShader->GetProgramID(), "viewMatrix");
 	int modelLocation = glGetUniformLocation(pointLightShader->GetProgramID(), "modelMatrix");
-	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 	glUniformMatrix4fv(glGetUniformLocation(pointLightShader->GetProgramID(), "inverseProjView"), 1, false, invViewProj.array);
 
@@ -966,9 +955,8 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 void GameTechRenderer::CombineBuffers(Camera* current) {
 
 	BindShader(combineShader);
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current->BuildViewMatrix();
-	Matrix4 projMatrix = current->BuildProjectionMatrix(screenAspect);
+	Matrix4 viewMatrix = viewMat;
+	Matrix4 projMatrix = projMat;
 	viewMatrix.ToIdentity();
 	projMatrix.ToIdentity();
 	Matrix4 identity = Matrix4();
@@ -1125,18 +1113,14 @@ void GameTechRenderer::RenderSkybox(Camera* current_camera) {
 	//glClearColor(0, 0, 0, 1);
 	//glClear(GL_COLOR_BUFFER_BIT);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
 	BindShader(skyboxShader);
 
 	int projLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "projMatrix");
 	int viewLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "viewMatrix");
 	int texLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "cubeTex");
 
-	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 	glUniform1i(texLocation, 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -1153,10 +1137,6 @@ void GameTechRenderer::RenderSkybox(Camera* current_camera) {
 }
 
 void GameTechRenderer::RenderCamera(Camera* current_camera) {
-
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
 
 	OGLShader* activeShader = nullptr;
 	int projLocation = 0;
@@ -1199,8 +1179,8 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
 
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 			glUniform1i(noOfLightsLocation, numLights);
 
@@ -1259,10 +1239,6 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
-	Matrix4 viewMatrix = current_camera->BuildViewMatrix();
-	Matrix4 projMatrix = current_camera->BuildProjectionMatrix(screenAspect);
-
 	BindShader(forwardPlusShader);
 
 	OGLShader* activeShader = nullptr;
@@ -1308,8 +1284,8 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
 
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
+			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 
 			glUniform1i(noOfLightsLocation, numLights);
 			glUniform1i(glGetUniformLocation(shader->GetProgramID(), "numTilesX"), tilesX);
