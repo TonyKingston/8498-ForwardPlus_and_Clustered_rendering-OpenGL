@@ -87,6 +87,8 @@ uniform int noOfLights;
 uniform uint totalNumLights;
 uniform ivec2 screenSize;
 uniform vec2 pixelSize;
+uniform mat4 invProj;
+
 //shared PointLight sharedLights[TILE_SIZE * TILE_SIZE];
 //shared uint globalIndexLightCount;
 
@@ -99,7 +101,7 @@ shared Frustum tileFrustum;
 
 shared mat4 viewProjMatrix;
 shared mat4 invViewProj;
-shared mat4 invProj;
+//shared mat4 invProj;
 
 //bool sphereAABBIntersect(uint light, uint tile);
 //float sqDistPointAABB(vec3 point, uint tile);
@@ -139,7 +141,7 @@ void main() {
 		maxDepthInt = 0;
 		visibleLightCount = 0;
 		viewProjMatrix = projMatrix * viewMatrix;
-		invProj = inverse(projMatrix);
+		//invProj = inverse(projMatrix);
 		invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
 
@@ -165,6 +167,7 @@ void main() {
 	minDepth = minDepth * 2.0 - 1.0;
 	float maxDepth = uintBitsToFloat(maxDepthInt);
 	maxDepth = maxDepth * 2.0 - 1.0;
+
 
 	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
 	float maxDepthVS = ClipToView(vec4(0.0, 0.0, maxDepth, 1.0)).z;

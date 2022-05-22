@@ -2,6 +2,7 @@
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
+uniform sampler2D   specTex;
 //uniform sampler2DShadow shadowTex;
 //
 //struct PointLight {
@@ -31,6 +32,7 @@ uniform vec3	cameraPos;
 
 uniform bool hasTexture;
 uniform bool hasBump;
+uniform bool hasSpec;
 
 in Vertex
 {
@@ -60,6 +62,11 @@ void main(void)
 	if (hasBump) {
 		normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
 		normal = normalize(TBN * normalize(normal));
+	}
+	
+	float specSample = 1;
+	if (hasSpec) {
+	    specSample = texture2D(specTex, IN.texCoord).r;
 	}
 
 	vec4 albedo = IN.colour;
@@ -94,7 +101,9 @@ void main(void)
 
 			//float rFactor = max(0.0, dot(halfDir, normal));
 			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
-			float sFactor = pow(rFactor, 60.0);
+			float sFactor = pow(rFactor, 60.0) * specSample;
+			
+			
 
 			vec3 attenuated = light.colour.rgb * attenuation;
 			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light

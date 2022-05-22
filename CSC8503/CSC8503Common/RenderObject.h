@@ -47,6 +47,14 @@ namespace NCL {
 				return textures;
 			}
 
+			void SetSpecularTextures(vector<TextureBase*> texes) {
+				specularTextures = texes;
+			}
+
+			vector<TextureBase*> GetSpecTextures() const {
+				return specularTextures;
+			}
+
 			MeshGeometry* GetMesh() const {
 				return mesh;
 			}
@@ -143,6 +151,7 @@ namespace NCL {
 			vector<TextureBase*> textures;
 			vector<TextureBase*> diffuseTextures;
 			vector<TextureBase*> bumpTextures;
+			vector<TextureBase*> specularTextures;
 			ShaderBase* shader;
 			Transform* transform;
 			Transform* localTransform;

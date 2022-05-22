@@ -466,8 +466,11 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	int ss[]{ 1280, 720 };
 
+	Matrix4 invProj = (projMatrix).Inverse();
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "invProj"), 1, false, (float*)&invProj);
+
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
 	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
@@ -621,11 +624,13 @@ void GameTechRenderer::GenerateShadowBuffer(GLuint& into) {
 
 void GameTechRenderer::BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump) {
 	vector<TextureBase*> textures = (*obj).GetTextures();
+	vector<TextureBase*> specTex = (*obj).GetSpecTextures();
 	int layerCount = (*obj).GetMesh()->GetSubMeshCount();
 
 	BindMesh((*obj).GetMesh());
 	int activeDiffuse = -1;
 	int activeBump = -1;
+	int activeSpec = -1;
 	for (int i = 0; i < layerCount; ++i) {
 		if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
 			BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
@@ -634,6 +639,10 @@ void GameTechRenderer::BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump
 		if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
 			BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
 			activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
+		}
+		if (specTex.size() > 0 && ((OGLTexture*)specTex[i])->GetObjectID() != activeSpec) {
+			BindTextureToShader((OGLTexture*)specTex[i], "specTex", 2);
+			activeSpec = ((OGLTexture*)specTex[i])->GetObjectID();
 		}
 		DrawBoundMesh(i);
 	}
@@ -804,6 +813,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 	int hasVColLocation = 0;
 	int hasTexLocation = 0;
 	int hasBumpLocation = 0;
+	int hasSpecLocation = 0;
 	int shadowLocation = 0;
 
 	int cameraLocation = 0;
@@ -827,6 +837,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
 			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
 			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
+			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
 
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
@@ -854,7 +865,9 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		bool hasBump = textures.size() == layerCount * 2;
+		bool hasSpec = (*i).GetSpecTextures().size() > 0;
 		glUniform1i(hasBumpLocation, hasBump);
+		glUniform1i(hasSpecLocation, hasSpec);
 
 		glUniform1f(glGetUniformLocation(shader->GetProgramID(), "isDepth"), depth);
 
@@ -1153,6 +1166,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 	int hasVColLocation = 0;
 	int hasTexLocation = 0;
 	int hasBumpLocation = 0;
+	int hasSpecLocation = 0;
 	int shadowLocation = 0;
 
 	int noOfLightsLocation = 0;
@@ -1178,6 +1192,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
 			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
 			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
+			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
 
 			noOfLightsLocation = glGetUniformLocation(shader->GetProgramID(), "noOfLights");
 
@@ -1209,7 +1224,9 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		bool hasBump = textures.size() == layerCount * 2;
+		bool hasSpec = (*i).GetSpecTextures().size() > 0;
 		glUniform1i(hasBumpLocation, hasBump);
+		glUniform1i(hasSpecLocation, hasSpec);
 
 		if (i->GetAnimation()) {
 			MeshGeometry* mesh = i->GetMesh();
@@ -1256,6 +1273,7 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 	int hasVColLocation = 0;
 	int hasTexLocation = 0;
 	int hasBumpLocation = 0;
+	int hasSpecLocation = 0;
 	int shadowLocation = 0;
 
 	int noOfLightsLocation = 0;
@@ -1283,6 +1301,7 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
 			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
 			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
+			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
 
 			noOfLightsLocation = glGetUniformLocation(shader->GetProgramID(), "noOfLights");
 
@@ -1317,7 +1336,10 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		bool hasBump = textures.size() == layerCount * 2;
+		bool hasSpec = (*i).GetSpecTextures().size() > 0;
 		glUniform1i(hasBumpLocation, hasBump);
+		glUniform1i(hasSpecLocation, hasSpec);
+
 
 		BindAndDraw(i, hasDiff, hasBump);
 	}

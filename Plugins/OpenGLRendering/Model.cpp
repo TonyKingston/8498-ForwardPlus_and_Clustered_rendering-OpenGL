@@ -59,6 +59,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	vector<Vector4> tangents;
 	vector<GLuint> indices;
 	vector<TextureBase*> textures;
+	vector<TextureBase*> specTex;
 	bool mask = false;
 
 	// Walk through each of the mesh's vertices
@@ -120,6 +121,9 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
+		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		specTex.insert(specTex.end(), specularMaps.begin(), specularMaps.end());
+
 		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY, "texture_mask");
 		if (masks.size() > 0) {
 			mask = true;
@@ -148,6 +152,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
 	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl")));
 	obj->GetRenderObject()->SetHasMask(mask);
+	obj->GetRenderObject()->SetSpecularTextures(specTex);
 //	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl")));
 	meshes.push_back(oglMesh);
 	return obj;
