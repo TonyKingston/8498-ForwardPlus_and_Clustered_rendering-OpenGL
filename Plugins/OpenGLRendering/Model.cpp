@@ -21,8 +21,8 @@ struct Vertex {
 
 void Model::LoadModel(string path) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate |
-		aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
+	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals |
+		aiProcess_CalcTangentSpace | aiProcess_FixInfacingNormals | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
@@ -57,6 +57,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	vector<Vector3> normals;
 	vector<Vector2> texCoords;
 	vector<Vector4> tangents;
+	vector<Vector4> bitangents;
 	vector<GLuint> indices;
 	vector<TextureBase*> textures;
 	vector<TextureBase*> specTex;
@@ -99,6 +100,15 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		tangent.z = mesh->mTangents[i].z;
 		tangent.w = -1;
 		tangents.push_back(vector);
+
+		if (tangent.y == 1.0) {
+			bool a = true;
+		}
+
+		Vector4 bitangent;
+		bitangent.x = mesh->mBitangents[i].x;
+		bitangent.y = mesh->mBitangents[i].y;
+		bitangent.z = mesh->mBitangents[i].z;
 	}
 
 	// Loop through each of the mesh's faces and get its vertex indices
@@ -118,11 +128,15 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// Normal maps
-		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
 		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		specTex.insert(specTex.end(), specularMaps.begin(), specularMaps.end());
+
+		if (specTex.size() > 0) {
+			bool a = true;
+		}
 
 		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY, "texture_mask");
 		if (masks.size() > 0) {

@@ -1,7 +1,7 @@
 #version 430 core
 
-#define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 64
+#define TILE_SIZE 8
+#define MAX_LIGHTS_PER_TILE 1024
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
@@ -183,7 +183,7 @@ void main() {
 	for (uint i = 0; i < batchCount; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-		if (lightIndex >= noOfLights) {
+		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
 			break;
 		}
 
@@ -196,8 +196,10 @@ void main() {
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
 			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
-				uint offset = atomicAdd(visibleLightCount, 1);
-				visibleLightIndices[offset] = int(lightIndex);
+			    if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+				   uint offset = atomicAdd(visibleLightCount, 1);
+				   visibleLightIndices[offset] = int(lightIndex);
+			    }
 			}
 		}
 	}

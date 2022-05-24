@@ -133,9 +133,8 @@ newmtl floor
 	Kd 1 1 1
 	Ks 0.5000 0.5000 0.5000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka textures\sponza_floor_a_diff.png
+	map_Disp textures\sponza_floor_a_normal_flip.png
 	map_Kd textures\sponza_floor_a_diff.png
-	map_bump textures\sponza_floor_a_bump.png
 	map_Ks textures\floor_gloss.png
 
 newmtl column_c

@@ -1,6 +1,6 @@
 #version 430 core
 
-#define TILE_SIZE 16
+#define TILE_SIZE 8
 layout(local_size_x = 1, local_size_y = 1) in;
 
 // Using vec4 for better alignment on the GPU

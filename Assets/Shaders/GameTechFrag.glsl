@@ -60,13 +60,13 @@ void main(void)
 
 	vec3 normal = IN.normal;
 	if (hasBump) {
-		normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
+		normal = texture(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
 		normal = normalize(TBN * normalize(normal));
 	}
 	
 	float specSample = 1;
 	if (hasSpec) {
-	    specSample = texture2D(specTex, IN.texCoord).r;
+	    specSample = texture(specTex, IN.texCoord).r;
 	}
 
 	vec4 albedo = IN.colour;

@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 49152;
+const unsigned int MAX_LIGHTS = 65536;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -116,7 +116,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
 
-//	numLights += 1;
+	//numLights += 1;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -185,6 +185,7 @@ void GameTechRenderer::InitDeferred() {
 	GenerateScreenTexture(bufferDepthTex, true);
 	GenerateScreenTexture(bufferColourTex);
 	GenerateScreenTexture(bufferNormalTex);
+	//GenerateScreenTexture(bufferSpecTex);
 	//GenerateScreenTexture(bufferShadowTex);
 	GenerateScreenTexture(lightDiffuseTex);
 	GenerateScreenTexture(lightSpecularTex);
@@ -197,7 +198,7 @@ void GameTechRenderer::InitDeferred() {
 	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, bufferShadowTex, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
 	//glDrawBuffers(3, buffers2);
-	glDrawBuffers(2, buffers);
+	glDrawBuffers(2, buffers2);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
 
@@ -823,8 +824,9 @@ void GameTechRenderer::RenderForward(bool withPrepass) {
 void GameTechRenderer::RenderDeferred() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	//glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
 	FillBuffers(gameWorld.GetMainCamera(), 0.0f);
+	glEnable(GL_BLEND);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/*glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
@@ -998,6 +1000,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 	/*glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);*/
 
+	int count = 0;
 	for (const auto& i : activeObjects) {
 		//OGLShader* shader = (OGLShader*)(*i).GetShader();
 		OGLShader* shader = sceneShader;
@@ -1043,6 +1046,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		bool hasBump = textures.size() == layerCount * 2;
 		bool hasSpec = (*i).GetSpecTextures().size() > 0;
+
 		glUniform1i(hasBumpLocation, hasBump);
 		glUniform1i(hasSpecLocation, hasSpec);
 
@@ -1065,7 +1069,12 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 
 		}
 
+		if (count == 8) {
+			bool a = true;
+		}
+
 		BindAndDraw(i, hasDiff, hasBump);
+		count++;
 	}
 
 	glDisable(GL_CULL_FACE);

@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 64
+#define MAX_LIGHTS_PER_TILE 1024
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -155,7 +155,7 @@ void main(void)
 
 			//float rFactor = max(0.0, dot(halfDir, normal));
 			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
-			float sFactor = pow(rFactor, 60.0);
+			float sFactor = pow(rFactor, 60.0) * specSample;
 
 			vec3 attenuated = light.colour.rgb * attenuation;
 			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light
