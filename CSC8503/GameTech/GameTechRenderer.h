@@ -65,7 +65,7 @@ namespace NCL {
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
-			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0);
+			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0, bool prepass = false);
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
@@ -74,7 +74,18 @@ namespace NCL {
 			void ResizeSceneTextures(float width, float height);
 
 			void UpdateLights(float dt);
-			void AddLights(int n);
+			bool AddLights(int n);
+
+			int GetNumLight() {
+				return numLights;
+			}
+
+			int GetRenderingMode() {
+				return renderMode;
+			}
+
+			void InitLights();
+
 
 		protected:
 			void RenderFrame()	override;
@@ -84,7 +95,6 @@ namespace NCL {
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
-			void InitLights();
 
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
@@ -206,6 +216,7 @@ namespace NCL {
 			vector<GLuint> sceneBuffers;
 
 			int renderMode;
+			bool usingPrepass = false;
 			int numLights = 0;
 			float lightDt = 0.2f;
 
@@ -220,6 +231,10 @@ namespace NCL {
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
+			//const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f);
+			//const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f);
+			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f);
 		};
 	}
 }

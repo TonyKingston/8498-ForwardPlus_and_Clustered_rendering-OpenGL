@@ -20,11 +20,14 @@ TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	
+	bool prepass = false;
 	int mode = AskRenderingMode();
+	if (mode == 0) {
+		prepass = AskPrepass();
+	}
 	InitCamera();
 
-	renderer = new GameTechRenderer(*world, resourceManager, mode);
+	renderer = new GameTechRenderer(*world, resourceManager, mode, prepass);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -137,6 +140,36 @@ int TutorialGame::AskRenderingMode() {
 	return input;
 }
 
+bool TutorialGame::AskPrepass() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nRender with depth prepass? 0 for no, 1 for yes:\n" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskRenderingMode();
+	}
+	switch (input) {
+	case 0:
+		cout << "Opted for no depth prepass." << endl;
+		return false;
+		break;
+	case 1:
+		cout << "Opted for depth prepass." << endl;
+		return true;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskPrepass();
+		break;
+	}
+
+}
+
 
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
@@ -147,9 +180,9 @@ void TutorialGame::UpdateGame(float dt) {
 
 	//world->UpdateWorld(dt);
 	renderer->Update(dt);
-	//renderer->UpdateLights(dt);
+	renderer->UpdateLights(dt);
 
-	Debug::FlushRenderables(dt);
+	//Debug::FlushRenderables(dt);
 	renderer->Render();
 }
 
@@ -165,16 +198,15 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
-
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N)) {
-		inDebugMode = !inDebugMode;
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+		Vector3 pos = world->GetMainCamera()->GetPosition();
+		cout << "Camera Position (x,y,z): " << pos.x << " " << pos.y << " " << pos.z << endl;
 	}
 }
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(1800.0f);
+	world->GetMainCamera()->SetFarPlane(1500.0f);
 	//world->GetMainCamera()->SetFarPlane(1000.0f);
 //	world->GetMainCamera()->SetPitch(-15.0f);
 //	world->GetMainCamera()->SetYaw(315.0f);
@@ -183,7 +215,7 @@ void TutorialGame::InitCamera() {
 
 	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
 //	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
-	world->GetMainCamera()->SetPosition(Vector3(-136, 71, -15));
+	world->GetMainCamera()->SetPosition(Vector3(-530, 71, -12));
 	lockedObject = nullptr;
 }
 

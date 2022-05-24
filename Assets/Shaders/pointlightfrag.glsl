@@ -10,7 +10,7 @@ uniform vec2 pixelSize; // reciprocal of resolution
 struct PointLight {
 	vec4 colour;
 	vec4 pos;
-	float radius;
+	vec4 radius;
 };
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
@@ -36,11 +36,11 @@ void main (void) {
 	PointLight light = pointLights[lightIndex];
 	vec3 lightVec = light.pos.xyz - worldPos;
 	float dist = length ( lightVec );
-	float atten = 1.0 - clamp ( dist / light.radius , 0.0 , 1.0);
+	float atten = 1.0 - clamp ( dist / light.radius.x , 0.0 , 1.0);
 
-	if( atten == 0.0) {
-	    discard;
-	}
+	// if( atten == 0.0) {
+	    // discard;
+	// }
 		
 	vec3 incident = normalize ( lightVec);
 	vec3 halfDir = normalize ( incident + viewDir );

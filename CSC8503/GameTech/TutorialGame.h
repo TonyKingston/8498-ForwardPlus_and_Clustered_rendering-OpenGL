@@ -43,6 +43,7 @@ namespace NCL {
 			int GetGameStatus() { return gameStatus; }
 
 			int AskRenderingMode();
+			bool AskPrepass();
 
 		protected:
 			void InitialiseAssets(int level = 1);

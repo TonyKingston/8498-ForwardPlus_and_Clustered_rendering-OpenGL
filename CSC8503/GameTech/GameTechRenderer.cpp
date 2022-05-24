@@ -17,12 +17,12 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 64;
+const unsigned int MAX_LIGHTS = 49152;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
-GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
-	: OGLRenderer(*Window::GetWindow()), gameWorld(w), renderMode(type) {
+GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, bool prepass)
+	: OGLRenderer(*Window::GetWindow()), gameWorld(w), renderMode(type), usingPrepass(prepass) {
 	//	glEnable(GL_DEPTH_TEST);
 	resourceManager = (OGLResourceManager*)rm;
 
@@ -33,7 +33,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 	shadowShader = new OGLShader("GameTechShadowVert.glsl", "GameTechShadowFrag.glsl");
 	printShader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
 
-	GenerateShadowBuffer(shadowFBO);
+	//GenerateShadowBuffer(shadowFBO);
 
 	glClearColor(1, 1, 1, 1);
 
@@ -57,7 +57,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type)
 
 	switch (type) {
 	case 0:
-		InitForward(true);
+		InitForward(prepass);
 		break;
 	case 1:
 		InitDeferred();
@@ -80,43 +80,43 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	glGenBuffers(1, &lightSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_LIGHTS * sizeof(Light), 0, GL_DYNAMIC_DRAW);
+//
+//	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+//	Light& light = pointLights[0];
+//	//light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+//	light.colour = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+//	light.position = Vector4(10.0f, 10.0f, 10.0f, 1.0f);
+//	//light.position = Vector3(10.0f, 10.0f, 10.0f);
+////	light.radius = 40.0f;
+//	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
 
-	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-	Light& light = pointLights[0];
-	//light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	light.colour = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-	light.position = Vector4(10.0f, 10.0f, 10.0f, 1.0f);
-	//light.position = Vector3(10.0f, 10.0f, 10.0f);
-//	light.radius = 40.0f;
-	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
-
-	Light& light2 = pointLights[1];
-	light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-	light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
-	//light2.position = Vector3(80.0f, 10.0f, 10.0f);
-	//light2.radius = 40.0f;
-	light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light2 = pointLights[1];
+	//light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	//light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
+	////light2.position = Vector3(80.0f, 10.0f, 10.0f);
+	////light2.radius = 40.0f;
+	//light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 
-	Light& light3 = pointLights[2];
-	light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
-	light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
-	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	//light3.radius = 40.0f;
-	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light3 = pointLights[2];
+	//light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
+	//light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
+	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	////light3.radius = 40.0f;
+	//light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
-	Light& light4 = pointLights[3];
-	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
-	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
-	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	//light3.radius = 40.0f;
-	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	//Light& light4 = pointLights[3];
+	//light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
+	//light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
+	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	////light3.radius = 40.0f;
+	//light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
 
-	numLights += 4;
+//	numLights += 1;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -373,19 +373,22 @@ void GameTechRenderer::UpdateLights(float dt) {
 	for (int i = 0; i < numLights; i++) {
 		Light& light = pointLights[i];
 		//light.position.x = fmod((light.position.y + (-4.5f * lightDt) - min + max), max) + min;
-		light.position.x += 2 * dt;
+		//light.position.x = light.position.x;
+		float min = LIGHT_MIN_BOUNDS[1];
+		float max = LIGHT_MAX_BOUNDS[1];
+
+		light.position.y = fmod((light.position.y + (-8.0f * dt) - min + max), max) + min;
 	}
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void GameTechRenderer::AddLights(int n) {
+bool GameTechRenderer::AddLights(int n) {
 	if (numLights + n >= MAX_LIGHTS) {
-		//n = MAX_LIGHTS - numLights;
-		n = 0;
+		n = MAX_LIGHTS - numLights;
 	}
-	if (n == 0) return;
+	if (n == 0) return false;
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
 	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
@@ -394,12 +397,12 @@ void GameTechRenderer::AddLights(int n) {
 	for (int i = numLights; i < numLights + n; i++) {
 		Light& light = pointLights[i];
 		for (int j = 0; j < 3; j++) {
-			float min = -150.0f;
-			float max = 150.0f;
+			float min = LIGHT_MIN_BOUNDS[j];
+			float max = LIGHT_MAX_BOUNDS[j];
 			lightPos[j] = lightDist(lightGen) * (max - min) + min;
 		}
 		light.colour = Vector4(1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0f);
-		lightPos.y = 10.0f;
+//		lightPos.y = 10.0f;
 		light.position = lightPos;
 		light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
 	}
@@ -408,6 +411,7 @@ void GameTechRenderer::AddLights(int n) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	numLights += n;
+	return true;
 }
 
 GameTechRenderer::~GameTechRenderer() {
@@ -447,7 +451,7 @@ void GameTechRenderer::ComputeTileGrid() {
 }
 
 void GameTechRenderer::ComputeClusterGrid() {
-	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)TILE_SIZE);
+	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
 
 	Camera* current = gameWorld.GetMainCamera();
 
@@ -764,7 +768,7 @@ void GameTechRenderer::RenderFrame() {
 
 	switch (renderMode) {
 	case 0:
-		RenderForward(true);
+		RenderForward(usingPrepass);
 		break;
 	case 1:
 		RenderDeferred();

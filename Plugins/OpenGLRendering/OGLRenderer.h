@@ -15,7 +15,6 @@ https://research.ncl.ac.uk/game/
 
 #ifdef _WIN32
 #include "windows.h"
-//extern "C" _declspec(dllexport) DWORD NvOptimusEnablement = 1;
 #endif
 
 #ifdef _DEBUG
