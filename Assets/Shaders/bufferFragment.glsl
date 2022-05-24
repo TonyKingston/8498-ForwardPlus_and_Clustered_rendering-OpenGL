@@ -57,6 +57,6 @@ void main ( void ) {
 	   specVal = texture2D(specTex, IN.texCoord).r;
 	}
 	
-	//fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 , 1);
-	fragColour[1] = vec4(IN.binormal, 1);
+	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 , 1);
+	//fragColour[1] = vec4(IN.binormal, 1);
 }

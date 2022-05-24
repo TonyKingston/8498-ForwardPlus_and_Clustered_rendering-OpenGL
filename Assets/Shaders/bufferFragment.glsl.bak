@@ -58,5 +58,5 @@ void main ( void ) {
 	}
 	
 	//fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 , 1);
-	fragColour[1] = vec4(IN.tangent, 1);
+	fragColour[1] = vec4(IN.binormal, 1);
 }

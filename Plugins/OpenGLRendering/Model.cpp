@@ -21,8 +21,8 @@ struct Vertex {
 
 void Model::LoadModel(string path) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals |
-		aiProcess_CalcTangentSpace | aiProcess_FixInfacingNormals | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
+	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_DropNormals |
+		aiProcess_CalcTangentSpace | aiProcess_FixInfacingNormals  | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
@@ -109,6 +109,8 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		bitangent.x = mesh->mBitangents[i].x;
 		bitangent.y = mesh->mBitangents[i].y;
 		bitangent.z = mesh->mBitangents[i].z;
+		bitangent.w = 1;
+		bitangents.push_back(bitangent);
 	}
 
 	// Loop through each of the mesh's faces and get its vertex indices
@@ -155,6 +157,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	oglMesh->SetVertexPositions(positions);
 	oglMesh->SetVertexNormals(normals);
 	oglMesh->SetVertexTangents(tangents);
+	oglMesh->SetVertexBiTangents(bitangents);
 	oglMesh->SetVertexTextureCoords(texCoords);
 	oglMesh->SetVertexIndices(indices);
 	SubMesh m;
