@@ -90,7 +90,7 @@ Win32Window::Win32Window(const std::string& title, int sizeX, int sizeY, bool fu
 	LockMouseToWindow(lockMouse);
 	ShowOSPointer(showMouse);
 
-	SetConsolePosition(1500, 200);
+	SetConsolePosition(1000, 200);
 
 	windowTitle = title;
 

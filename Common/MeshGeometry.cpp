@@ -254,6 +254,10 @@ void MeshGeometry::SetVertexTangents(const vector<Vector4>& newTans) {
 	tangents = newTans;
 }
 
+void MeshGeometry::SetVertexBiTangents(const vector<Vector4> & newBiTans) {
+	bitangents = newBiTans;
+}
+
 void MeshGeometry::SetVertexIndices(const vector<unsigned int>& newIndices) {
 	indices = newIndices;
 }
@@ -368,6 +372,11 @@ bool MeshGeometry::ValidateMeshData() {
 	}
 	if (!GetTangentData().empty() && GetTangentData().size() != GetVertexCount()) {
 		std::cout << __FUNCTION__ << " mesh " << debugName << " has an incorrect tangent attribute count!" << std::endl;
+		return false;
+	}
+
+	if (!GetBiTangentData().empty() && GetBiTangentData().size() != GetVertexCount()) {
+		std::cout << __FUNCTION__ << " mesh " << debugName << " has an incorrect bitangent attribute count!" << std::endl;
 		return false;
 	}
 

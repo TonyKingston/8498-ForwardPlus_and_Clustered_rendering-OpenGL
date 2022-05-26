@@ -47,6 +47,14 @@ namespace NCL {
 				return textures;
 			}
 
+			void SetSpecularTextures(vector<TextureBase*> texes) {
+				specularTextures = texes;
+			}
+
+			vector<TextureBase*> GetSpecTextures() const {
+				return specularTextures;
+			}
+
 			MeshGeometry* GetMesh() const {
 				return mesh;
 			}
@@ -129,6 +137,13 @@ namespace NCL {
 				dColour = defaultColour;
 			}
 
+			void SetHasMask(bool val) {
+				hasMask = val;
+			}
+
+			bool HasMask() {
+				return hasMask;
+			}
 
 		protected:
 			MeshGeometry* mesh;
@@ -136,11 +151,14 @@ namespace NCL {
 			vector<TextureBase*> textures;
 			vector<TextureBase*> diffuseTextures;
 			vector<TextureBase*> bumpTextures;
+			vector<TextureBase*> specularTextures;
 			ShaderBase* shader;
 			Transform* transform;
 			Transform* localTransform;
 			Maths::Vector4			colour;
 			Maths::Vector4          dColour = Vector4();
+
+			bool hasMask = false;
 
 
 			MeshAnimation* animation;

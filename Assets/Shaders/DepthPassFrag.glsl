@@ -1,6 +1,7 @@
 #version 430 core
 
 uniform sampler2D 	mainTex;
+uniform bool hasMask;
 
 in Vertex
 {
@@ -9,8 +10,11 @@ in Vertex
 
 void main(void)
 {
-	//float alpha = texture(mainTex, IN.texCoord).a;
-	//if (alpha < 0.5) {
-	//    discard;
-	//}
+    if (hasMask) {
+	    float alpha = texture(mainTex, IN.texCoord).a;
+		
+		if (alpha < 0.5) {
+		    discard;
+		}
+	}
 }

@@ -12,11 +12,22 @@
 using namespace NCL;
 using namespace CSC8503;
 
+using std::cout;
+using std::endl;
+using std::cin;
+
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	renderer = new GameTechRenderer(*world, resourceManager, 2);
+	bool prepass = false;
+	int mode = AskRenderingMode();
+	if (mode == 0) {
+		prepass = AskPrepass();
+	}
+	InitCamera();
+
+	renderer = new GameTechRenderer(*world, resourceManager, mode, prepass);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -64,7 +75,6 @@ void TutorialGame::InitialiseAssets(int level) {
 	basicTex = (OGLTexture*)resourceManager->LoadTexture("checkerboard.png");
 	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	InitCamera();
 	InitSponza();
 }
 
@@ -90,30 +100,90 @@ TutorialGame::~TutorialGame() {
 	delete grid;
 }
 
+int TutorialGame::AskRenderingMode() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nPlease select a rendering mode from the following:\n" << endl;
+	cout << "0. Forward" << endl;
+	cout << "1. Deferred" << endl;
+	cout << "2. Forward+" << endl;
+	cout << "3. Clustered" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskRenderingMode();
+	}
+
+	switch (input) {
+	case 0:
+		cout << "Forward rendering selected." << endl;
+		break;
+	case 1:
+		cout << "Deferred rendering selected." << endl;
+		break;
+	case 2:
+		cout << "Forward+ rendering selected." << endl;
+		break;
+	case 3:
+		cout << "Clustered rendering selected." << endl;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskRenderingMode();
+		break;
+	}
+
+	return input;
+}
+
+bool TutorialGame::AskPrepass() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nRender with depth prepass? 0 for no, 1 for yes:\n" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskRenderingMode();
+	}
+	switch (input) {
+	case 0:
+		cout << "Opted for no depth prepass." << endl;
+		return false;
+		break;
+	case 1:
+		cout << "Opted for depth prepass." << endl;
+		return true;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskPrepass();
+		break;
+	}
+
+}
+
+
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
 
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
+	world->GetMainCamera()->UpdateCamera(dt);
 
 	UpdateKeys();
 
-//	SelectObject();
-//	MoveSelectedObject();
-
-	world->UpdateWorld(dt);
+	//world->UpdateWorld(dt);
 	renderer->Update(dt);
 	//renderer->UpdateLights(dt);
 
-	Debug::FlushRenderables(dt);
-	if (inDebugMode) {
-		world->DrawBoundingVolumes();
-		renderer->Render();
-	}
-	else {
-		renderer->Render();
-	}
+	//Debug::FlushRenderables(dt);
+	renderer->Render();
 }
 
 void TutorialGame::UpdateKeys() {
@@ -123,156 +193,29 @@ void TutorialGame::UpdateKeys() {
 		lockedObject = nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		renderer->AddLights(5);
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM2)) {
-		InitOBBTest();
-		selectionObject = nullptr;
-		lockedObject = nullptr;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM3)) {
-		InitSleepTest();
-		selectionObject = nullptr;
-		lockedObject = nullptr;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM4)) {
-		InitSpringTest();
-		selectionObject = nullptr;
-		lockedObject = nullptr;
+		renderer->AddLights(16);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
-		useGravity = !useGravity; //Toggle gravity!
-		physics->UseGravity(useGravity);
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+		Vector3 pos = world->GetMainCamera()->GetPosition();
+		cout << "Camera Position (x,y,z): " << pos.x << " " << pos.y << " " << pos.z << endl;
 	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N)) {
-		inDebugMode = !inDebugMode;
-	}
-	//Running certain physics updates in a consistent order might cause some
-	//bias in the calculations - the same objects might keep 'winning' the constraint
-	//allowing the other one to stretch too much etc. Shuffling the order so that it
-	//is random every frame can help reduce such bias.
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F5)) {
-		world->ShuffleConstraints(true);
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F6)) {
-		world->ShuffleConstraints(false);
-	}
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F7)) {
-		world->ShuffleObjects(true);
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
-		world->ShuffleObjects(false);
-	}
-
-	if (lockedObject) {
-		LockedObjectMovement();
-	}
-	else {
-		DebugObjectMovement();
-	}
-}
-
-void TutorialGame::LockedObjectMovement() {
-	Matrix4 view = world->GetMainCamera()->BuildViewMatrix();
-	Matrix4 camWorld = view.Inverse();
-
-	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
-
-	//forward is more tricky -  camera forward is 'into' the screen...
-	//so we can take a guess, and use the cross of straight up, and
-	//the right axis, to hopefully get a vector that's good enough!
-
-	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-	fwdAxis.y = 0.0f;
-	fwdAxis.Normalise();
-
-	Vector3 charForward = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
-	Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
-
-	float force = 15.0f;
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		Vector3 worldPos = selectionObject->GetTransform().GetPosition();
-		lockedObject->GetPhysicsObject()->AddForce(rightAxis * force);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * force);
-		//lockedObject->GetPhysicsObject()->AddTorque(fwdAxis * force);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * force);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
-		lockedObject->GetPhysicsObject()->AddForce(Vector3(0, -force, 0));
-	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SHIFT)) {
-		lockedObject->GetPhysicsObject()->AddForce(Vector3(0, force, 0));
-	}
-}
-
-void NCL::CSC8503::TutorialGame::ShowPlayerScore() {
-	Debug::Print("Score: " + std::to_string(player->GetScore()), Vector3(5, 5, 5));
-	Debug::Print("Time: " + std::to_string(timeTaken), Vector3(5, 10, 5));
-}
-
-void NCL::CSC8503::TutorialGame::EndGame(int status) {
-	gameStatus = status;
-}
-
-void TutorialGame::DebugObjectMovement() {
-	//If we've selected an object, we can manipulate it with some key presses
-	if (inSelectionMode && selectionObject) {
-		//Twist the selected object!
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM7)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, 10, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM8)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, -10, 0));
-		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM0)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(-5, 0, 0));
-		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, -20));
-		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, 20));
-		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(-20, 0, 0));
-		}
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(20, 0, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM9)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(5, 0, 0));
-		}
-	}
-
 }
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(1800.0f);
-	world->GetMainCamera()->SetPitch(-15.0f);
-	world->GetMainCamera()->SetYaw(315.0f);
+	world->GetMainCamera()->SetFarPlane(1500.0f);
+	//world->GetMainCamera()->SetFarPlane(1000.0f);
+//	world->GetMainCamera()->SetPitch(-15.0f);
+//	world->GetMainCamera()->SetYaw(315.0f);
+	world->GetMainCamera()->SetYaw(270.0f);
+	world->GetMainCamera()->SetPitch(-5.5f);
+
 	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
-	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
+//	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
+	world->GetMainCamera()->SetPosition(Vector3(-530, 71, -12));
 	lockedObject = nullptr;
 }
 
@@ -779,14 +722,6 @@ GameObject* NCL::CSC8503::TutorialGame::AddVictoryTriggerToWorld(const Vector3& 
 	//plane->SetRenderObject(new RenderObject(&plane->GetTransform(), cubeMesh, NULL, basicShader, Vector4(0, 0, 0, 0)));
 	plane->SetTrigger();
 
-
-	plane->SetTriggerFunc([&](GameObject* otherObj) {
-		if (otherObj->GetName() == "player") {
-			EndGame(1);
-			return;
-		}
-		});
-
 	world->AddGameObject(plane);
 
 	return plane;
@@ -868,121 +803,4 @@ void TutorialGame::InitGameExamples() {
 	//AddPlayerToWorld(Vector3(0, 5, 0));
 	//AddEnemyToWorld(Vector3(5, 5, 0));
 	//AddBonusToWorld(Vector3(10, 5, 0));
-}
-
-/*
-
-Every frame, this code will let you perform a raycast, to see if there's an object
-underneath the cursor, and if so 'select it' into a pointer, so that it can be
-manipulated later. Pressing Q will let you toggle between this behaviour and instead
-letting you move the camera around.
-
-*/
-bool TutorialGame::SelectObject() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::Q)) {
-		inSelectionMode = !inSelectionMode;
-		if (inSelectionMode) {
-			Window::GetWindow()->ShowOSPointer(true);
-			Window::GetWindow()->LockMouseToWindow(false);
-		}
-		else {
-			Window::GetWindow()->ShowOSPointer(false);
-			Window::GetWindow()->LockMouseToWindow(true);
-		}
-	}
-	if (inSelectionMode) {
-		renderer->DrawString("Press Q to change to camera mode!", Vector2(5, 85));
-
-		if (Window::GetMouse()->ButtonDown(NCL::MouseButtons::LEFT)) {
-			if (selectionObject) {	//set colour to deselected;
-				selectionObject->GetRenderObject()->SetColour(Vector4(1, 1, 1, 1));
-				selectionObject = nullptr;
-				lockedObject = nullptr;
-			}
-
-			Ray ray = CollisionDetection::BuildRayFromMouse(*world->GetMainCamera());
-
-			RayCollision closestCollision;
-			RayCollision c2;
-
-			if (world->Raycast(ray, closestCollision, true)) {
-				Debug::DrawLine(ray.GetPosition(), closestCollision.collidedAt, Debug::RED, 10.0f);
-				selectionObject = (GameObject*)closestCollision.node;
-				selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
-				ray = CollisionDetection::BuildRayFromObject(*selectionObject, 100);
-				if (world->Raycast(ray, c2, true)) {
-					Debug::DrawLine(ray.GetPosition(), c2.collidedAt, Debug::RED, 10.0f);
-				}
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-	else {
-		renderer->DrawString("Press Q to change to select mode!", Vector2(5, 85));
-	}
-
-	if (lockedObject) {
-		renderer->DrawString("Press L to unlock object!", Vector2(5, 80));
-	}
-
-	else if (selectionObject) {
-		renderer->DrawString("Press L to lock selected object object!", Vector2(5, 80));
-		selectionObject->PrintDebugInfo();
-		selectionObject->OnClick();
-	}
-
-	if (Window::GetKeyboard()->KeyPressed(NCL::KeyboardKeys::L)) {
-		if (selectionObject) {
-			if (lockedObject == selectionObject) {
-				lockedObject = nullptr;
-			}
-			else {
-				lockedObject = selectionObject;
-			}
-		}
-
-	}
-
-	return false;
-}
-
-
-/*
-If an object has been clicked, it can be pushed with the right mouse button, by an amount
-determined by the scroll wheel. In the first tutorial this won't do anything, as we haven't
-added linear motion into our physics system. After the second tutorial, objects will move in a straight
-line - after the third, they'll be able to twist under torque aswell.
-*/
-void TutorialGame::MoveSelectedObject() {
-	renderer->DrawString(" Click Force :" + std::to_string(forceMagnitude),
-		Vector2(10, 20)); // Draw debug text at 10 ,20
-	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {  // Add force when using laptop
-		forceMagnitude += 10.0f;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
-		forceMagnitude -= 10.0f;
-	}
-
-	if (!selectionObject) {
-		return;
-	}
-	// Push the selected object !
-	if (Window::GetMouse()->ButtonPressed(NCL::MouseButtons::RIGHT)) {
-		Ray ray = CollisionDetection::BuildRayFromMouse(
-			*world->GetMainCamera());
-		RayCollision closestCollision;
-		if (world->Raycast(ray, closestCollision, true)) {
-			if (closestCollision.node == selectionObject) {
-				//selectionObject->GetPhysicsObject()->
-					//AddForce(ray.GetDirection() * forceMagnitude);
-				selectionObject->GetPhysicsObject()->
-					AddForceAtPosition(ray.GetDirection() * forceMagnitude,
-						closestCollision.collidedAt);
-			}
-		}
-	}
 }

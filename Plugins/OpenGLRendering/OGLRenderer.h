@@ -40,9 +40,11 @@ namespace NCL {
 		class OGLShader;
 
 		class SimpleFont;
-		
+
+
 		class OGLRenderer : public RendererBase
 		{
+
 		public:
 			friend class OGLRenderer;
 			OGLRenderer(Window& w);

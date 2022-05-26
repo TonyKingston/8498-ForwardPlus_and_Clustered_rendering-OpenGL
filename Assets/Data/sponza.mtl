@@ -136,6 +136,7 @@ newmtl floor
 	map_Ka textures\sponza_floor_a_diff.png
 	map_Kd textures\sponza_floor_a_diff.png
 	map_Ks textures\floor_gloss.png
+	map_Disp textures\sponza_floor_a_normal.png
 
 newmtl column_c
 	Ns 10.0000

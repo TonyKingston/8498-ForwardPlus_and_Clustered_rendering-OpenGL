@@ -2,6 +2,7 @@
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
+uniform sampler2D   specTex;
 //uniform sampler2DShadow shadowTex;
 //
 //struct PointLight {
@@ -10,10 +11,15 @@ uniform sampler2D   bumpTex;
 //	float radius;
 //};
 
+// struct PointLight {
+	// vec3 pos;
+	// float radius;
+	// vec4 colour;
+// };
 struct PointLight {
-	vec3 pos;
-	float radius;
-	vec4 colour;
+    vec4 colour;
+	vec4 pos;
+	vec4 radius;
 };
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
@@ -26,6 +32,7 @@ uniform vec3	cameraPos;
 
 uniform bool hasTexture;
 uniform bool hasBump;
+uniform bool hasSpec;
 
 in Vertex
 {
@@ -53,8 +60,13 @@ void main(void)
 
 	vec3 normal = IN.normal;
 	if (hasBump) {
-		normal = texture2D(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
+		normal = texture(bumpTex, IN.texCoord).rgb * 2.0 - 1.0;
 		normal = normalize(TBN * normalize(normal));
+	}
+	
+	float specSample = 1;
+	if (hasSpec) {
+	    specSample = texture(specTex, IN.texCoord).r;
 	}
 
 	vec4 albedo = IN.colour;
@@ -76,12 +88,12 @@ void main(void)
 	for (int i = 0; i < noOfLights; i++) {
 		PointLight light = pointLights[i];
 		//vec3 lightVec = light.pos.xyz - IN.worldPos;
-		vec3 lightVec = light.pos - IN.worldPos;
+		vec3 lightVec = light.pos.xyz - IN.worldPos;
 		//float lambert = max(0.0, dot(incident, normal)) * 0.9;
 
 		float distance = length(lightVec);
-		float attenuation = 1.0f - clamp(distance / light.radius, 0.0, 1.0);
-		if (attenuation > 0.0f) {
+		float attenuation = 1.0f - clamp(distance / light.radius.x, 0.0, 1.0);
+	//	if (attenuation > 0.0f) {
 			vec3  incident = normalize(lightVec);
 			vec3 halfDir = normalize(incident + viewDir);
 
@@ -89,7 +101,8 @@ void main(void)
 
 			//float rFactor = max(0.0, dot(halfDir, normal));
 			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
-			float sFactor = pow(rFactor, 60.0);
+			float sFactor = pow(rFactor, 60.0) * specSample;
+			
 
 			vec3 attenuated = light.colour.rgb * attenuation;
 			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light
@@ -97,7 +110,7 @@ void main(void)
 			//fragColor.rgb += light.colour.rgb * attenuated * sFactor * 0.33;
 			diffuseLight.rgb += attenuated * lambert; //diffuse light
 			specularLight.rgb += attenuated * sFactor * 0.33; //specular light
-		}
+	//	}
 	}
 	
 	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));

@@ -18,6 +18,16 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 		//class D_GUI;
+#define TILE_SIZE 16 // 16x16 tiles
+
+// Using the same values as Doom 2016
+#define CLUSTER_GRID_X 16
+#define CLUSTER_GRID_Y 8
+#define CLUSTER_GRID_Z 24
+
+#define MAX_LIGHTS_PER_TILE 64
+
+		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
 		struct Light {
 			Vector4 colour;
@@ -38,11 +48,29 @@ namespace NCL {
 			Vector4 extent;
 		};
 
-#define TILE_SIZE 16 // 16x16 tiles
+		struct TilePlane {
+			Vector4 normal;
+			Vector4 distance;
+		};
+	
+		struct TileFrustum {
+			TilePlane plane[4];
+		};
+
+		struct ClusterFrustum {
+			TilePlane plane[4];
+			Vector2 nearFar;
+		};
+
+		struct LightGrid {
+			unsigned int count;
+			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
+		};
+
 
 		class GameTechRenderer : public OGLRenderer {
 		public:
-			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0);
+			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0, bool prepass = false);
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
@@ -51,21 +79,32 @@ namespace NCL {
 			void ResizeSceneTextures(float width, float height);
 
 			void UpdateLights(float dt);
-			void AddLights(int n);
+			bool AddLights(int n);
+
+			int GetNumLight() {
+				return numLights;
+			}
+
+			int GetRenderingMode() {
+				return renderMode;
+			}
+
+			void InitLights();
+
 
 		protected:
 			void RenderFrame()	override;
 			void BeginFrame() override;
 
+			void InitForward(bool withPrepass = false);
 			void InitDeferred();
 			void InitForwardPlus();
 			void InitClustered();
-			void InitLights();
 
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
 
-			void RenderForward();
+			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
 			void RenderForwardPlus();
 			void RenderClustered();
@@ -123,9 +162,11 @@ namespace NCL {
 			OGLShader* forwardPlusGridShader;
 			OGLShader* forwardPlusCullShader;
 			OGLShader* depthPrepassShader;
+			OGLShader* debugShader;
 
 			GLuint bufferFBO;
-			GLuint bufferColourTex, bufferNormalTex, bufferDepthTex;
+			GLuint depthColourTex;
+			GLuint bufferColourTex, bufferNormalTex, bufferSpecTex, bufferDepthTex;
 			GLuint bufferShadowTex; 
 			GLuint pointLightFBO;
 			GLuint lightDiffuseTex, lightSpecularTex;
@@ -142,13 +183,14 @@ namespace NCL {
 			GLuint globalCountSSBO;
 			int tilesX;
 			int tilesY;
+			unsigned int totalNumLights;
 
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;
 
 			//vice camera things
-			OGLShader* print_shader;
+			OGLShader* printShader;
 			OGLShader* split_shader;
 			OGLMesh* printer;
 			GLuint printFBO;
@@ -179,11 +221,30 @@ namespace NCL {
 			vector<GLuint> sceneBuffers;
 
 			int renderMode;
+			bool usingPrepass = false;
 			int numLights = 0;
 			float lightDt = 0.2f;
 
+			Matrix4 viewMat;
+			Matrix4 projMat;
+			float aspect;
+
+			// clustered 
+			float scaleFactor;
+			float biasFactor;
+
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
+			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f);
+
+			// Clump lights in center corridor
+			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f);*/
+
+			//Depth disparity test
+			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-350.0f, 0.0f, -100.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(300.0f, 420.0f, 80.0f);*/
 		};
 	}
 }

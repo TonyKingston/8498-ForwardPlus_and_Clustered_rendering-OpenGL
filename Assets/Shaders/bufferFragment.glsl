@@ -1,13 +1,15 @@
-#version 330 core
+#version 430 core
 
-uniform sampler2D mainTex; // Diffuse texture map
-uniform sampler2D bumpTex; // Bump map
+layout(binding = 0) uniform sampler2D mainTex; // Diffuse texture map
+layout(binding = 1) uniform sampler2D bumpTex; // Bump map
+layout(binding = 2) uniform sampler2D specTex;
 //uniform sampler2DShadow shadowTex;
 
 uniform vec3	cameraPos;
 
 uniform bool hasTexture;
 uniform bool hasBump;
+uniform bool hasSpec;
 
 uniform float isDepth;
 
@@ -50,9 +52,11 @@ void main ( void ) {
 	  normal = normalize(TBN * normalize(normal));
 	}
 	
-	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 ,1.0);
-	//fragColour[2].r = shadow;
-
-	// if (isDepth == 1.0) 
-		// fragColour[0].rgb = vec3(IN.depth, 0, 0);
+	float specVal = 1.0;
+	if (hasSpec) {
+	   specVal = texture2D(specTex, IN.texCoord).r;
+	}
+	
+	fragColour [1] = vec4 (normal.xyz * 0.5 + 0.5 , 1);
+	//fragColour[1] = vec4(IN.binormal, 1);
 }

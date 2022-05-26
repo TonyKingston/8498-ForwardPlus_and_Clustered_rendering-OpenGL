@@ -42,6 +42,9 @@ namespace NCL {
 			float GetGameTime() { return timeTaken;}
 			int GetGameStatus() { return gameStatus; }
 
+			int AskRenderingMode();
+			bool AskPrepass();
+
 		protected:
 			void InitialiseAssets(int level = 1);
 
@@ -67,14 +70,6 @@ namespace NCL {
 			void BridgeConstraintTest();
 			void PendulumConstraint();
 	
-			bool SelectObject();
-			void MoveSelectedObject();
-			void DebugObjectMovement();
-			void LockedObjectMovement();
-
-			void ShowPlayerScore();
-			void EndGame(int status);
-
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f, bool hollow = false);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, bool isOBB = false, float inverseMass = 10.0f, Vector4 colour = Debug::GRAY);

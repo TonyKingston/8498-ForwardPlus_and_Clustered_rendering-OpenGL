@@ -89,6 +89,11 @@ void OGLMesh::UploadToGPU(Rendering::RendererBase* renderer) {
 		BindVertexAttribute(VertexAttribute::Tangents, attributeBuffers[VertexAttribute::Tangents], VertexAttribute::Tangents, 4, sizeof(Vector4), 0);
 	}
 
+	if (!GetBiTangentData().empty()) {	//Buffer tangent data
+		CreateVertexBuffer(attributeBuffers[VertexAttribute::Bitangents], numVertices * sizeof(Vector4), (char*)GetBiTangentData().data());
+		BindVertexAttribute(VertexAttribute::Bitangents, attributeBuffers[VertexAttribute::Bitangents], VertexAttribute::Bitangents, 4, sizeof(Vector4), 0);
+	}
+
 	if (!GetSkinWeightData().empty()) {	//Skeleton weights
 		CreateVertexBuffer(attributeBuffers[VertexAttribute::JointWeights], numVertices * sizeof(Vector4), (char*)GetSkinWeightData().data());
 		BindVertexAttribute(VertexAttribute::JointWeights, attributeBuffers[VertexAttribute::JointWeights], VertexAttribute::JointWeights, 4, sizeof(Vector4), 0);
@@ -131,6 +136,11 @@ void OGLMesh::UpdateGPUBuffers(unsigned int startVertex, unsigned int vertexCoun
 	if (!GetTangentData().empty()) {	//Buffer tangent data
 		glBindBuffer(GL_ARRAY_BUFFER, attributeBuffers[VertexAttribute::Tangents]);
 		glBufferSubData(GL_ARRAY_BUFFER, startVertex * sizeof(Vector4), vertexCount * sizeof(Vector4), (char*)&GetTangentData()[startVertex]);
+	}
+
+	if (!GetTangentData().empty()) {	//Buffer bitangent data
+		glBindBuffer(GL_ARRAY_BUFFER, attributeBuffers[VertexAttribute::Bitangents]);
+		glBufferSubData(GL_ARRAY_BUFFER, startVertex * sizeof(Vector4), vertexCount * sizeof(Vector4), (char*)&GetBiTangentData()[startVertex]);
 	}
 
 	//if (!GetSkinWeightData().empty()) {	//Skeleton weights
