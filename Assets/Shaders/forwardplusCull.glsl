@@ -207,6 +207,7 @@ void main() {
 	barrier();
 
 	if (gl_LocalInvocationIndex == 0) {
+		testDepth[tileIndex] = maxDepthVS;
 		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
 
 		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {

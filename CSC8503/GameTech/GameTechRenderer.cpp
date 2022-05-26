@@ -453,6 +453,7 @@ void GameTechRenderer::ComputeTileGrid() {
 
 void GameTechRenderer::ComputeClusterGrid() {
 	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
+	int sizeY = (unsigned int)std::ceilf(currentHeight / (float)CLUSTER_GRID_Y);
 
 	Camera* current = gameWorld.GetMainCamera();
 
@@ -464,6 +465,7 @@ void GameTechRenderer::ComputeClusterGrid() {
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "inverseProj"), 1, false, invProj.array);
 	glUniform2f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), sizeX);
+	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxY"), sizeY);
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
 	unsigned int query;

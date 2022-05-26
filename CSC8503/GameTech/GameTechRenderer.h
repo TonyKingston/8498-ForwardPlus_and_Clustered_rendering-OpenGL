@@ -59,7 +59,7 @@ namespace NCL {
 
 		struct ClusterFrustum {
 			TilePlane plane[4];
-			Vector2 nearFar;
+			Vector4 nearFar;
 		};
 
 		struct LightGrid {

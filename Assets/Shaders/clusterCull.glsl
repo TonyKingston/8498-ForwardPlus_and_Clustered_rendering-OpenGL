@@ -38,7 +38,7 @@ struct Plane {
 
 struct Frustum {
 	Plane planes[4];
-	vec2 nearFar;
+	vec4 nearFar;
 };
 
 //struct LightGrid {
@@ -157,8 +157,8 @@ void main() {
 
 	} 
 
-	float minDepthVS = ClipToView(vec4(0.0, 0.0, tileFrustum.nearFar[0], 1.0)).z;
-	float maxDepthVS = ClipToView(vec4(0.0, 0.0, tileFrustum.nearFar[1], 1.0)).z;
+	float minDepthVS = tileFrustum.nearFar.x;
+	float maxDepthVS = tileFrustum.nearFar.y;
 	float nearClipVS = ClipToView(vec4(0.0, 0.0, 0.0, 1.0)).z;
 
 	Plane minPlane = { vec4(0.0, 0.0, -1.0, 0.0), vec4(-minDepthVS, 0.0,0.0,0.0) };
@@ -181,12 +181,12 @@ void main() {
 		float radius = light.radius.x;
 		vec4 vPos = viewMatrix * position;
 
-	//	if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
+		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
 		//	if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
 				uint offset = atomicAdd(visibleLightCount, 1);
 				visibleLightIndices[offset] = int(lightIndex);
 		//	}
-	//	}
+		}
 	}
 
 	barrier();
