@@ -1,7 +1,7 @@
 #version 430 core
 
-#define TILE_SIZE 32
-#define MAX_LIGHTS_PER_TILE 4096
+#define TILE_SIZE 16
+#define MAX_LIGHTS_PER_TILE 2048
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
@@ -32,7 +32,7 @@ struct TileAABB {
 
 struct Plane {
 	vec4 normal;
-	vec4 dist;
+	vec4 distance;
 };
 
 struct Frustum {
@@ -195,12 +195,12 @@ void main() {
 		vec4 vPos = viewMatrix * position;
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
-		//	if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
+			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
 			    if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
 				   uint offset = atomicAdd(visibleLightCount, 1);
 				   visibleLightIndices[offset] = int(lightIndex);
 			    }
-		//	}
+			}
 		}
 	}
 
@@ -333,7 +333,7 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 	bool result = true;
 
 	if (posVs.z - radius > zNear || posVs.z + radius < zFar) {
-		result = true;
+		result = false;
 	}
 
 	for (int i = 0; i < 4 && result; i++) {
@@ -348,7 +348,7 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 
 // Check if sphere is inside the negative halfspace of the plane.
 bool SphereInsidePlane(vec3 posVs, float radius, Plane plane) {
-	return (dot(plane.normal.xyz, posVs) - plane.dist.x) < -radius;
+	return (dot(plane.normal.xyz, posVs) - plane.distance.x) < -radius;
 }
 
 //float sqDistPointAABB(vec3 point, uint tile) {

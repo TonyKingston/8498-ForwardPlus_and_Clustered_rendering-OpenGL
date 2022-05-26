@@ -1,6 +1,6 @@
 #version 430 core
 
-#define TILE_SIZE 16
+#define TILE_SIZE 32
 layout(local_size_x = 1, local_size_y = 1) in;
 
 // Using vec4 for better alignment on the GPU
@@ -88,14 +88,19 @@ void main() {
 	// Compute screen space position of frustum points on the far plane.
 	vec4 screenSpace[4];
 	// -1 for z as the co-ordinate system is right-handed i.e. camera points towards -1
-	// Top left
+	// // Bottom left
 	screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
-	// Top right point
+	// Bottom right
 	screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0f, 1.0f);
-	// Bottom left point
+	// Top right
 	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
-	// Bottom right point
+	// Top left
 	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
+	
+	 // screenSpace[0] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0); // Top left
+    // screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0); // Top Right
+    // screenSpace[2] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0); // Bottom left
+    // screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0, 1.0); // Bottom Right
 
 
 	// Convert these to view space positions;
@@ -213,6 +218,7 @@ Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
 	vec3 AC = C - A;
 
 	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
+//	plane.normal = vec4(normalize(cross(AC, AB)), 0.0); // different winding order
 ///	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0); // Doesn't cause error?
 	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
 

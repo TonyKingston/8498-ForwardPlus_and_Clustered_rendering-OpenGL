@@ -104,7 +104,7 @@ void main(void)
 	}*/
 	
 	uint zTile     = uint(max(log2(linearDepth(gl_FragCoord.z)) * scale + bias, 0.0));
-    uvec3 tiles    = uvec3( uvec2( gl_FragCoord.xy / 79), zTile);  // 79 = tiles in x
+    uvec3 tiles    = uvec3( uvec2( gl_FragCoord.xy / tilePxX), zTile);  // 79 = tiles in x
     uint tileIndex = tiles.x +
                      tileSizes.x * tiles.y +
                      (tileSizes.x * tileSizes.y) * tiles.z;  

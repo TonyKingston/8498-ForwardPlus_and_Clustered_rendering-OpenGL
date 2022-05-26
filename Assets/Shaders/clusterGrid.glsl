@@ -17,6 +17,7 @@ struct Plane {
 
 struct Frustum {
 	Plane planes[4];
+	vec2 nearFar;
 };
 
 //layout(std430, binding = 1) buffer tileGrid {
@@ -40,8 +41,14 @@ vec3 AABBExtent(vec3 min, vec3 max);
 vec3 ConstructPlane(vec3 A, vec3 B, float zDistance);
 Plane ComputePlane(vec3 A, vec3 B, vec3 C);
 
+float linearDepth(float depthSample) {
+	float depthRange = 2.0 * depthSample - 1.0;
+	float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
+	return linear;
+}
+
 void main() {
-	const vec3 eyePos = vec3(0, 0, 0);
+	const vec3 eyePos = vec3(0);
 
 	uint tileIndex = gl_WorkGroupID.x +
                      gl_WorkGroupID.y * gl_NumWorkGroups.x +
@@ -146,6 +153,9 @@ void main() {
 	//frustum.planes[3] = frustum.planes[2];
 	//frustum.planes[3].normal = -frustum.planes[3].normal;
 
+	frustum.nearFar[0] = linearDepth(tileNear);
+	frustum.nearFar[1] = linearDepth(tileFar);
+
 	//frustum.planes[0].distance.y = gl_WorkGroupID.x;
 	//frustum.planes[0].distance.z = gl_WorkGroupID.y;
 	//frustum.planes[0].distance.w = gl_GlobalInvocationID.x;
@@ -226,8 +236,8 @@ Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
 	vec3 AB = B - A;
 	vec3 AC = C - A;
 
-	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
-///	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0); // Doesn't cause error?
+	//plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
+	plane.normal = vec4(normalize(cross(AC, AB)), 0.0);
 	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
 
 	return plane;

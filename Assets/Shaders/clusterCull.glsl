@@ -2,7 +2,7 @@
 
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 64
-layout(local_size_x = 16, local_size_y = 8, local_size_z = 4) in;
+layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -35,8 +35,10 @@ struct Plane {
 	vec4 distance;
 };
 
+
 struct Frustum {
 	Plane planes[4];
+	vec2 nearFar;
 };
 
 //struct LightGrid {
@@ -88,13 +90,13 @@ uniform uint totalNumLights;
 uniform ivec2 screenSize;
 uniform vec2 pixelSize;
 uniform mat4 invProj;
+uniform float near;
+uniform float far;
 
 //shared PointLight sharedLights[TILE_SIZE * TILE_SIZE];
 //shared uint globalIndexLightCount;
 
 //shared vec4 frustumPlanes[6];
-shared uint minDepthInt;
-shared uint maxDepthInt;
 shared uint visibleLightCount;
 shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 shared Frustum tileFrustum;
@@ -112,33 +114,32 @@ vec4 ClipToView(vec4 clip);
 bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear, float zFar);
 bool SphereInsidePlane(vec3 posVs, float radius, Plane plane);
 
+
+float linearDepth(float depthSample) {
+	float depthRange = 2.0 * depthSample - 1.0;
+	float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
+	return linear;
+}
+
 void main() {
 	ivec2 tileId = ivec2(gl_WorkGroupID.xy);
 	ivec2 tileNumber = ivec2(gl_NumWorkGroups.xy);
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
 
-	uint tileIndex = tileId.y * tileNumber.x + tileId.x;
+	//uint tileIndex = tileId.y * tileNumber.x + tileId.x;
+	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
+	uint tileIndex = gl_WorkGroupID.x +
+		gl_WorkGroupID.y * gl_NumWorkGroups.x +
+		gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
 
 	if (gl_LocalInvocationIndex == 0) {
 		vec2 test = vec2(location) * pixelSize;
 		testDepth[tileIndex] = test.y;
 	}
-	//vec2 texCoord = (vec2(location)) / screenSize;
-	//vec2 texCoord = vec2(location) / ivec2(1264, 681);
-
-	vec2 texCoord = vec2(location) * pixelSize;
-	float depth = texture(depthTex, texCoord).r;
-	// Convert sampled depth into viewspace -1 to 1 range
-//	depth = depth * 2.0 - 1.0;
-	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
-
-	uint depthInt = floatBitsToUint(depth);
 
     // One thread to init values and get the group's tile frustum.
 	// Could also reset everything in the indices buffer to 0 if so desired
 	if (gl_LocalInvocationIndex == 0) {
-		minDepthInt = 0xFFFFFFFF;
-		maxDepthInt = 0;
 		visibleLightCount = 0;
 		viewProjMatrix = projMatrix * viewMatrix;
 		//invProj = inverse(projMatrix);
@@ -155,29 +156,15 @@ void main() {
 		//}
 
 	} 
-	
-	barrier();
 
-	atomicMin(minDepthInt, depthInt);
-	atomicMax(maxDepthInt, depthInt);
-
-	barrier();
-
-	float minDepth = uintBitsToFloat(minDepthInt);
-	minDepth = minDepth * 2.0f - 1.0f;
-	float maxDepth = uintBitsToFloat(maxDepthInt);
-	maxDepth = maxDepth * 2.0f - 1.0f;
-
-
-	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
-	float maxDepthVS = ClipToView(vec4(0.0, 0.0, maxDepth, 1.0)).z;
+	float minDepthVS = ClipToView(vec4(0.0, 0.0, tileFrustum.nearFar[0], 1.0)).z;
+	float maxDepthVS = ClipToView(vec4(0.0, 0.0, tileFrustum.nearFar[1], 1.0)).z;
 	float nearClipVS = ClipToView(vec4(0.0, 0.0, 0.0, 1.0)).z;
 
 	Plane minPlane = { vec4(0.0, 0.0, -1.0, 0.0), vec4(-minDepthVS, 0.0,0.0,0.0) };
 
 	barrier();
 
-	// Each batch will handle 256 lights with a tile size of 16
 	uint threadCount = TILE_SIZE * TILE_SIZE;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
@@ -194,12 +181,12 @@ void main() {
 		float radius = light.radius.x;
 		vec4 vPos = viewMatrix * position;
 
-		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
-			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
+	//	if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
+		//	if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
 				uint offset = atomicAdd(visibleLightCount, 1);
 				visibleLightIndices[offset] = int(lightIndex);
-			}
-		}
+		//	}
+	//	}
 	}
 
 	barrier();

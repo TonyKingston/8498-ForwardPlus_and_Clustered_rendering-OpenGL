@@ -18,14 +18,14 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 		//class D_GUI;
-#define TILE_SIZE 32 // 16x16 tiles
+#define TILE_SIZE 16 // 16x16 tiles
 
 // Using the same values as Doom 2016
 #define CLUSTER_GRID_X 16
 #define CLUSTER_GRID_Y 8
 #define CLUSTER_GRID_Z 24
 
-#define MAX_LIGHTS_PER_TILE 4096
+#define MAX_LIGHTS_PER_TILE 64
 
 		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
@@ -55,6 +55,11 @@ namespace NCL {
 	
 		struct TileFrustum {
 			TilePlane plane[4];
+		};
+
+		struct ClusterFrustum {
+			TilePlane plane[4];
+			Vector2 nearFar;
 		};
 
 		struct LightGrid {
@@ -227,7 +232,6 @@ namespace NCL {
 			// clustered 
 			float scaleFactor;
 			float biasFactor;
-
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
