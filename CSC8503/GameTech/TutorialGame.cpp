@@ -180,7 +180,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	//world->UpdateWorld(dt);
 	renderer->Update(dt);
-	renderer->UpdateLights(dt);
+	//renderer->UpdateLights(dt);
 
 	//Debug::FlushRenderables(dt);
 	renderer->Render();
@@ -193,7 +193,7 @@ void TutorialGame::UpdateKeys() {
 		lockedObject = nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		renderer->AddLights(5);
+		renderer->AddLights(16);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place

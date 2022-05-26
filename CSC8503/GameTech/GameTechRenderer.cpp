@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 65536;
+const unsigned int MAX_LIGHTS = 98304;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -264,6 +264,8 @@ void GameTechRenderer::InitForwardPlus() {
 
 	tilesX = (currentWidth + (currentWidth % TILE_SIZE)) / TILE_SIZE;
 	tilesY = (currentHeight + (currentHeight % TILE_SIZE)) / TILE_SIZE;
+	//int sizeX = (unsigned int)std::ceilf(1920 / (float)TILE_SIZE);
+	//int sizey = (unsigned int)std::ceilf(1080/ (float)TILE_SIZE);
 	size_t numTiles = tilesX * tilesY;
 	glGenBuffers(1, &lightGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightGridSSBO);
@@ -534,7 +536,6 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	int ss[]{ 1280, 720 };
 
 	Matrix4 invProj = (projMat).Inverse();
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMat);
@@ -544,7 +545,6 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
 	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
-	//glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, ss);
 	glUniform2f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 
 	glDispatchCompute(tilesX, tilesY, 1);

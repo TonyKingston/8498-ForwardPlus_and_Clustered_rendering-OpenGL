@@ -1,7 +1,7 @@
 #version 430 core
 
-#define TILE_SIZE 8
-#define MAX_LIGHTS_PER_TILE 1024
+#define TILE_SIZE 32
+#define MAX_LIGHTS_PER_TILE 4096
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -147,6 +147,7 @@ void main(void)
 
 		float distance = length(lightVec);
 		float attenuation = 1.0f - clamp(distance / light.radius.x, 0.0, 1.0);
+		
 		if (attenuation > 0.0f) {
 			vec3  incident = normalize(lightVec);
 			vec3 halfDir = normalize(incident + viewDir);

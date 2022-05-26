@@ -130,7 +130,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// Normal maps
-		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_normal");
+		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
 		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
