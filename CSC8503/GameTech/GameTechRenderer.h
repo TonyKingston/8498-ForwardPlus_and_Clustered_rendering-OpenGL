@@ -25,7 +25,7 @@ namespace NCL {
 #define CLUSTER_GRID_Y 8
 #define CLUSTER_GRID_Z 24
 
-#define MAX_LIGHTS_PER_TILE 64
+#define MAX_LIGHTS_PER_TILE 2048
 
 		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
@@ -79,6 +79,7 @@ namespace NCL {
 			void ResizeSceneTextures(float width, float height);
 
 			void UpdateLights(float dt);
+			void UpdateLightsGPU(float dt);
 			bool AddLights(int n);
 
 			int GetNumLight() {
@@ -156,6 +157,7 @@ namespace NCL {
 			Matrix4     shadowMatrix;
 
 			OGLShader* sceneShader;
+			OGLShader* lightUpdateShader;
 			OGLShader* pointLightShader;
 			OGLShader* combineShader;
 			OGLShader* forwardPlusShader;
@@ -183,6 +185,8 @@ namespace NCL {
 			GLuint globalCountSSBO;
 			int tilesX;
 			int tilesY;
+			int clusterX;
+			int clusterY;
 			unsigned int totalNumLights;
 
 			Vector4		lightColour;

@@ -1,6 +1,6 @@
 #version 430 core
 
-#define TILE_SIZE 32
+#define TILE_SIZE 16
 layout(local_size_x = 1, local_size_y = 1) in;
 
 // Using vec4 for better alignment on the GPU
@@ -92,9 +92,9 @@ void main() {
 	screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
 	// Bottom right
 	screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0f, 1.0f);
-	// Top right
-	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
 	// Top left
+	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
+	// Top right
 	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
 	
 	 // screenSpace[0] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0); // Top left

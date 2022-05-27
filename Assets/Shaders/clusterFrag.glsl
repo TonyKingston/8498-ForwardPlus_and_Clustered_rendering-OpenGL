@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 64
+#define MAX_LIGHTS_PER_TILE 2048
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -55,6 +55,7 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 uniform int noOfLights;
 uniform int numTilesX;
 uniform int tilePxX;
+uniform int tilePxY;
 
 uniform vec3	cameraPos;
 
@@ -93,7 +94,7 @@ float linearDepth(float depthSample){
 }
 
 // Doom values
-const uvec3 tileSizes = uvec3(16, 8, 24);
+const uvec3 gridDims = uvec3(16, 8, 24);
 
 void main(void)
 {
@@ -104,19 +105,13 @@ void main(void)
 	}*/
 	
 	uint zTile     = uint(max(log2(linearDepth(gl_FragCoord.z)) * scale + bias, 0.0));
-    uvec3 tiles    = uvec3( uvec2( gl_FragCoord.xy / tilePxX), zTile);  // 79 = tiles in x
-    uint tileIndex = tiles.x +
-                     tileSizes.x * tiles.y +
-                     (tileSizes.x * tileSizes.y) * tiles.z;  
+   // uvec3 tiles    = uvec3( uvec2( gl_FragCoord.xy / tilePxX), zTile);
+	uvec3 tiles = uvec3(uvec2(gl_FragCoord.x / tilePxX, gl_FragCoord.y / tilePxY), zTile);
+   /* uint tileIndex = tiles.x +
+                     gridDims.x * tiles.y +
+                     (gridDims.x * gridDims.y) * tiles.z;  */
+	uint tileIndex = tiles.x + (gridDims.x * (tiles.y + gridDims.y * tiles.z));
 	
-    //uvec2 tiles = uvec2( gl_FragCoord.xy / tilePxX);
-    //uint tileIndex = tiles.x + TILE_SIZE * tiles.y + (TILE_SIZE * TILE_SIZE);
-	
-	//uint tileIndex = 0;
-
-//	uint lightCount = lightGrid[tileIndex].count;
- //   uint lightIndexOffset = lightGrid[tileIndex].offset;
-//	lightIndexOffset = tileIndex * noOfLights;
 	uint lightCount = 0;
 	uint lightIndexOffset = tileIndex * MAX_LIGHTS_PER_TILE;
 

@@ -73,6 +73,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, 
 }
 
 void NCL::CSC8503::GameTechRenderer::InitLights() {
+
+	lightUpdateShader = (OGLShader*) resourceManager->LoadShader("updateLights.comp");
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> dis(0, 1);
@@ -105,21 +107,23 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	//light3.radius = 40.0f;
 	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
-	//Light& light4 = pointLights[3];
-	//light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
-	//light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
-	////light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-	////light3.radius = 40.0f;
-	//light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	Light& light4 = pointLights[3];
+	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
+	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
+	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
+	//light3.radius = 40.0f;
+	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
-
-	numLights += 3;
+	numLights += 4;
+	//AddLights(100);
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+
 	if (withPrepass) {
 		glGenFramebuffers(1, &bufferFBO);
 		glGenFramebuffers(1, &forwardPlusFBO);
@@ -159,6 +163,8 @@ void GameTechRenderer::InitForward(bool withPrepass) {
 }
 
 void GameTechRenderer::InitDeferred() {
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+
 	sceneShader = (OGLShader*) resourceManager->LoadShader("GameTechVert.glsl", "bufferFragment.glsl");
 	pointLightShader = new OGLShader("pointlightvertex.glsl", "pointlightfrag.glsl");
 	combineShader = new OGLShader("combinevert.glsl", "combinefrag.glsl");
@@ -362,6 +368,9 @@ void GameTechRenderer::InitClustered() {
 	scaleFactor = (float)CLUSTER_GRID_Z/ std::log2f(zFar / zNear);
 	biasFactor = -((float)CLUSTER_GRID_Z * std::log2f(zNear) / std::log2f(zFar / zNear));
 
+	clusterX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
+	clusterX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
+	clusterY = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_Y);
 
 	ComputeClusterGrid();
 	//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
@@ -383,6 +392,20 @@ void GameTechRenderer::UpdateLights(float dt) {
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void GameTechRenderer::UpdateLightsGPU(float dt) {
+	BindShader(lightUpdateShader);
+
+	OGLShader* shader = lightUpdateShader;
+
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "noOfLights"), numLights);
+	glUniform3fv(glGetUniformLocation(shader->GetProgramID(), "minBounds"), 1, (float*)&LIGHT_MIN_BOUNDS);
+	glUniform3fv(glGetUniformLocation(shader->GetProgramID(), "maxBounds"), 1, (float*)&LIGHT_MAX_BOUNDS);
+	glUniform1f(glGetUniformLocation(shader->GetProgramID(), "dt"), dt);
+
+	glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 bool GameTechRenderer::AddLights(int n) {
@@ -464,8 +487,8 @@ void GameTechRenderer::ComputeClusterGrid() {
 
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "inverseProj"), 1, false, invProj.array);
 	glUniform2f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
-	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), sizeX);
-	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxY"), sizeY);
+	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), clusterX);
+	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxY"), clusterY);
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
 	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
 	unsigned int query;
@@ -527,7 +550,7 @@ void GameTechRenderer::DepthPrePass() {
 }
 
 void GameTechRenderer::ForwardPlusCullLights() {
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	BindShader(forwardPlusCullShader);
 
@@ -552,7 +575,7 @@ void GameTechRenderer::ForwardPlusCullLights() {
 }
 
 void GameTechRenderer::ClusteredCullLights() {
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	BindShader(forwardPlusCullShader);
 
@@ -882,7 +905,6 @@ void GameTechRenderer::RenderForwardPlus() {
 
 	BindMesh(quad);
 	DrawBoundMesh();
-
 }
 
 void GameTechRenderer::RenderClustered() {
@@ -907,8 +929,6 @@ void GameTechRenderer::RenderClustered() {
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
 
 	BindShader(forwardPlusShader);
-
-	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
 
 	for (const auto& i : activeObjects) {
 		OGLShader* shader = forwardPlusShader;
@@ -949,7 +969,9 @@ void GameTechRenderer::RenderClustered() {
 		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), biasFactor);
 		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "near"), gameWorld.GetMainCamera()->GetNearPlane());
 		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "far"), gameWorld.GetMainCamera()->GetFarPlane());
-		glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxX"), sizeX);
+		glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxX"), clusterX);
+		glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxY"), clusterY);
+
 
 
 		//Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
@@ -1092,7 +1114,7 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 
 void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	/** Draw Point Lights **/
 	glBindFramebuffer(GL_FRAMEBUFFER, pointLightFBO);
@@ -1149,7 +1171,7 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	glClearColor(0.2f, 0.2f, 0.2f, 1);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 
 }
 
@@ -1356,7 +1378,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 	//glActiveTexture(GL_TEXTURE0 + 2);
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	for (const auto& i : activeObjects) {
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
@@ -1428,7 +1450,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 
 		BindAndDraw(i, hasDiff, hasBump);
 	}
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+//	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 
 }
 

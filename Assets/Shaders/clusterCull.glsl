@@ -1,8 +1,8 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 64
-layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+#define MAX_LIGHTS_PER_TILE 2048
+layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -165,12 +165,13 @@ void main() {
 
 	barrier();
 
-	uint threadCount = TILE_SIZE * TILE_SIZE;
+	//uint threadCount = TILE_SIZE * TILE_SIZE;
+	uint threadCount = 16;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-		if (lightIndex >= noOfLights) {
+		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
 			break;
 		}
 
@@ -182,10 +183,12 @@ void main() {
 		vec4 vPos = viewMatrix * position;
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
-		//	if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
-				uint offset = atomicAdd(visibleLightCount, 1);
-				visibleLightIndices[offset] = int(lightIndex);
-		//	}
+			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
+				if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+					uint offset = atomicAdd(visibleLightCount, 1);
+					visibleLightIndices[offset] = int(lightIndex);
+				}
+			}
 		}
 	}
 

@@ -180,7 +180,8 @@ void TutorialGame::UpdateGame(float dt) {
 
 	//world->UpdateWorld(dt);
 	renderer->Update(dt);
-	//renderer->UpdateLights(dt);
+//	renderer->UpdateLights(dt);
+	renderer->UpdateLightsGPU(dt);
 
 	//Debug::FlushRenderables(dt);
 	renderer->Render();

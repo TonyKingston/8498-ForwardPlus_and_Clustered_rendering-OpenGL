@@ -17,7 +17,7 @@ int main() {
 	bool reachedCapacity = false;
 	const std::string OUTPUTDIR("../../Data/");
 	std::ofstream file;
-	//file.open(OUTPUTDIR + "forwardplus-full-test-updatelights.csv", std::ios_base::app);
+	//file.open(OUTPUTDIR + "clustered-full.csv", std::ios_base::app);
 	//fileOpen = true;
 	//file << "frame time" << "," << "Number of lights" << std::endl;
 
@@ -54,7 +54,7 @@ int main() {
 		}
 		float frameTime = 1000.0f * dt;
 		w->SetTitle("Frame time:" + std::to_string( frameTime) + "    No. of Lights:" + std::to_string(g->GetRenderer()->GetNumLight()));
-	/*	if (frameCount > 300) {
+		/*if (frameCount > 300) {
 			if (frameCount <= 800) {
 				file << frameTime << "," << g->GetRenderer()->GetNumLight() << std::endl;
 			}

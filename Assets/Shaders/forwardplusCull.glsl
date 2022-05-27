@@ -119,10 +119,10 @@ void main() {
 
 	uint tileIndex = tileId.y * tileNumber.x + tileId.x;
 
-	if (gl_LocalInvocationIndex == 0) {
-		vec2 test = vec2(location) * pixelSize;
-		testDepth[tileIndex] = test.y;
-	}
+	// if (gl_LocalInvocationIndex == 0) {
+		// vec2 test = vec2(location) * pixelSize;
+		// testDepth[tileIndex] = test.y;
+	// }
 	//vec2 texCoord = (vec2(location)) / screenSize;
 	//vec2 texCoord = vec2(location) / ivec2(1264, 681);
 
@@ -207,7 +207,7 @@ void main() {
 	barrier();
 
 	if (gl_LocalInvocationIndex == 0) {
-		testDepth[tileIndex] = maxDepthVS;
+	//	testDepth[tileIndex] = maxDepthVS;
 		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
 
 		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {

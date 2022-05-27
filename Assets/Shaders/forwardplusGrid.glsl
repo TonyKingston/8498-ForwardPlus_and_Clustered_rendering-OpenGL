@@ -217,8 +217,8 @@ Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
 	vec3 AB = B - A;
 	vec3 AC = C - A;
 
-	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
-//	plane.normal = vec4(normalize(cross(AC, AB)), 0.0); // different winding order
+//	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
+	plane.normal = vec4(normalize(cross(AC, AB)), 0.0); // different winding order
 ///	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0); // Doesn't cause error?
 	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
 

@@ -101,31 +101,23 @@ void main() {
 	// Compute screen space position of frustum points on the far plane.
 	vec4 screenSpace[4];
 	// -1 for z as the co-ordinate system is right-handed i.e. camera points towards -1
-	// Top left
-	//screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
-	//// Top right point
-	//screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0f, 1.0f);
-	//// Bottom left point
-	//screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
-	//// Bottom right point
-	//screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
 
 	// Bottom left point
-	screenSpace[0] = vec4(gl_WorkGroupID.xy * tilePxX, -1.0f, 1.0f);
-	// Bottom right point
-	screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * tilePxX, -1.0f, 1.0f);
-	// Top left point
-	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * tilePxX, -1.0f, 1.0f);
-	// Top right point
-	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0f, 1.0f);
-
-	//screenSpace[0] = vec4(vec2(gl_WorkGroupID.x * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	//screenSpace[0] = vec4(gl_WorkGroupID.xy * tilePxX, -1.0f, 1.0f);
 	//// Bottom right point
-	//screenSpace[1] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	//screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * tilePxX, -1.0f, 1.0f);
 	//// Top left point
-	//screenSpace[2] = vec4(vec2(gl_WorkGroupID.x * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
+	//screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * tilePxX, -1.0f, 1.0f);
 	//// Top right point
-	//screenSpace[3] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
+	//screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0f, 1.0f);
+
+	screenSpace[0] = vec4(vec2(gl_WorkGroupID.x * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	// Bottom right point
+	screenSpace[1] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	// Top left point
+	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
+	// Top right point
+	screenSpace[3] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
 
 	// Convert these to view space positions;
 	vec3 viewSpace[4];
