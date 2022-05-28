@@ -94,9 +94,18 @@ void main() {
 
 	/*vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
 	vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);*/
+
+	float tileNear;
+	float tileFar;
+
+	// Should push first cluster group out 
+	/*if (gl_WorkGroupID.z = 0) {
+		tileNear = 0.1;
+		tileFar = 5;
+	}*/
 	
-	float tileNear  = -near * pow(far/ near, gl_WorkGroupID.z/float(gl_NumWorkGroups.z));
-    float tileFar   = -near * pow(far/ near, (gl_WorkGroupID.z + 1) /float(gl_NumWorkGroups.z));
+	tileNear  = -near * pow(far/ near, gl_WorkGroupID.z/float(gl_NumWorkGroups.z));
+	tileFar   = -near * pow(far/ near, (gl_WorkGroupID.z + 1) /float(gl_NumWorkGroups.z));
 
 	// Compute screen space position of frustum points on the far plane.
 	vec4 screenSpace[4];

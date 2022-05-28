@@ -1,8 +1,8 @@
 #version 430 core
 
-#define TILE_SIZE 16
+#define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
-layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -77,12 +77,12 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 	int lightIndices[];
 };
 
-//layout(std430, binding = 3) buffer globalLightIndexListSSBO {
-//	uint globalLightIndexList[];
-//};
-
 layout(std430, binding = 4) buffer globalIndexCountSSBO {
 	float testDepth[];
+};
+
+layout(std430, binding = 5) buffer activeClustersSSBO {
+	uint activeIndices[];
 };
 
 uniform int noOfLights;
@@ -102,7 +102,7 @@ shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 shared Frustum tileFrustum;
 
 shared mat4 viewProjMatrix;
-shared mat4 invViewProj;
+//shared mat4 invViewProj;
 //shared mat4 invProj;
 
 //bool sphereAABBIntersect(uint light, uint tile);
@@ -132,10 +132,10 @@ void main() {
 		gl_WorkGroupID.y * gl_NumWorkGroups.x +
 		gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
 
-	if (gl_LocalInvocationIndex == 0) {
-		vec2 test = vec2(location) * pixelSize;
-		testDepth[tileIndex] = test.y;
-	}
+	//if (gl_LocalInvocationIndex == 0) {
+	//	vec2 test = vec2(location) * pixelSize;
+	//	testDepth[tileIndex] = test.y;
+	//}
 
     // One thread to init values and get the group's tile frustum.
 	// Could also reset everything in the indices buffer to 0 if so desired
@@ -143,7 +143,7 @@ void main() {
 		visibleLightCount = 0;
 		viewProjMatrix = projMatrix * viewMatrix;
 		//invProj = inverse(projMatrix);
-		invViewProj = inverse(viewProjMatrix);
+		//invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
 
 		//if (tileId.x < 78) {
@@ -166,7 +166,7 @@ void main() {
 	barrier();
 
 	//uint threadCount = TILE_SIZE * TILE_SIZE;
-	uint threadCount = 16;
+	uint threadCount = THREADS;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;

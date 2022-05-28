@@ -42,9 +42,9 @@ void main (void) {
 	float dist = length ( lightVec );
 	float atten = 1.0 - clamp ( dist / light.radius.x , 0.0 , 1.0);
 
-	if( atten == 0.0) {
-	    discard;
-	}
+	// if( atten == 0.0) {
+	    // discard;
+	// }
 
 		
 	vec3 incident = normalize ( lightVec);

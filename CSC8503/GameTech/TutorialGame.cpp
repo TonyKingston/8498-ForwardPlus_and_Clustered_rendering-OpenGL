@@ -203,11 +203,15 @@ void TutorialGame::UpdateKeys() {
 		Vector3 pos = world->GetMainCamera()->GetPosition();
 		cout << "Camera Position (x,y,z): " << pos.x << " " << pos.y << " " << pos.z << endl;
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM9)) {
+		renderer->ToggleDebugMode();
+	}
 }
 
 void TutorialGame::InitCamera() {
-	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(1500.0f);
+	world->GetMainCamera()->SetNearPlane(2.0f);
+	world->GetMainCamera()->SetFarPlane(1150.0f);
+	//world->GetMainCamera()->SetFarPlane(500.0f);
 	//world->GetMainCamera()->SetFarPlane(1000.0f);
 //	world->GetMainCamera()->SetPitch(-15.0f);
 //	world->GetMainCamera()->SetYaw(315.0f);

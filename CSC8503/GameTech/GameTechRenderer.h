@@ -74,6 +74,7 @@ namespace NCL {
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
+			bool inDebugMode = false;
 
 			void RenderStartView();
 			void ResizeSceneTextures(float width, float height);
@@ -92,6 +93,10 @@ namespace NCL {
 
 			void InitLights();
 
+			void ToggleDebugMode() {
+				inDebugMode = !inDebugMode;
+			}
+
 
 		protected:
 			void RenderFrame()	override;
@@ -100,15 +105,18 @@ namespace NCL {
 			void InitForward(bool withPrepass = false);
 			void InitDeferred();
 			void InitForwardPlus();
-			void InitClustered();
+			void InitClustered(bool withPrepass = false);
 
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
+			void ComputeActiveClusters();
 
 			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
 			void RenderForwardPlus();
-			void RenderClustered();
+			void RenderClustered(bool withPrepass = false);
+
+			void GenPrePassFBO();
 
 			void DepthPrePass();
 
@@ -183,6 +191,7 @@ namespace NCL {
 			GLuint aabbGridSSBO;
 			GLuint globalListSSBO;
 			GLuint globalCountSSBO;
+			GLuint activeClusterSSBO;
 			int tilesX;
 			int tilesY;
 			int clusterX;
