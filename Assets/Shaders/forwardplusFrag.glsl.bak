@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 2048
+#define MAX_LIGHTS_PER_TILE 2096
 
 #define HEATMAP_COLORS_COUNT 6
 
@@ -231,7 +231,6 @@ void main(void)
 		  colour = vec3(0.725, 0.96, 0.26);
 	   } else if (lightCount < 35) {
 	      colour = vec3(0.95, 0.95, 0.3);
-	   }
 	   } else if (lightCount < 50) {
 	      colour = vec3(1,0.65,0);
 	   } else if (lightCount < 100) {

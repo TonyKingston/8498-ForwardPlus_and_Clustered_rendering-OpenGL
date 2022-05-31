@@ -1,8 +1,8 @@
 #version 430 core
 
-#define TILE_SIZE 16
+#define THREADS 32
 #define MAX_LIGHTS_PER_TILE 4096
-layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -35,8 +35,10 @@ struct Plane {
 	vec4 distance;
 };
 
+
 struct Frustum {
 	Plane planes[4];
+	vec4 nearFar;
 };
 
 //struct LightGrid {
@@ -75,12 +77,20 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 	int lightIndices[];
 };
 
-//layout(std430, binding = 3) buffer globalLightIndexListSSBO {
-//	uint globalLightIndexList[];
-//};
+layout(std430, binding = 3) buffer activeClusterSSBO {
+	int activeClusters[];
+};
 
 layout(std430, binding = 4) buffer globalIndexCountSSBO {
 	float testDepth[];
+};
+
+layout(std430, binding = 5) buffer activeClustersSSBO {
+	uint activeIndices[];
+};
+
+layout(std430, binding = 6) buffer countSSBO {
+	uint activeClusterCount;
 };
 
 uniform int noOfLights;
@@ -88,19 +98,20 @@ uniform uint totalNumLights;
 uniform ivec2 screenSize;
 uniform vec2 pixelSize;
 uniform mat4 invProj;
+uniform float near;
+uniform float far;
 
 //shared PointLight sharedLights[TILE_SIZE * TILE_SIZE];
 //shared uint globalIndexLightCount;
 
 //shared vec4 frustumPlanes[6];
-shared uint minDepthInt;
-shared uint maxDepthInt;
 shared uint visibleLightCount;
 shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 shared Frustum tileFrustum;
+shared bool clusterActive;
 
 shared mat4 viewProjMatrix;
-shared mat4 invViewProj;
+//shared mat4 invViewProj;
 //shared mat4 invProj;
 
 //bool sphereAABBIntersect(uint light, uint tile);
@@ -112,38 +123,47 @@ vec4 ClipToView(vec4 clip);
 bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear, float zFar);
 bool SphereInsidePlane(vec3 posVs, float radius, Plane plane);
 
+
+float linearDepth(float depthSample) {
+	float depthRange = 2.0 * depthSample - 1.0;
+	float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
+	return linear;
+}
+
 void main() {
 	ivec2 tileId = ivec2(gl_WorkGroupID.xy);
 	ivec2 tileNumber = ivec2(gl_NumWorkGroups.xy);
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
 
-	uint tileIndex = tileId.y * tileNumber.x + tileId.x;
+	//uint tileIndex = tileId.y * tileNumber.x + tileId.x;
+	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
+	uint tileIndex = gl_WorkGroupID.x +
+		gl_WorkGroupID.y * gl_NumWorkGroups.x +
+		gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
 
-	// if (gl_LocalInvocationIndex == 0) {
-		// vec2 test = vec2(location) * pixelSize;
-		// testDepth[tileIndex] = test.y;
-	// }
-	//vec2 texCoord = (vec2(location)) / screenSize;
-	//vec2 texCoord = vec2(location) / ivec2(1264, 681);
-
-	vec2 texCoord = vec2(location) * pixelSize;
-	float depth = texture(depthTex, texCoord).r;
-	// Convert sampled depth into viewspace -1 to 1 range
-//	depth = depth * 2.0 - 1.0;
-	//depth = (0.5 * projMatrix[3][2]) / (depth + 0.5 * projMatrix[2][2] - 0.5);
-
-	uint depthInt = floatBitsToUint(depth);
+	//if (gl_LocalInvocationIndex == 0) {
+	//	vec2 test = vec2(location) * pixelSize;
+	//	testDepth[tileIndex] = test.y;
+	//}
 
     // One thread to init values and get the group's tile frustum.
 	// Could also reset everything in the indices buffer to 0 if so desired
 	if (gl_LocalInvocationIndex == 0) {
-		minDepthInt = 0xFFFFFFFF;
-		maxDepthInt = 0;
 		visibleLightCount = 0;
 		viewProjMatrix = projMatrix * viewMatrix;
 		//invProj = inverse(projMatrix);
-		invViewProj = inverse(viewProjMatrix);
+		//invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
+		clusterActive = false;
+		// for (uint i = 0; i < activeClusterCount && !clusterActive; i++) {
+			// if (activeIndices[i] == tileIndex) {
+				// clusterActive = true;
+				// //testDepth[tileIndex] = activeClusterCount;
+			// }
+		// }
+		if (activeClusters[tileIndex]) {
+		   clusterActive = true;
+		}
 
 		//if (tileId.x < 78) {
 		//	tileFrustum.planes[1] = tile[tileIndex + 1].planes[0];
@@ -153,34 +173,20 @@ void main() {
 		//	tileFrustum.planes[2] = tile[tileIndex + (tileId.y * tileNumber.x)].planes[3];
 		//	tileFrustum.planes[2].normal = -tileFrustum.planes[2].normal;
 		//}
+	}
 
-	} 
-	
-	barrier();
-
-	atomicMin(minDepthInt, depthInt);
-	atomicMax(maxDepthInt, depthInt);
-
-	barrier();
-
-	float minDepth = uintBitsToFloat(minDepthInt);
-	minDepth = minDepth * 2.0f - 1.0f;
-	float maxDepth = uintBitsToFloat(maxDepthInt);
-	maxDepth = maxDepth * 2.0f - 1.0f;
-
-
-	float minDepthVS = ClipToView(vec4(0.0, 0.0, minDepth, 1.0)).z;
-	float maxDepthVS = ClipToView(vec4(0.0, 0.0, maxDepth, 1.0)).z;
+	float minDepthVS = tileFrustum.nearFar.x;
+	float maxDepthVS = tileFrustum.nearFar.y;
 	float nearClipVS = ClipToView(vec4(0.0, 0.0, 0.0, 1.0)).z;
 
 	Plane minPlane = { vec4(0.0, 0.0, -1.0, 0.0), vec4(-minDepthVS, 0.0,0.0,0.0) };
 
 	barrier();
 
-	// Each batch will handle 256 lights with a tile size of 16
-	uint threadCount = TILE_SIZE * TILE_SIZE;
+	//uint threadCount = TILE_SIZE * TILE_SIZE;
+	uint threadCount = THREADS;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
-	for (uint i = 0; i < batchCount; ++i) {
+	for (uint i = 0; i < batchCount && clusterActive; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
 		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
@@ -196,10 +202,10 @@ void main() {
 
 		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
 			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
-			    if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
-				   uint offset = atomicAdd(visibleLightCount, 1);
-				   visibleLightIndices[offset] = int(lightIndex);
-			    }
+				if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+					uint offset = atomicAdd(visibleLightCount, 1);
+					visibleLightIndices[offset] = int(lightIndex);
+				}
 			}
 		}
 	}
@@ -207,7 +213,6 @@ void main() {
 	barrier();
 
 	if (gl_LocalInvocationIndex == 0) {
-	//	testDepth[tileIndex] = maxDepthVS;
 		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
 
 		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
@@ -346,8 +351,6 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 	return result;
 }
 
-
-// Check if sphere is inside the negative halfspace of the plane.
 bool SphereInsidePlane(vec3 posVs, float radius, Plane plane) {
 	return (dot(plane.normal.xyz, posVs) - plane.distance.x) < -radius;
 }

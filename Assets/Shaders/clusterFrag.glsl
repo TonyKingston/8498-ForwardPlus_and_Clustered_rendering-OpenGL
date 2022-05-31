@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 2048
+#define MAX_LIGHTS_PER_TILE 4096
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -49,6 +49,9 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 //	uint globalLightIndexList[];
 //};
 
+layout(std430, binding = 3) buffer activeClusterSSBO {
+	bool activeClusters[];
+};
 
 layout(std430, binding = 4) buffer globalIndexCountSSBO {
 	float testDepth[];
@@ -104,7 +107,7 @@ float linearDepth(float depthSample){
 }
 
 // Doom values
-const uvec3 gridDims = uvec3(16, 8, 24);
+const uvec3 gridDims = uvec3(16, 8, 64);
 
 void main(void)
 {
@@ -194,7 +197,7 @@ void main(void)
 //	fragColor.rgb += albedo.rgb * shade;
 	//float normalised = (zTile - 0) / (gridDims.z - 0);
 	//fragColor.rgb = vec3(normalised);
-	testDepth[tileIndex] = tiles.z;
+	//testDepth[tileIndex] = tiles.z;
 
 	if (inDebug) {
 		//fragColor.rgb = vec3(colors[uint(mod(zTile, 8))]);
@@ -230,6 +233,10 @@ void main(void)
 			}
 
 			fragColor.rgb = colour;
+
+			if (activeClusters[tileIndex]) {
+				fragColor.rgb = vec3(1, 0, 0);
+			}
 
 		}
 	}

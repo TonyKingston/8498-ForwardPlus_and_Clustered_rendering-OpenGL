@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 2048
+#define MAX_LIGHTS_PER_TILE 4096
 
 #define HEATMAP_COLORS_COUNT 6
 

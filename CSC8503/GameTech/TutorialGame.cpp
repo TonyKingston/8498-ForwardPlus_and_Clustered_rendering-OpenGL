@@ -22,7 +22,7 @@ TutorialGame::TutorialGame() {
 	resourceManager = new OGLResourceManager();
 	bool prepass = false;
 	int mode = AskRenderingMode();
-	if (mode == 0) {
+	if (mode == 0 || mode == 3) {
 		prepass = AskPrepass();
 	}
 	InitCamera();
@@ -167,6 +167,8 @@ bool TutorialGame::AskPrepass() {
 		AskPrepass();
 		break;
 	}
+
+	return 0;
 
 }
 

@@ -29,35 +29,39 @@ layout(std430, binding = 1) buffer tileGrid {
 };
 
 layout(std430, binding = 3) buffer activeClusterSSBO {
-	bool activeClusters[];
+	int activeClusters[];
+};
+
+layout(std430, binding = 4) buffer globalIndexCountSSBO {
+	float testDepth[];
+};
+
+layout(std430, binding = 5) buffer testSSBO {
+	uint testCluster[];
+};
+
+layout(std430, binding = 6) buffer countSSBO {
+	uint activeClusterCount;
 };
 
 uniform sampler2D depthTex;
 
 uniform mat4 projMatrix;
-uniform mat4 inverseProj;
 uniform vec2 pixelSize;
 uniform int tilePxX;
 uniform int tilePxY;
 
-uniform float near;
-uniform float far;
-
 uniform float scale;
 uniform float bias;
 
-vec4 screenToView(vec4 screenSpace);
-vec3 AABBExtent(vec3 min, vec3 max);
-vec3 ConstructPlane(vec3 A, vec3 B, float zDistance);
-Plane ComputePlane(vec3 A, vec3 B, vec3 C);
-
 float lineariseDepth(float depthSample) {
-	float depthRange = 2.0 * depthSample - 1.0;
-	float lin = projMatrix[3][2] / (projMatrix[2][2] + depthRange);
+	float depthRange = depthSample * 2.0 - 1.0;
+	float lin = 2.0 * 2.0 * 1150.0 / (1150.0 + 2.0 - depthRange * (1150.0 - 2.0));
+	//float lin = projMatrix[3][2] / (projMatrix[2][2] + depthRange);
 	return lin;
 }
 
-const uvec3 gridDims = uvec3(16, 8, 24);
+const uvec3 gridDims = uvec3(16, 8, 64);
 
 void main() {
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
@@ -68,5 +72,10 @@ void main() {
 	uint zTile     = uint(max(log2(lineariseDepth(depth)) * scale + bias, 0.0));
 	uvec3 tiles = uvec3(uvec2(location.x / tilePxX, location.y / tilePxY), zTile);
 	uint clusterIndex = tiles.x + (gridDims.x * (tiles.y + gridDims.y * tiles.z));
-	activeClusters[clusterIndex] = true;
+	activeClusters[clusterIndex] = 1;
+//	testDepth[clusterIndex] = clusterIndex;
+	//testCluster[clusterIndex] = gl_GlobalInvocationID.x;
+	if (location.xy == ivec2(0)) {
+	   activeClusterCount = 0;
+	}
 }

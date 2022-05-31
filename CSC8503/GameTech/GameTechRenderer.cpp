@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 98304;
+const unsigned int MAX_LIGHTS = 49152;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -66,7 +66,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, 
 		InitForwardPlus();
 		break;
 	case 3:
-		InitClustered();
+		InitClustered(prepass);
 		break;
 	}
 
@@ -292,15 +292,25 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	if (withPrepass) {
 		GenPrePassFBO();
 		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
-
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(int), NULL, GL_STATIC_COPY);
+		glGenBuffers(1, &activeClusterSSBO);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, activeClusterSSBO);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(unsigned int), NULL, GL_STATIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, activeClusterSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+		glGenBuffers(1, &activeCountSSBO);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, activeCountSSBO);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, activeCountSSBO);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterActiveCull.glsl");
+	}
+	else {
+		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.glsl");
 	}
 
 	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "clusterFrag.glsl");
 	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("clusterGrid.glsl");
-	forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.glsl");
 
 	glGenBuffers(1, &lightGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightGridSSBO);
@@ -321,7 +331,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	totalNumLights = numClusters * MAX_LIGHTS_PER_TILE;
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, globalListSSBO);
 
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(bool), NULL, GL_STATIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(int), NULL, GL_STATIC_COPY);
 	//glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(LightGrid) * numTiles, NULL, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, globalListSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -482,8 +492,8 @@ void GameTechRenderer::ComputeActiveClusters() {
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "depthTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMat);
 
@@ -495,7 +505,16 @@ void GameTechRenderer::ComputeActiveClusters() {
 	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), biasFactor);
 
 	glDispatchCompute(currentWidth, currentHeight, 1);
-	//	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+void GameTechRenderer::CompactClusterList() {
+	OGLShader* activeShader = (OGLShader*)resourceManager->LoadShader("compactClusters.comp");
+	BindShader(activeShader);
+
+	glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
+	//glDispatchCompute(1, 1, 6);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void GameTechRenderer::DepthPrePass() {
@@ -590,7 +609,13 @@ void GameTechRenderer::ClusteredCullLights() {
 
 
 	//glDispatchCompute(1, 1, 6);
-	glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
+	if (usingPrepass) {
+		//glDispatchComputeIndirect();
+		glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
+	}
+	else {
+		glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
+	}
 }
 
 void GameTechRenderer::LoadPrinter() {
@@ -802,7 +827,7 @@ void GameTechRenderer::RenderFrame() {
 		RenderForwardPlus();
 		break;
 	case 3:
-		RenderClustered();
+		RenderClustered(usingPrepass);
 		break;
 	}
 
@@ -909,6 +934,7 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 	if (withPrepass) {
 		DepthPrePass();
 		ComputeActiveClusters();
+		CompactClusterList();
 	}
 
 	ClusteredCullLights();

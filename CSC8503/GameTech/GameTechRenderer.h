@@ -23,9 +23,9 @@ namespace NCL {
 // Using the same values as Doom 2016
 #define CLUSTER_GRID_X 16
 #define CLUSTER_GRID_Y 8
-#define CLUSTER_GRID_Z 24
+#define CLUSTER_GRID_Z 64
 
-#define MAX_LIGHTS_PER_TILE 2048
+#define MAX_LIGHTS_PER_TILE 4096
 
 		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
@@ -110,6 +110,7 @@ namespace NCL {
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
 			void ComputeActiveClusters();
+			void CompactClusterList();
 
 			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
@@ -192,6 +193,7 @@ namespace NCL {
 			GLuint globalListSSBO;
 			GLuint globalCountSSBO;
 			GLuint activeClusterSSBO;
+			GLuint activeCountSSBO;
 			int tilesX;
 			int tilesY;
 			int clusterX;
@@ -248,12 +250,12 @@ namespace NCL {
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
-			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f);
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f);
+		/*	const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f);*/
 
 			// Clump lights in center corridor
-			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f);
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f);*/
+			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f);
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f);
 
 			//Depth disparity test
 			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-350.0f, 0.0f, -100.0f);

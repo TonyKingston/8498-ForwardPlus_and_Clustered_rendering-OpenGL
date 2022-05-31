@@ -1,7 +1,7 @@
 #version 430 core
 
 #define THREADS 32
-#define MAX_LIGHTS_PER_TILE 2048
+#define MAX_LIGHTS_PER_TILE 4096
 layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
@@ -81,10 +81,6 @@ layout(std430, binding = 4) buffer globalIndexCountSSBO {
 	float testDepth[];
 };
 
-layout(std430, binding = 5) buffer activeClustersSSBO {
-	uint activeIndices[];
-};
-
 uniform int noOfLights;
 uniform uint totalNumLights;
 uniform ivec2 screenSize;
@@ -154,8 +150,7 @@ void main() {
 		//	tileFrustum.planes[2] = tile[tileIndex + (tileId.y * tileNumber.x)].planes[3];
 		//	tileFrustum.planes[2].normal = -tileFrustum.planes[2].normal;
 		//}
-
-	} 
+	}
 
 	float minDepthVS = tileFrustum.nearFar.x;
 	float maxDepthVS = tileFrustum.nearFar.y;
