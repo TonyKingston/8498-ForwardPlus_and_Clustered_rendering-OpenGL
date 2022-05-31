@@ -1,7 +1,7 @@
 #version 430 core
 
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 4096
+#define MAX_LIGHTS_PER_TILE 2048
 
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
@@ -107,7 +107,7 @@ float linearDepth(float depthSample){
 }
 
 // Doom values
-const uvec3 gridDims = uvec3(16, 8, 64);
+const uvec3 gridDims = uvec3(16, 8, 24);
 
 void main(void)
 {

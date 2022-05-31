@@ -17,7 +17,7 @@ int main() {
 	bool reachedCapacity = false;
 	const std::string OUTPUTDIR("../../Data/");
 	std::ofstream file;
-	file.open(OUTPUTDIR + "deferred-final-clumped.csv", std::ios_base::app);
+	file.open(OUTPUTDIR + "clustered-final-clumped-test.csv", std::ios_base::app);
 	fileOpen = true;
 	file << "frame time" << "," << "Number of lights" << std::endl;
 

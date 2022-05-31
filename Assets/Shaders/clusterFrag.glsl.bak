@@ -107,7 +107,7 @@ float linearDepth(float depthSample){
 }
 
 // Doom values
-const uvec3 gridDims = uvec3(32, 18, 32);
+const uvec3 gridDims = uvec3(16, 8, 24);
 
 void main(void)
 {

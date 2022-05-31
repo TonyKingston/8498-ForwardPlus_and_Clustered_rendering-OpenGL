@@ -213,6 +213,7 @@ void TutorialGame::UpdateKeys() {
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(2.0f);
 	world->GetMainCamera()->SetFarPlane(1150.0f);
+	//world->GetMainCamera()->SetFarPlane(575.0f);
 	//world->GetMainCamera()->SetFarPlane(500.0f);
 	//world->GetMainCamera()->SetFarPlane(1000.0f);
 //	world->GetMainCamera()->SetPitch(-15.0f);

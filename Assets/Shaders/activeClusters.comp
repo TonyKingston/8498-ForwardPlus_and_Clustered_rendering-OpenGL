@@ -61,7 +61,7 @@ float lineariseDepth(float depthSample) {
 	return lin;
 }
 
-const uvec3 gridDims = uvec3(16, 8, 64);
+const uvec3 gridDims = uvec3(16, 8, 24);
 
 void main() {
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);

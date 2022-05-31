@@ -18,6 +18,7 @@ using namespace CSC8503;
 #define SHADOWSIZE 4096
 
 const unsigned int MAX_LIGHTS = 49152;
+//const unsigned int MAX_LIGHTS = 98304;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
