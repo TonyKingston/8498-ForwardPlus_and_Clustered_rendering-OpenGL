@@ -2,7 +2,7 @@
 
 #define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
-layout(local_size_x = THREADS, local_size_y = THREADS, local_size_z = 1) in;
+layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
