@@ -136,12 +136,7 @@ void main() {
 		//invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
 		clusterActive = false;
-		// for (uint i = 0; i < activeClusterCount && !clusterActive; i++) {
-			// if (activeIndices[i] == tileIndex) {
-				// clusterActive = true;
-				// //testDepth[tileIndex] = activeClusterCount;
-			// }
-		// }
+		
 		if (activeClusters[tileIndex]) {
 		   clusterActive = true;
 		}

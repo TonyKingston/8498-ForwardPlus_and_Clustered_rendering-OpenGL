@@ -112,7 +112,6 @@ shared mat4 viewProjMatrix;
 //shared mat4 invViewProj;
 //shared mat4 invProj;
 
-
 //bool quickIntersect(uint light, uint tile);
 TileAABB AABBtransform(TileAABB aabb, mat4 mat);
 vec4 ClipToView(vec4 clip);
