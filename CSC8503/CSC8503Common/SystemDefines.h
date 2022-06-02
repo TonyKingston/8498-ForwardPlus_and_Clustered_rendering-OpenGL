@@ -14,3 +14,6 @@ template <typename M> void DeleteVector(M& vector) {
 }
 
 #define SAFE_RELEASE(x)	if(x)	{ x->release(); x = nullptr;}
+
+const int WORLD_SCALE = 1;
+

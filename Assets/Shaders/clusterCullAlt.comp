@@ -1,8 +1,7 @@
 #version 430 core
 
-#define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
-layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 8, local_size_z = 4) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -77,20 +76,8 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 	int lightIndices[];
 };
 
-layout(std430, binding = 3) buffer activeClusterSSBO {
-	bool activeClusters[];
-};
-
 layout(std430, binding = 4) buffer globalIndexCountSSBO {
 	float testDepth[];
-};
-
-layout(std430, binding = 5) buffer activeClustersSSBO {
-	uint activeIndices[];
-};
-
-layout(std430, binding = 6) buffer countSSBO {
-	uint activeClusterCount;
 };
 
 uniform int noOfLights;
@@ -105,12 +92,10 @@ uniform float far;
 //shared uint globalIndexLightCount;
 
 //shared vec4 frustumPlanes[6];
-shared uint visibleLightCount;
-shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
-shared Frustum tileFrustum;
-shared bool clusterActive;
+shared uint globalLightCount;
+//shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
+shared PointLight sharedLights[16 * 8 * 4];
 
-shared mat4 viewProjMatrix;
 //shared mat4 invViewProj;
 //shared mat4 invProj;
 
@@ -131,15 +116,11 @@ float linearDepth(float depthSample) {
 }
 
 void main() {
-	ivec2 tileId = ivec2(gl_WorkGroupID.xy);
-	ivec2 tileNumber = ivec2(gl_NumWorkGroups.xy);
-	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
-
-	//uint tileIndex = tileId.y * tileNumber.x + tileId.x;
-	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
-	uint tileIndex = gl_WorkGroupID.x +
-		gl_WorkGroupID.y * gl_NumWorkGroups.x +
-		gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
+    globalLightCount = 0;
+	uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
+	//uint tileIndex = gl_WorkGroupID.x +
+	//	gl_WorkGroupID.y * gl_NumWorkGroups.x +
+	//	gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
 
 	//if (gl_LocalInvocationIndex == 0) {
 	//	vec2 test = vec2(location) * pixelSize;
@@ -148,32 +129,8 @@ void main() {
 
     // One thread to init values and get the group's tile frustum.
 	// Could also reset everything in the indices buffer to 0 if so desired
-	if (gl_LocalInvocationIndex == 0) {
-		visibleLightCount = 0;
-		viewProjMatrix = projMatrix * viewMatrix;
-		//invProj = inverse(projMatrix);
-		//invViewProj = inverse(viewProjMatrix);
-		tileFrustum = tile[tileIndex];
-		clusterActive = false;
-		// for (uint i = 0; i < activeClusterCount && !clusterActive; i++) {
-			// if (activeIndices[i] == tileIndex) {
-				// clusterActive = true;
-				// //testDepth[tileIndex] = activeClusterCount;
-			// }
-		// }
-		if (activeClusters[tileIndex]) {
-		   clusterActive = true;
-		}
 
-		//if (tileId.x < 78) {
-		//	tileFrustum.planes[1] = tile[tileIndex + 1].planes[0];
-		//	tileFrustum.planes[1].normal = -tileFrustum.planes[1].normal;
-		//}
-		//if (tileId.y < 42) {
-		//	tileFrustum.planes[2] = tile[tileIndex + (tileId.y * tileNumber.x)].planes[3];
-		//	tileFrustum.planes[2].normal = -tileFrustum.planes[2].normal;
-		//}
-	}
+	Frustum tileFrustum = tile[tileIndex];
 
 	float minDepthVS = tileFrustum.nearFar.x;
 	float maxDepthVS = tileFrustum.nearFar.y;
@@ -183,47 +140,70 @@ void main() {
 
 	barrier();
 
+	uint visibleLightCount = 0;
+    int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 	//uint threadCount = TILE_SIZE * TILE_SIZE;
-	uint threadCount = THREADS;
+	uint threadCount = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
-	for (uint i = 0; i < batchCount && clusterActive; ++i) {
+	for (uint i = 0; i < batchCount; ++i) {
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
-			break;
-		}
+//		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
+//			break;
+//		}
+        lightIndex = min(lightIndex, noOfLights);
 
 		/*lightIndex = min(lightIndex, noOfLights);*/
-		PointLight light = pointLights[lightIndex];
-		vec4 position = light.pos;
-		position.w = 1.0;
-		float radius = light.radius.x;
-		vec4 vPos = viewMatrix * position;
+		//PointLight light = pointLights[lightIndex];
+		sharedLights[gl_LocalInvocationIndex] = pointLights[lightIndex];
+		barrier();
 
-		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
-			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
-				if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
-					uint offset = atomicAdd(visibleLightCount, 1);
-					visibleLightIndices[offset] = int(lightIndex);
-				}
-			}
+		for (uint j = 0; j < threadCount; ++j ) {
+		  vec4 position = sharedLights[j].pos;
+		  position.w = 1.0;
+		  float radius = sharedLights[j].radius.x;
+		  vec4 vPos = viewMatrix * position;
+		  if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
+			  if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
+				  if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+					 // uint offset = atomicAdd(visibleLightCount, 1);
+					  //visibleLightIndices[offset] = int(i * threadCount + j);
+					  visibleLightIndices[visibleLightCount] = int(i * threadCount + j);
+					  visibleLightCount += 1;
+				  }
+			  }
+		  }
 		}
 	}
 
 	barrier();
 
-	if (gl_LocalInvocationIndex == 0) {
-		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
+//	uint offset = atomicAdd(globalLightCount, visibleLightCount);
 
-		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
-			lightIndices[offset + i] = visibleLightIndices[i];
-		}
-
-		if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
-			lightIndices[offset + visibleLightCount] = -1;
-		}
-
+	for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
+		lightIndices[(tileIndex * MAX_LIGHTS_PER_TILE) + i] = visibleLightIndices[i];
 	}
+
+    if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+	   lightIndices[(tileIndex * MAX_LIGHTS_PER_TILE) + visibleLightCount] = -1;
+	}
+
+//	testDepth[tileIndex] = tileIndex;
+	
+
+//
+//	if (gl_LocalInvocationIndex == 0) {
+//		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
+//
+//		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
+//			lightIndices[offset + i] = visibleLightIndices[i];
+//		}
+//
+//		if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
+//			lightIndices[offset + visibleLightCount] = -1;
+//		}
+//
+//	}
 }
 
 /*void main() {

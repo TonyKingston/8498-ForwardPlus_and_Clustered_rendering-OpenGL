@@ -129,13 +129,13 @@ void main() {
 	////// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
 	Frustum frustum;
 	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);  // Left
-	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
-	//frustum.planes[1] = frustum.planes[0];  // Right
-	//frustum.planes[1].normal = -frustum.planes[1].normal;
+	//frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
+	frustum.planes[1] = frustum.planes[0];  // Right
+	frustum.planes[1].normal = -frustum.planes[1].normal;
 	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);  // Top
-	frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
-	//frustum.planes[3] = frustum.planes[2];
-	//frustum.planes[3].normal = -frustum.planes[3].normal;
+	//frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
+	frustum.planes[3] = frustum.planes[2];
+	frustum.planes[3].normal = -frustum.planes[3].normal;
 
 	//frustum.planes[0].distance.y = gl_WorkGroupID.x;
 	//frustum.planes[0].distance.z = gl_WorkGroupID.y;

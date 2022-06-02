@@ -17,7 +17,7 @@ int main() {
 	bool reachedCapacity = false;
 	const std::string OUTPUTDIR("../../Data/");
 	std::ofstream file;
-	file.open(OUTPUTDIR + "clustered-final-clumped-test.csv", std::ios_base::app);
+	file.open(OUTPUTDIR + "clustered-thread-test-2048.csv", std::ios_base::app);
 	fileOpen = true;
 	file << "frame time" << "," << "Number of lights" << std::endl;
 
@@ -38,7 +38,7 @@ int main() {
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE) && !reachedCapacity) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
-		if (dt > 0.14f) {
+		if (dt > 0.45f) {
 			std::cout << "Skipping large time delta" << std::endl;
 			continue; //must have hit a breakpoint or something to have a 1 second frame time!
 		}

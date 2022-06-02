@@ -2,7 +2,7 @@
 
 #define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
-layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = THREADS, local_size_y = THREADS, local_size_z = 1) in;
 //layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size x = 32) in;
 
@@ -128,9 +128,9 @@ void main() {
 		gl_WorkGroupID.y * gl_NumWorkGroups.x +
 		gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
 
-	//if (gl_LocalInvocationIndex == 0) {
-	//	vec2 test = vec2(location) * pixelSize;
-	//	testDepth[tileIndex] = test.y;
+	//if (gl_LocalInvocationIndex == 32) {
+	////	vec2 test = vec2(location) * pixelSize;
+	//	testDepth[tileIndex] = gl_LocalInvocationIndex;
 	//}
 
     // One thread to init values and get the group's tile frustum.
@@ -160,7 +160,6 @@ void main() {
 
 	barrier();
 
-	//uint threadCount = TILE_SIZE * TILE_SIZE;
 	uint threadCount = THREADS;
 	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
@@ -182,7 +181,7 @@ void main() {
 				if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
 					uint offset = atomicAdd(visibleLightCount, 1);
 					visibleLightIndices[offset] = int(lightIndex);
-				}
+			    }
 			}
 		}
 	}
@@ -202,109 +201,6 @@ void main() {
 
 	}
 }
-
-/*void main() {
-	globalIndexLightCount = 0;
-	//uint threadCount = TILE_SIZE * TILE_SIZE;
-	uint threadCount = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
-	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
-	ivec2 tileNumber = ivec2(gl_NumWorkGroups.xy);
-
-//	uint tileIndex = gl_WorkGroupID.y * tileNumber.x + gl_WorkGroupID.x;
-	//uint tileIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
-	uint tileIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
-	
-	//if (gl_LocalInvocationIndex == 0) {
-		// uint offset = tileIndex * 50;
-		// for (uint i = 0; i < 50; i++) {
-			// globalLightIndexList[offset + i] = -1;
-		// }
-	// }
-	//barrier();
-
-	uint visibleLightCount = 0;
-	uint visibleLightIndices[100];
-
-	for (uint i = 0; i < batchCount; ++i) {
-		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
-
-		if (lightIndex >= noOfLights) {
-			break;
-		}
-
-	//	lightIndex = min(lightIndex, noOfLights);
-
-		sharedLights[gl_LocalInvocationIndex] = pointLights[lightIndex];
-		barrier();
-
-		for (uint light = 0; light < threadCount; ++light) {
-			if (sphereAABBIntersect(light, tileIndex)) {
-		//	if (quickIntersect(light, tileIndex)) {
-		//	if (frustSphereIntersect(light, tileIndex)) {
-				visibleLightIndices[visibleLightCount] = i * threadCount + light;
-				visibleLightCount += 1;
-			}
-		}
-	}
-
-	barrier();
-
-	uint offset = atomicAdd(globalIndexLightCount, visibleLightCount);
-
-	for (uint i = 0; i < visibleLightCount; ++i) {
-		globalLightIndexList[offset + i] = visibleLightIndices[i];
-	}
-
-	lightGrid[tileIndex].offset = offset;
-	lightGrid[tileIndex].count = visibleLightCount;
-
-	//tiles[tileIndex].min = vec4(tileIndex, 0.0, 0.0, 0.0);
-}*/
-
-// We know 16 is length. Max - min. Pythagoras?
-//bool sphereAABBIntersect(uint light, uint tile) {
-//	float radius = sharedLights[light].radius;
-//	vec3 center = vec3(viewMatrix * sharedLights[light].position);
-//	float distSq = sqDistPointAABB(center, tile);
-//
-//	return distSq <= (radius * radius);
-//}
-
-//bool frustumSphereIntersect(uint light, uint tile) {
-//	//vec3 center = vec3(viewMatrix * sharedLights[light].pos);
-//	//float radius = sharedLights[light].radius.x;
-//	float distance = 0.0;
-//	//for (uint j = 0; j < 6; j++) {
-//	//	distance = dot(position, frustumPlanes[j]) + radius;
-//
-//	//	// If one of the tests fails, then there is no intersection
-//	//	if (distance <= 0.0) {
-//	//		break;
-//	//	}
-//	//}
-//	return false;
-//}
-//
-//bool quickIntersect(uint light, uint tile) {
-//	TileAABB currentTile = tiles[tile];
-//	vec4 tileCenter = (currentTile.min + currentTile.max) * 0.5;
-//	//vec3 center = vec3(viewMatrix * vec4(sharedLights[light].pos, 0));
-//	vec3 center = vec3(viewMatrix * sharedLights[light].pos);
-//	float radius = sharedLights[light].radius.x;
-//	vec3 vDelta = max(vec3(0,0,0), abs(tileCenter.xyz - center) - currentTile.extent.xyz);
-//	float sqDist = dot(vDelta, vDelta);
-//	return sqDist <= (radius * radius);
-//}
-//
-//bool sphereAABBIntersect(uint light, uint tile) {
-//	vec3 center = vec3(viewMatrix * sharedLights[light].pos);
-//	float radius = sharedLights[light].radius.x;
-//	//float radius = pointLights[light].radius.x;
-//	//vec3 center = vec3(viewMatrix * pointLights[light].pos);
-//	float sqDist = sqDistPointAABB(center, tile);
-//
-//	return sqDist <= (radius * radius);
-//}
 
 vec4 ClipToView(vec4 clip) {
 	vec4 view = invProj * clip;

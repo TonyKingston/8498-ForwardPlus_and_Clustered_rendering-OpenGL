@@ -212,18 +212,13 @@ void TutorialGame::UpdateKeys() {
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(2.0f);
-	world->GetMainCamera()->SetFarPlane(1150.0f);
+	world->GetMainCamera()->SetFarPlane(1150.0f / WORLD_SCALE);
 	//world->GetMainCamera()->SetFarPlane(575.0f);
-	//world->GetMainCamera()->SetFarPlane(500.0f);
-	//world->GetMainCamera()->SetFarPlane(1000.0f);
-//	world->GetMainCamera()->SetPitch(-15.0f);
-//	world->GetMainCamera()->SetYaw(315.0f);
 	world->GetMainCamera()->SetYaw(270.0f);
 	world->GetMainCamera()->SetPitch(-5.5f);
 
-	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
-//	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
-	world->GetMainCamera()->SetPosition(Vector3(-530, 71, -12));
+	world->GetMainCamera()->SetPosition(Vector3(-530, 71, -12) / WORLD_SCALE);
+	//world->GetMainCamera()->SetPosition(Vector3(-265, 35, -6.5));
 	lockedObject = nullptr;
 }
 

@@ -56,8 +56,8 @@ uniform float bias;
 
 float lineariseDepth(float depthSample) {
 	float depthRange = depthSample * 2.0 - 1.0;
-	float lin = 2.0 * 2.0 * 1150.0 / (1150.0 + 2.0 - depthRange * (1150.0 - 2.0));
-	//float lin = projMatrix[3][2] / (projMatrix[2][2] + depthRange);
+	//float lin = 2.0 * 2.0 * 1150.0 / (1150.0 + 2.0 - depthRange * (1150.0 - 2.0));
+	float lin = projMatrix[3][2] / (projMatrix[2][2] + depthRange);
 	return lin;
 }
 

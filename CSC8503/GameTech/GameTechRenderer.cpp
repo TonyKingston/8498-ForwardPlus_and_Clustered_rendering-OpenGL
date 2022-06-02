@@ -17,8 +17,8 @@ using namespace CSC8503;
 
 #define SHADOWSIZE 4096
 
-const unsigned int MAX_LIGHTS = 49152;
-//const unsigned int MAX_LIGHTS = 98304;
+//const unsigned int MAX_LIGHTS = 49152;
+const unsigned int MAX_LIGHTS = 98304;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -92,7 +92,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 //	//light.position = Vector3(10.0f, 10.0f, 10.0f);
 ////	light.radius = 40.0f;
 //	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
-//
+////
 //	Light& light2 = pointLights[1];
 //	light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
 //	light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
@@ -118,7 +118,7 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
-	//numLights += 3;
+ //   numLights += 3;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -308,6 +308,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	}
 	else {
 		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.glsl");
+		//forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCullAlt.comp");
 	}
 
 	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "clusterFrag.glsl");
@@ -415,7 +416,7 @@ bool GameTechRenderer::AddLights(int n) {
 		light.colour = Vector4(1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0f);
 //		lightPos.y = 10.0f;
 		light.position = lightPos;
-		light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
+		light.radius = Vector4(LIGHT_RADIUS, 0.0, 0.0, 0.0);
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER,0, lightSSBO);
@@ -435,6 +436,7 @@ GameTechRenderer::~GameTechRenderer() {
 }
 
 void GameTechRenderer::ComputeTileGrid() {
+
 	int sizeX = (unsigned int)std::ceilf(currentWidth / (float)TILE_SIZE);
 
 	Camera* current = gameWorld.GetMainCamera();
@@ -449,14 +451,15 @@ void GameTechRenderer::ComputeTileGrid() {
 	glUniform1i(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "tilePxX"), sizeX);
 //	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "near"), current->GetNearPlane());
 //	glUniform1f(glGetUniformLocation(forwardPlusGridShader->GetProgramID(), "far"), current->GetFarPlane());
-	unsigned int query;
+	/*unsigned int query;
 	GLuint64 timer;
 	glGenQueries(1, &query);
-	glBeginQuery(GL_TIME_ELAPSED, query);
+	glBeginQuery(GL_TIME_ELAPSED, query);*/
 	glDispatchCompute(tilesX, tilesY, 1);
-	glEndQuery(GL_TIME_ELAPSED);
+	/*glEndQuery(GL_TIME_ELAPSED);
 	glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timer);
-	std::printf("Time spent on the GPU: %f ms\n", timer / 1000000.0);
+	float time = timer / 1000000.0;
+	std::printf("Time spent on the GPU: %f ms\n", time);*/
 
 	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
@@ -609,13 +612,14 @@ void GameTechRenderer::ClusteredCullLights() {
 	glUniform1f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "far"), gameWorld.GetMainCamera()->GetFarPlane());
 
 
-	//glDispatchCompute(1, 1, 6);
 	if (usingPrepass) {
 		//glDispatchComputeIndirect();
 		glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
 	}
 	else {
 		glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
+	    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
 	}
 }
 
