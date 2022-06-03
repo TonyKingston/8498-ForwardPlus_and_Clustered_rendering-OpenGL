@@ -39,7 +39,8 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		GameObject* obj = this->ProcessMesh(mesh, scene);
 		obj->GetTransform().SetPosition(Vector3(0, 0, 0))
-			.SetScale(Vector3(0.4, 0.4, 0.4));
+			.SetScale(Vector3(0.4, 0.4, 0.4) / WORLD_SCALE);
+		 //   .SetScale(Vector3(0.2, 0.2, 0.2));
 		//obj->GetTransform().SetPosition();
 		//node->mTransformation.
 		this->objects.push_back(obj);
@@ -126,21 +127,22 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		// Diffuse maps
-		std::vector<OGLTexture*> diffuseMaps = this->LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<OGLTexture*> diffuseMaps = this->LoadMaterialTextures(material, aiTextureType_DIFFUSE);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// Normal maps
-		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		//std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT);
+		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_DISPLACEMENT);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR);
 		specTex.insert(specTex.end(), specularMaps.begin(), specularMaps.end());
 
 		if (specTex.size() > 0) {
 			bool a = true;
 		}
 
-		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY, "texture_mask");
+		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY);
 		if (masks.size() > 0) {
 			mask = true;
 		}
@@ -176,7 +178,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
 }
 
-vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
+vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type) {
 	vector<OGLTexture*> textures;
 
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {

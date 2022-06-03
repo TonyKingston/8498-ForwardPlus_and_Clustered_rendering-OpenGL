@@ -44,6 +44,7 @@ namespace NCL {
 
 			int AskRenderingMode();
 			bool AskPrepass();
+			bool AskForwardPlus();
 
 		protected:
 			void InitialiseAssets(int level = 1);
@@ -121,6 +122,8 @@ namespace NCL {
 			Model* sponza;
 
 			const int GAME_LENGTH = 180.0f;
+
+			unsigned int lightsToAdd = 16;
 
 		};
 	}

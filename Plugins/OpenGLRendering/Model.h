@@ -47,8 +47,7 @@ namespace NCL {
             void LoadModel(string path);
             void ProcessNode(aiNode* node, const aiScene* scene);
             CSC8503::GameObject* ProcessMesh(aiMesh* mesh, const aiScene* scene);
-            vector<OGLTexture*> LoadMaterialTextures(aiMaterial* mat, aiTextureType type,
-                string typeName);
+            vector<OGLTexture*> LoadMaterialTextures(aiMaterial* mat, aiTextureType type);
 
             OGLResourceManager* resourceManager;
 		};

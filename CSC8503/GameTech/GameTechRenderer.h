@@ -25,7 +25,8 @@ namespace NCL {
 #define CLUSTER_GRID_Y 8
 #define CLUSTER_GRID_Z 24
 
-#define MAX_LIGHTS_PER_TILE 64
+#define MAX_LIGHTS_PER_TILE 2048
+#define LIGHT_RADIUS 40.0 / WORLD_SCALE
 
 		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
@@ -59,7 +60,7 @@ namespace NCL {
 
 		struct ClusterFrustum {
 			TilePlane plane[4];
-			Vector2 nearFar;
+			Vector4 nearFar;
 		};
 
 		struct LightGrid {
@@ -74,11 +75,13 @@ namespace NCL {
 			~GameTechRenderer();
 
 			bool inSplitScreen = false;
+			bool inDebugMode = false;
 
 			void RenderStartView();
 			void ResizeSceneTextures(float width, float height);
 
 			void UpdateLights(float dt);
+			void UpdateLightsGPU(float dt);
 			bool AddLights(int n);
 
 			int GetNumLight() {
@@ -91,6 +94,10 @@ namespace NCL {
 
 			void InitLights();
 
+			void ToggleDebugMode() {
+				inDebugMode = !inDebugMode;
+			}
+
 
 		protected:
 			void RenderFrame()	override;
@@ -99,15 +106,19 @@ namespace NCL {
 			void InitForward(bool withPrepass = false);
 			void InitDeferred();
 			void InitForwardPlus();
-			void InitClustered();
+			void InitClustered(bool withPrepass = false);
 
 			void ComputeTileGrid();
 			void ComputeClusterGrid();
+			void ComputeActiveClusters();
+			void CompactClusterList();
 
 			void RenderForward(bool withPrepass = false);
 			void RenderDeferred();
 			void RenderForwardPlus();
-			void RenderClustered();
+			void RenderClustered(bool withPrepass = false);
+
+			void GenPrePassFBO();
 
 			void DepthPrePass();
 
@@ -156,6 +167,7 @@ namespace NCL {
 			Matrix4     shadowMatrix;
 
 			OGLShader* sceneShader;
+			OGLShader* lightUpdateShader;
 			OGLShader* pointLightShader;
 			OGLShader* combineShader;
 			OGLShader* forwardPlusShader;
@@ -181,8 +193,12 @@ namespace NCL {
 			GLuint aabbGridSSBO;
 			GLuint globalListSSBO;
 			GLuint globalCountSSBO;
+			GLuint activeClusterSSBO;
+			GLuint activeCountSSBO;
 			int tilesX;
 			int tilesY;
+			int clusterX;
+			int clusterY;
 			unsigned int totalNumLights;
 
 			Vector4		lightColour;
@@ -235,12 +251,12 @@ namespace NCL {
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
-			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f);
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f);
+			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f) / WORLD_SCALE;
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;
 
 			// Clump lights in center corridor
-			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f);
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f);*/
+			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f) / WORLD_SCALE;
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f) / WORLD_SCALE;*/
 
 			//Depth disparity test
 			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-350.0f, 0.0f, -100.0f);

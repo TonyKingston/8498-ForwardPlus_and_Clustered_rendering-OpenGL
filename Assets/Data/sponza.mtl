@@ -16,6 +16,7 @@ newmtl leaf
 	map_Kd textures\sponza_thorn_diff.png
 	map_d textures\sponza_thorn_mask.png
 	map_bump textures\sponza_thorn_bump.png
+	map_Disp textures\sponza_thorn_normal.png
 
 newmtl vase_round
 	Ns 10.0000
@@ -31,6 +32,7 @@ newmtl vase_round
 	map_Ka textures\vase_round.png
 	map_Kd textures\vase_round.png
 	map_bump textures\vase_round_bump.png
+	map_Disp textures\vase_round_normal.png
 
 newmtl Material__57
 	Ns 10.0000
@@ -61,7 +63,7 @@ newmtl Material__298
 	map_Ka textures\background.png
 	map_Kd textures\background.png
 	map_bump textures\background_bump.png
-
+	map_Disp textures\background_normal.png
 
 newmtl bricks
 	Ns 10.0000
@@ -78,6 +80,7 @@ newmtl bricks
 	map_Ka textures\spnza_bricks_a_diff.png
 	map_Kd textures\spnza_bricks_a_diff.png
 	map_bump textures\spnza_bricks_a_bump.png
+	map_Disp textures\spnza_bricks_a_normal.png
 
 newmtl arch
 	Ns 40.0000
@@ -92,6 +95,7 @@ newmtl arch
 	Ke 0.0000 0.0000 0.0000
 	map_Ka textures\sponza_arch_diff.png
 	map_Kd textures\sponza_arch_diff.png
+	map_Disp textures\sponza_arch_normal.png
 
 newmtl ceiling
 	Ns 10.0000
@@ -121,6 +125,7 @@ newmtl column_a
 	map_Ka textures\sponza_column_a_diff.png
 	map_Kd textures\sponza_column_a_diff.png
 	map_bump textures\sponza_column_a_bump.png
+	map_Disp textures\sponza_column_a_normal.png
 
 newmtl floor
 	Ns 70.0000
@@ -152,6 +157,7 @@ newmtl column_c
 	map_Ka textures\sponza_column_c_diff.png
 	map_Kd textures\sponza_column_c_diff.png
 	map_bump textures\sponza_column_c_bump.png
+	map_Disp textures\sponza_column_c_normal.png
 
 newmtl details
 	Ns 10.0000
@@ -181,6 +187,7 @@ newmtl column_b
 	map_Ka textures\sponza_column_b_diff.png
 	map_Kd textures\sponza_column_b_diff.png
 	map_bump textures\sponza_column_b_bump.png
+	map_Disp textures\sponza_column_b_normal.png
 
 newmtl Material__47
 	Ns 10.0000
@@ -307,6 +314,7 @@ newmtl chain
 	map_Kd textures\chain_texture.png
 	map_d textures\chain_texture_mask.png
 	map_bump textures\chain_texture_bump.png
+	map_Disp textures\chain_texture_normal.png
 
 newmtl vase_hanging
 	Ns 50.0
@@ -337,6 +345,7 @@ newmtl vase
 	map_Ka textures\vase_dif.png
 	map_Kd textures\vase_dif.png
 	map_bump textures\vase_bump.png
+	map_Disp textures\vase_normal.png
 
 newmtl Material__25
 	Ns 10.0000
@@ -352,6 +361,7 @@ newmtl Material__25
 	map_Ka textures\lion.png
 	map_Kd textures\lion.png
 	map_bump textures\lion_bump.png
+	map_Disp textures\lion_normal.png
 
 newmtl roof
 	Ns 10.0000
