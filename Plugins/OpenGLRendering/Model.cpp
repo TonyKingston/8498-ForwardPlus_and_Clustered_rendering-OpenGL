@@ -21,8 +21,8 @@ struct Vertex {
 
 void Model::LoadModel(string path) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate |
-		aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
+	const aiScene* scene = importer.ReadFile(Assets::DATADIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_DropNormals |
+		aiProcess_CalcTangentSpace | aiProcess_FixInfacingNormals  | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
@@ -39,7 +39,8 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		GameObject* obj = this->ProcessMesh(mesh, scene);
 		obj->GetTransform().SetPosition(Vector3(0, 0, 0))
-			.SetScale(Vector3(0.4, 0.4, 0.4));
+			.SetScale(Vector3(0.4, 0.4, 0.4) / WORLD_SCALE);
+		 //   .SetScale(Vector3(0.2, 0.2, 0.2));
 		//obj->GetTransform().SetPosition();
 		//node->mTransformation.
 		this->objects.push_back(obj);
@@ -57,6 +58,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	vector<Vector3> normals;
 	vector<Vector2> texCoords;
 	vector<Vector4> tangents;
+	vector<Vector4> bitangents;
 	vector<GLuint> indices;
 	vector<TextureBase*> textures;
 	vector<TextureBase*> specTex;
@@ -99,6 +101,17 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		tangent.z = mesh->mTangents[i].z;
 		tangent.w = -1;
 		tangents.push_back(vector);
+
+		if (tangent.y == 1.0) {
+			bool a = true;
+		}
+
+		Vector4 bitangent;
+		bitangent.x = mesh->mBitangents[i].x;
+		bitangent.y = mesh->mBitangents[i].y;
+		bitangent.z = mesh->mBitangents[i].z;
+		bitangent.w = 1;
+		bitangents.push_back(bitangent);
 	}
 
 	// Loop through each of the mesh's faces and get its vertex indices
@@ -114,17 +127,22 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		// Diffuse maps
-		std::vector<OGLTexture*> diffuseMaps = this->LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<OGLTexture*> diffuseMaps = this->LoadMaterialTextures(material, aiTextureType_DIFFUSE);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// Normal maps
-		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		//std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_HEIGHT);
+		std::vector<OGLTexture*> normalMaps = this->LoadMaterialTextures(material, aiTextureType_DISPLACEMENT);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<OGLTexture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR);
 		specTex.insert(specTex.end(), specularMaps.begin(), specularMaps.end());
 
-		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY, "texture_mask");
+		if (specTex.size() > 0) {
+			bool a = true;
+		}
+
+		std::vector<OGLTexture*> masks = this->LoadMaterialTextures(material, aiTextureType_OPACITY);
 		if (masks.size() > 0) {
 			mask = true;
 		}
@@ -141,6 +159,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	oglMesh->SetVertexPositions(positions);
 	oglMesh->SetVertexNormals(normals);
 	oglMesh->SetVertexTangents(tangents);
+	oglMesh->SetVertexBiTangents(bitangents);
 	oglMesh->SetVertexTextureCoords(texCoords);
 	oglMesh->SetVertexIndices(indices);
 	SubMesh m;
@@ -159,7 +178,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
 }
 
-vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
+vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type) {
 	vector<OGLTexture*> textures;
 
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {

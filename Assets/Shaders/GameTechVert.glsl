@@ -10,6 +10,7 @@ layout(location = 1) in vec4 colour;
 layout(location = 2) in vec2 texCoord;
 layout(location = 3) in vec3 normal;
 layout(location = 4) in vec4 tangent;
+layout(location = 5) in vec4 bitangent;
 
 
 uniform vec4 		objectColour = vec4(1,1,1,1);
@@ -40,7 +41,8 @@ void main(void)
 	OUT.worldPos 	= ( modelMatrix * vec4 ( position.xyz ,1)).xyz;
 	OUT.normal 		= wNormal;
 	OUT.tangent     = wTangent;
-	OUT.binormal    = cross(wTangent, wNormal) * tangent.w;
+	//OUT.binormal    = cross(wTangent, wNormal) * tangent.w;
+	OUT.binormal = bitangent.xyz * -1;
 	OUT.texCoord	= texCoord;
 	OUT.colour		= objectColour;
 

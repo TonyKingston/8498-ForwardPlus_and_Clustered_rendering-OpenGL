@@ -1,0 +1,139 @@
+#version 430 core
+
+#define TILE_SIZE 16
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// Using vec4 for better alignment on the GPU
+struct TileAABB {
+	vec4 min;
+	vec4 max;
+	vec4 extent;
+};
+
+struct Plane {
+	vec4 normal;
+	vec4 distance;
+};
+
+struct Frustum {
+	Plane planes[4];
+	vec4 nearFar;
+};
+
+//layout(std430, binding = 1) buffer tileGrid {
+//	TileAABB tile[];
+//};
+
+layout(std430, binding = 1) buffer tileGrid {
+	Frustum tile[];
+};
+
+
+uniform mat4 inverseProj;
+uniform vec2 pixelSize;
+uniform int tilePxX;
+uniform int tilePxY;
+
+uniform float near;
+uniform float far;
+
+vec4 screenToView(vec4 screenSpace);
+vec3 AABBExtent(vec3 min, vec3 max);
+vec3 ConstructPlane(vec3 A, vec3 B, float zDistance);
+Plane ComputePlane(vec3 A, vec3 B, vec3 C);
+
+float linearDepth(float depthSample) {
+	float depthRange = 2.0 * depthSample - 1.0;
+	float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
+	return linear;
+}
+
+void main() {
+	const vec3 eyePos = vec3(0);
+
+	uint tileIndex = gl_WorkGroupID.x +
+                     gl_WorkGroupID.y * gl_NumWorkGroups.x +
+                     gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
+
+
+	float tileNear;
+	float tileFar;
+
+	// Should push first cluster group out 
+	/*if (gl_WorkGroupID.z = 0) {
+		tileNear = 0.1;
+		tileFar = 5;
+	}*/
+	
+	tileNear  = -near * pow(far/ near, gl_WorkGroupID.z/float(gl_NumWorkGroups.z));
+	tileFar   = -near * pow(far/ near, (gl_WorkGroupID.z + 1) /float(gl_NumWorkGroups.z));
+
+	// Compute screen space position of frustum points on the far plane.
+	vec4 screenSpace[4];
+	// -1 for z as the co-ordinate system is right-handed i.e. camera points towards -1
+
+	screenSpace[0] = vec4(vec2(gl_WorkGroupID.x * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	// Bottom right point
+	screenSpace[1] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, gl_WorkGroupID.y * tilePxY), -1.0f, 1.0f);
+	// Top left point
+	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
+	// Top right point
+	screenSpace[3] = vec4(vec2((gl_WorkGroupID.x + 1) * tilePxX, (gl_WorkGroupID.y + 1) * tilePxY), -1.0f, 1.0f);
+
+	// Convert these to view space positions;
+	vec3 viewSpace[4];
+	for (int i = 0; i < 4; i++) {
+		viewSpace[i] = screenToView(screenSpace[i]).xyz;
+	}
+
+
+	////// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
+	Frustum frustum;
+	frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);  // Left
+	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
+
+	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);  // Top
+	frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
+	
+	frustum.nearFar = vec4(tileNear, tileFar, 0.0, 0.0);
+	
+	tile[tileIndex] = frustum;
+}
+
+vec4 screenToView(vec4 screenSpace) {
+	vec2 texCoord = screenSpace.xy * pixelSize;
+	vec4 clipSpace = vec4(vec2(texCoord.x, texCoord.y) * 2.0f - 1.0f, screenSpace.z, screenSpace.w);
+	vec4 view = inverseProj * clipSpace;
+	view = view / view.w;
+	return view;
+}
+
+vec3 AABBExtent(vec3 min, vec3 max) {
+  vec3 centre = (min + max) * 0.5;
+  return abs(max - centre);
+}
+
+vec3 ConstructPlane(vec3 A, vec3 B, float zDistance) {
+
+	vec3 normal = vec3(0.0, 0.0, 1.0);
+
+	vec3 ab = B - A;
+
+	float t = (zDistance - dot(normal, A)) / dot(normal, ab);
+
+	vec3 result = A + t * ab;
+
+	return result;
+}
+
+Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
+	Plane plane;
+
+	vec3 AB = B - A;
+	vec3 AC = C - A;
+
+	plane.normal = vec4(normalize(cross(AC, AB)), 0.0);
+	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
+
+	return plane;
+}

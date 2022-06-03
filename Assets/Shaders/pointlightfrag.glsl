@@ -2,6 +2,7 @@
 
 uniform sampler2D depthTex;
 uniform sampler2D normTex;
+uniform sampler2D specTex;
 //uniform sampler2D shadowTex;
 
 uniform vec3 cameraPos;
@@ -10,7 +11,7 @@ uniform vec2 pixelSize; // reciprocal of resolution
 struct PointLight {
 	vec4 colour;
 	vec4 pos;
-	float radius;
+	vec4 radius;
 };
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
@@ -30,17 +31,21 @@ void main (void) {
 	vec4 invClipPos = inverseProjView * vec4 ( ndcPos , 1.0);
 	vec3 worldPos = invClipPos . xyz / invClipPos.w;
 	
-	vec3 normal = normalize ( texture ( normTex , texCoord.xy ).xyz *2.0 -1.0);
+	vec4 normalAndSpec = texture(normTex, texCoord.xy);
+	float specSample = normalAndSpec.a;
+	//vec3 normal = normalize ( texture ( normTex , texCoord.xy ).xyz *2.0 -1.0);
+	vec3 normal = normalize(normalAndSpec.xyz * 2.0 - 1.0);
 	vec3 viewDir = normalize ( cameraPos - worldPos );
 
 	PointLight light = pointLights[lightIndex];
 	vec3 lightVec = light.pos.xyz - worldPos;
 	float dist = length ( lightVec );
-	float atten = 1.0 - clamp ( dist / light.radius , 0.0 , 1.0);
+	float atten = 1.0 - clamp ( dist / light.radius.x , 0.0 , 1.0);
 
-	if( atten == 0.0) {
-	    discard;
-	}
+	// if( atten == 0.0) {
+	    // discard;
+	// }
+
 		
 	vec3 incident = normalize ( lightVec);
 	vec3 halfDir = normalize ( incident + viewDir );

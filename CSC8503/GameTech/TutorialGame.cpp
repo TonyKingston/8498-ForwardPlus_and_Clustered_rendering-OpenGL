@@ -20,11 +20,18 @@ TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
 	resourceManager = new OGLResourceManager();
-	
+	bool prepass = false;
 	int mode = AskRenderingMode();
+	if (mode == 0 || mode == 3) {
+		prepass = AskPrepass();
+	}
+	else if (mode == 2) {
+		prepass = AskForwardPlus();
+	}
+
 	InitCamera();
 
-	renderer = new GameTechRenderer(*world, resourceManager, mode);
+	renderer = new GameTechRenderer(*world, resourceManager, mode, prepass);
 	//physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -137,6 +144,68 @@ int TutorialGame::AskRenderingMode() {
 	return input;
 }
 
+bool TutorialGame::AskPrepass() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nRender with depth prepass? 0 for no, 1 for yes:\n" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskRenderingMode();
+	}
+	switch (input) {
+	case 0:
+		cout << "Opted for no depth prepass." << endl;
+		return false;
+		break;
+	case 1:
+		cout << "Opted for depth prepass." << endl;
+		return true;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskPrepass();
+		break;
+	}
+
+	return 0;
+
+}
+
+bool TutorialGame::AskForwardPlus() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nUse AABBs for light culling? 0 for no, 1 for yes:\n" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskForwardPlus();
+	}
+	switch (input) {
+	case 0:
+		cout << "Opted to not use AABBs." << endl;
+		return false;
+		break;
+	case 1:
+		cout << "Opted to use AABBs." << endl;
+		return true;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskForwardPlus();
+		break;
+	}
+
+	return 0;
+}
 
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
@@ -147,9 +216,10 @@ void TutorialGame::UpdateGame(float dt) {
 
 	//world->UpdateWorld(dt);
 	renderer->Update(dt);
-	//renderer->UpdateLights(dt);
+//	renderer->UpdateLights(dt);
+	renderer->UpdateLightsGPU(dt);
 
-	Debug::FlushRenderables(dt);
+	//Debug::FlushRenderables(dt);
 	renderer->Render();
 }
 
@@ -160,30 +230,38 @@ void TutorialGame::UpdateKeys() {
 		lockedObject = nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		renderer->AddLights(5);
+		renderer->AddLights(lightsToAdd);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
+		Vector3 pos = world->GetMainCamera()->GetPosition();
+		cout << "Camera Position (x,y,z): " << pos.x << " " << pos.y << " " << pos.z << endl;
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM9)) {
+		renderer->ToggleDebugMode();
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
+		lightsToAdd = lightsToAdd / 2;
+		cout << "Decreased lights to " << lightsToAdd << endl;
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {
+		lightsToAdd = lightsToAdd * 2;
+		cout << "Increased lights to " << lightsToAdd << endl;
 
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N)) {
-		inDebugMode = !inDebugMode;
 	}
 }
 
 void TutorialGame::InitCamera() {
-	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(1800.0f);
-	//world->GetMainCamera()->SetFarPlane(1000.0f);
-//	world->GetMainCamera()->SetPitch(-15.0f);
-//	world->GetMainCamera()->SetYaw(315.0f);
+	world->GetMainCamera()->SetNearPlane(2.0f);
+	world->GetMainCamera()->SetFarPlane(1150.0f / WORLD_SCALE);
+	//world->GetMainCamera()->SetFarPlane(575.0f);
 	world->GetMainCamera()->SetYaw(270.0f);
 	world->GetMainCamera()->SetPitch(-5.5f);
 
-	//world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
-//	world->GetMainCamera()->SetPosition(Vector3(0, 0, 50));
-	world->GetMainCamera()->SetPosition(Vector3(-136, 71, -15));
+	world->GetMainCamera()->SetPosition(Vector3(-530, 71, -12) / WORLD_SCALE);
+	//world->GetMainCamera()->SetPosition(Vector3(-265, 35, -6.5));
 	lockedObject = nullptr;
 }
 

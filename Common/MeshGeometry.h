@@ -34,6 +34,7 @@ namespace NCL {
 		TextureCoords,
 		Normals,
 		Tangents,
+		Bitangents,
 		JointWeights,
 		JointIndices,
 		MAX_ATTRIBUTES
@@ -102,6 +103,8 @@ namespace NCL {
 		const vector<Vector4>&		GetColourData()			const { return colours;		}
 		const vector<Vector3>&		GetNormalData()			const { return normals;		}
 		const vector<Vector4>&		GetTangentData()		const { return tangents;	}
+		const vector<Vector4>& GetBiTangentData()		const { return bitangents; }
+
 
 
 		const vector<Vector4>& GetSkinWeightData()		const { return skinWeights; }
@@ -121,6 +124,7 @@ namespace NCL {
 		void SetVertexColours(const vector<Vector4>& newColours);
 		void SetVertexNormals(const vector<Vector3>& newNorms);
 		void SetVertexTangents(const vector<Vector4>& newTans);
+		void SetVertexBiTangents(const vector<Vector4>& newBiTans);
 		void SetVertexIndices(const vector<unsigned int>& newIndices);
 
 		void SetVertexSkinWeights(const vector<Vector4>& newSkinWeights);
@@ -160,6 +164,7 @@ namespace NCL {
 		vector<Vector4>			colours;
 		vector<Vector3>			normals;
 		vector<Vector4>			tangents;
+		vector<Vector4>			bitangents;
 		vector<unsigned int>	indices;
 
 		vector<SubMesh>			subMeshes;

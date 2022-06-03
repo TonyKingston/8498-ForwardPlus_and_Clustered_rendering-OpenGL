@@ -44,7 +44,6 @@ void main() {
 	const vec3 eyePos = vec3(0, 0, 0);
 
 	uint tileIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
-//	uint tileIndex = gl_LocalInvocationIndex;
 
 	// Approximating the frustum of each tile with an AABB. A recommended optimization from Advancements in Tiled-Based
 	// Compute Rendering by Gareth Thomas
@@ -88,38 +87,20 @@ void main() {
 	// Compute screen space position of frustum points on the far plane.
 	vec4 screenSpace[4];
 	// -1 for z as the co-ordinate system is right-handed i.e. camera points towards -1
-	// Top left
+	// // Bottom left
 	screenSpace[0] = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0f, 1.0f);
-	// Top right point
+	// Bottom right
 	screenSpace[1] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y) * TILE_SIZE, -1.0f, 1.0f);
-	// Bottom left point
+	// Top left
 	screenSpace[2] = vec4(vec2(gl_WorkGroupID.x, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
-	// Bottom right point
+	// Top right
 	screenSpace[3] = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0f, 1.0f);
-
 
 	// Convert these to view space positions;
 	vec3 viewSpace[4];
 	for (int i = 0; i < 4; i++) {
 		viewSpace[i] = screenToView(screenSpace[i]).xyz;
 	}
-
-	//Frustum frustum;
-	//Plane plane = { vec4(0), vec4(0) };
-	//frustum.planes[0] = ComputePlane(eyePos, viewSpace[2], viewSpace[0]);  // Left
-	//frustum.planes[3] = ComputePlane(eyePos, viewSpace[3], viewSpace[2]);  // Bottom
-	//frustum.planes[1] = plane;
-	//frustum.planes[2] = plane;
-
-	//if (gl_WorkGroupID.x == gl_NumWorkGroups.x - 1) {
-	//	frustum.planes[1] = ComputePlane(eyePos, viewSpace[1], viewSpace[3]);  // Right
-	//}
-
-	//if (gl_WorkGroupID.y == 42) {
-	//	frustum.planes[2] = ComputePlane(eyePos, viewSpace[0], viewSpace[1]);  // Top
-	//}
-	
-
 
 	////// Construct a frustum from these points. The near and far sides are calculated in the culling lights shader.
 	Frustum frustum;
@@ -132,34 +113,7 @@ void main() {
 	//frustum.planes[3] = frustum.planes[2];
 	//frustum.planes[3].normal = -frustum.planes[3].normal;
 
-	//frustum.planes[0].distance.y = gl_WorkGroupID.x;
-	//frustum.planes[0].distance.z = gl_WorkGroupID.y;
-	//frustum.planes[0].distance.w = gl_GlobalInvocationID.x;
 	tile[tileIndex] = frustum;
-
-//	vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * tilePxX, -1.0, 1.0);
-	//vec4 minPoint = vec4(gl_WorkGroupID.xy * tilePxX, -1.0, 1.0);
-
-	//float tileNear = -near * pow(far / near, gl_WorkGroupID.z / float(gl_NumWorkGroups.z));
-	//float tileFar = -near * pow(far / near, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
-	////
-	////// view space
-	////maxPoint.w = 1.0;
-	////minPoint.w = 1.0;
-	//vec3 maxPointV = screenToView(maxPoint).xyz;
-	//vec3 minPointV = screenToView(minPoint).xyz;
-
-	//vec3 minPointNear = ConstructPlane(eyePos, minPointV, tileNear);
-	//vec3 minPointFar = ConstructPlane(eyePos, minPointV, tileFar);
-	//vec3 maxPointNear = ConstructPlane(eyePos, maxPointV, tileNear);
-	//vec3 maxPointFar = ConstructPlane(eyePos, maxPointV, tileFar);
-
-	//vec3 minPointAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
-	//vec3 maxPointAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
-	//
-	//tile[tileIndex].min = vec4(minPointAABB, 1.0);
-	//tile[tileIndex].max = vec4(maxPointAABB, 1.0);
-	//tile[tileIndex].extent = vec4(AABBExtent(minPointAABB, maxPointAABB), 0.0);
 
 	//vec4 maxPoint = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1) * TILE_SIZE, -1.0, 1.0);
 	//vec4 minPoint = vec4(gl_WorkGroupID.xy * TILE_SIZE, -1.0, 1.0);
@@ -178,8 +132,6 @@ void main() {
 
 vec4 screenToView(vec4 screenSpace) {
 	vec2 texCoord = screenSpace.xy * pixelSize;
-//	vec2 texCoord = screenSpace.xy / vec2(1280, 720);
-	//vec4 clipSpace = vec4(texCoord * 2.0 - 1.0, screenSpace.z, screenSpace.w);
 	vec4 clipSpace = vec4(vec2(texCoord.x, texCoord.y) * 2.0f - 1.0f, screenSpace.z, screenSpace.w);
 	vec4 view = inverseProj * clipSpace;
 	view = view / view.w;
@@ -197,10 +149,8 @@ vec3 ConstructPlane(vec3 A, vec3 B, float zDistance) {
 
 	vec3 ab = B - A;
 
-	//Computing the intersection length for the line and the plane
 	float t = (zDistance - dot(normal, A)) / dot(normal, ab);
 
-	//Computing the actual xyz position of the point along the line
 	vec3 result = A + t * ab;
 
 	return result;
@@ -212,8 +162,8 @@ Plane ComputePlane(vec3 A, vec3 B, vec3 C) {
 	vec3 AB = B - A;
 	vec3 AC = C - A;
 
-	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
-///	plane.distance = vec4(dot(plane.normal.xyz, AB), 0.0, 0.0, 0.0); // Doesn't cause error?
+//	plane.normal = vec4(normalize(cross(AB, AC)), 0.0);
+	plane.normal = vec4(normalize(cross(AC, AB)), 0.0); // different winding order
 	plane.distance = vec4(dot(plane.normal.xyz, A), 0.0, 0.0, 0.0);
 
 	return plane;
