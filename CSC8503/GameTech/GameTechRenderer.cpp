@@ -308,7 +308,6 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	}
 	else {
 		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.glsl");
-		//forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCullAlt.comp");
 	}
 
 	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "clusterFrag.glsl");

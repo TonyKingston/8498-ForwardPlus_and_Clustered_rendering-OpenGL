@@ -251,12 +251,12 @@ namespace NCL {
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
-			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f) / WORLD_SCALE;
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;*/
+			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f) / WORLD_SCALE;
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;
 
 			// Clump lights in center corridor
-			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f) / WORLD_SCALE;
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f) / WORLD_SCALE;
+			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f) / WORLD_SCALE;
+			const Vector3 LIGHT_MAX_BOUNDS = Vector3(250.0f, 250.0f, 60.0f) / WORLD_SCALE;*/
 
 			//Depth disparity test
 			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-350.0f, 0.0f, -100.0f);

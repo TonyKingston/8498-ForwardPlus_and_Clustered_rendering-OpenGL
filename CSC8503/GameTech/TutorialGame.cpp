@@ -244,11 +244,11 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
 		lightsToAdd = lightsToAdd / 2;
-		cout << "Increased lights to " << lightsToAdd << endl;
+		cout << "Decreased lights to " << lightsToAdd << endl;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {
 		lightsToAdd = lightsToAdd * 2;
-		cout << "Decreased lights to " << lightsToAdd << endl;
+		cout << "Increased lights to " << lightsToAdd << endl;
 
 	}
 }
