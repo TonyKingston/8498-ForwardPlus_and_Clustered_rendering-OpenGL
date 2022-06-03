@@ -21,11 +21,6 @@ uniform mat4 projMatrix;
 //  vec4 colour;
 //};
 
-//struct LightGrid {
-//	uint offset;
-//	uint count;
-//};
-
  struct LightGrid {
 	 uint count;
 	 uint lightIndices[MAX_LIGHTS_PER_TILE];
@@ -36,17 +31,9 @@ layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
-//layout(std430, binding = 2) buffer lightGridSSBO {
-//	LightGrid lightGrid[];
-//};
-
 layout(std430, binding = 2) buffer lightGridSSBO {
 	int lightIndices[];
 };
-
-//layout(std430, binding = 3) buffer globalLightIndexListSSBO {
-//	uint globalLightIndexList[];
-//};
 
 layout(std430, binding = 3) buffer activeClusterSSBO {
 	bool activeClusters[];
@@ -92,15 +79,12 @@ vec3 colors[8] = vec3[](
 	vec3(1, 0, 0), vec3(1, 0, 1), vec3(1, 1, 0), vec3(1, 1, 1)
 );
 
-
 float remap(float minval, float maxval, float curval) {
 	return (curval - minval) / (maxval - minval);
 }
 
 float linearDepth(float depthSample){
     float depthRange = depthSample * 2.0 - 1.0;
-	//float lin = 2.0 * near * far / (far + near - depthRange * (far - near));
-	//float lin = 2.0 * 5 * far / (far + 5 - depthRange * (far - 5));
 	float lin = projMatrix[3][2] / (projMatrix[2][2] + depthRange);
     return lin;
 }
@@ -117,11 +101,7 @@ void main(void)
 	}*/
 	
 	uint zTile     = uint(max(log2(linearDepth(gl_FragCoord.z)) * scale + bias, 0.0));
-   // uvec3 tiles    = uvec3( uvec2( gl_FragCoord.xy / tilePxX), zTile);
 	uvec3 tiles = uvec3(uvec2(gl_FragCoord.x / tilePxX, gl_FragCoord.y / tilePxY), zTile);
-   /*uint tileIndex = tiles.x +
-                     gridDims.x * tiles.y +
-                     (gridDims.x * gridDims.y) * tiles.z;*/
 	uint tileIndex = tiles.x + (gridDims.x * (tiles.y + gridDims.y * tiles.z));
 	
 	uint lightCount = 0;
@@ -193,15 +173,8 @@ void main(void)
 	fragColor.rgb += albedo.rgb * diffuseLight;
 	fragColor.rgb += specularLight.rgb;
 
-//	fragColor.rgb += albedo.rgb * shade;
-	//float normalised = (zTile - 0) / (gridDims.z - 0);
-	//fragColor.rgb = vec3(normalised);
-	//testDepth[tileIndex] = tiles.z;
-
 	if (inDebug) {
-		//fragColor.rgb = vec3(colors[uint(mod(zTile, 8))]);
 		if (inDebug) {
-			//   fragColor = HeatMapColor(lightCount, 0, 50);
 			vec3 colour;
 			if (lightCount == 0) {
 				colour = vec3(0);
@@ -233,9 +206,9 @@ void main(void)
 
 			fragColor.rgb = colour;
 
-			if (activeClusters[tileIndex]) {
+		/*	if (activeClusters[tileIndex]) {
 				fragColor.rgb = vec3(1, 0, 0);
-			}
+			}*/
 
 		}
 	}

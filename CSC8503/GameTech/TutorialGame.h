@@ -123,6 +123,8 @@ namespace NCL {
 
 			const int GAME_LENGTH = 180.0f;
 
+			unsigned int lightsToAdd = 16;
+
 		};
 	}
 }

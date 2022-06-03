@@ -230,7 +230,7 @@ void TutorialGame::UpdateKeys() {
 		lockedObject = nullptr;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM1)) {
-		renderer->AddLights(16);
+		renderer->AddLights(lightsToAdd);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
@@ -241,6 +241,15 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM9)) {
 		renderer->ToggleDebugMode();
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
+		lightsToAdd = lightsToAdd / 2;
+		cout << "Increased lights to " << lightsToAdd << endl;
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {
+		lightsToAdd = lightsToAdd * 2;
+		cout << "Decreased lights to " << lightsToAdd << endl;
+
 	}
 }
 

@@ -3,8 +3,6 @@
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 2048
 
-#define HEATMAP_COLORS_COUNT 6
-
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
 uniform sampler2D   specTex;
@@ -16,17 +14,6 @@ uniform sampler2D   specTex;
 	 vec4 radius;
  };
 
-//struct PointLight {
-//  vec3 pos;
-//  float radius;
-//  vec4 colour;
-//};
-
-//struct LightGrid {
-//	uint offset;
-//	uint count;
-//};
-
  struct LightGrid {
 	 uint count;
 	 uint lightIndices[MAX_LIGHTS_PER_TILE];
@@ -37,18 +24,9 @@ layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
-//layout(std430, binding = 2) buffer lightGridSSBO {
-//	LightGrid lightGrid[];
-//};
-
 layout(std430, binding = 2) buffer lightGridSSBO {
 	int lightIndices[];
 };
-
-//layout(std430, binding = 3) buffer globalLightIndexListSSBO {
-//	uint globalLightIndexList[];
-//};
-
 
 //layout(std430, binding = 4) buffer globalIndexCountSSBO {
 //	float testDepth[];
@@ -90,23 +68,6 @@ vec3 colors[8] = vec3[](
 	vec3(1, 0, 0), vec3(1, 0, 1), vec3(1, 1, 0), vec3(1, 1, 1)
 );
 
-// vec4 HeatMapColor(float value, float minValue, float maxValue) {
-    
-    // vec4 colors[HEATMAP_COLORS_COUNT] =
-    // {
-        // vec4(0.32, 0.00, 0.32, 1.00),
-        // vec4(0.00, 0.00, 1.00, 1.00),
-        // vec4(0.00, 1.00, 0.00, 1.00),
-        // vec4(1.00, 1.00, 0.00, 1.00),
-        // vec4(1.00, 0.60, 0.00, 1.00),
-        // vec4(1.00, 0.00, 0.00, 1.00),
-    // };
-    // float ratio=(HEATMAP_COLORS_COUNT-1.0) * clamp((value-minValue)/(maxValue-minValue),0.0,1.0);
-    // int indexMin= int(ratio);
-    // float indexMax=min(indexMin+1,HEATMAP_COLORS_COUNT-1);
-    // return mix(colors[indexMin], colors[indexMax], ratio-indexMin);
-// }
-
 void main(void)
 {
 	float shadow = 1.0;
@@ -118,14 +79,6 @@ void main(void)
 	ivec2 tileID = ivec2(gl_FragCoord.xy) / ivec2(TILE_SIZE, TILE_SIZE); 
 	int tileIndex = tileID.y * numTilesX + tileID.x;
 	
-    //uvec2 tiles = uvec2( gl_FragCoord.xy / tilePxX);
-    //uint tileIndex = tiles.x + TILE_SIZE * tiles.y + (TILE_SIZE * TILE_SIZE);
-	
-	//uint tileIndex = 0;
-
-//	uint lightCount = lightGrid[tileIndex].count;
- //   uint lightIndexOffset = lightGrid[tileIndex].offset;
-//	lightIndexOffset = tileIndex * noOfLights;
 	uint lightCount = 0;
 	uint lightIndexOffset = tileIndex * MAX_LIGHTS_PER_TILE;
 
@@ -195,26 +148,10 @@ void main(void)
 	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
 	fragColor.rgb += albedo.rgb * diffuseLight;
 	fragColor.rgb += specularLight.rgb;
-	//fragColor.rgb = albedo.rgb;
-	/* if (tileIndex == 0 && lightCount > 0) {
-	   fragColor.rgb = vec3(1,0,0);
-	 }*/
-	 /*if (tileIndex == 3386) {
-	   fragColor.rgb = vec3(0,1,0);
-	 }*/
-	// if (tileIndex == 20) {
-	  // fragColor.rgb = vec3(0,1,0);
-	// }
-	// if (tileIndex == 500) {
- 	   // if (lightGrid[tileIndex].count > 0) {
-	    // fragColor.rgb = vec3(1,1,0);
-	   // }
-	// }
 
 	//fragColor.rgb = vec3(0.1, 0.1, 0.2);
 
 	if (inDebug) {
-	//   fragColor = HeatMapColor(lightCount, 0, 50);
 	   vec3 colour;
 	   if (lightCount == 0) {
 	      colour = vec3(0);
@@ -242,31 +179,6 @@ void main(void)
 	   fragColor.rgb = colour;
 
 	}
-	/*float shade = float(lightCount) / float(noOfLights);
 
-	if (shade < 0.2) {
-		fragColor.rgb = mix(vec3(0, 0, 1), vec3(1), remap(0.0, 0.2, shade));
-	}
-	else if (shade < 0.5) {
-		fragColor.rgb = mix(vec3(0, 1, 0), vec3(1), remap(0.0, 0.5, shade));
-	}
-	else {
-		fragColor.rgb = mix(vec3(1), vec3(1, 0, 0), remap(0.5, 1.0, shade));
-	}*/
-	/*if (lightCount == 1) {
-		fragColor.rgb = vec3(0, 0, 1);
-	}
-	else if (lightCount == 2) {
-		fragColor.rgb = vec3(0, 1, 0);
-	}
-	else if (lightCount == 3) {
-		fragColor.rgb = vec3(1, 0, 0);
-	}
-	vec3 _min = vec3(0.0);
-	vec3 _max = vec3(1.0);*/
-	//fragColor.r = mix(1.0, 0.0, max(0.8, shade));
-	//fragColor.rgb = mix(max, min, 1.0 - shade);
-
-//	fragColor.rgb += albedo.rgb * shade;
 	fragColor.a = 1.0;
 }
