@@ -232,7 +232,7 @@ void GameTechRenderer::InitForwardPlus() {
 
 	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl");
 	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("forwardplusGrid.glsl");
-	forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("forwardplusCull.glsl");
+	forwardPlusCullShader = usingPrepass ? (OGLShader*)resourceManager->LoadShader("forwardplusCullAABB.comp") : (OGLShader*)resourceManager->LoadShader("forwardplusCull.glsl");
 	depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
 	debugShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusDebugFrag.glsl");
 

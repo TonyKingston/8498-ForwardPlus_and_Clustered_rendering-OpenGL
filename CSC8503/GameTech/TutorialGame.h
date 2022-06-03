@@ -44,6 +44,7 @@ namespace NCL {
 
 			int AskRenderingMode();
 			bool AskPrepass();
+			bool AskForwardPlus();
 
 		protected:
 			void InitialiseAssets(int level = 1);

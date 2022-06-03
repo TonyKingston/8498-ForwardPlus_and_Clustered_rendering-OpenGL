@@ -17,7 +17,7 @@ int main() {
 	bool reachedCapacity = false;
 	const std::string OUTPUTDIR("../../Data/");
 	std::ofstream file;
-	file.open(OUTPUTDIR + "clustered-active-edges-2048-02.csv", std::ios_base::app);
+	file.open(OUTPUTDIR + "forwardPlus-final-aabb-clumped-2048.csv", std::ios_base::app);
 	fileOpen = true;
 	file << "frame time" << "," << "Number of lights" << std::endl;
 

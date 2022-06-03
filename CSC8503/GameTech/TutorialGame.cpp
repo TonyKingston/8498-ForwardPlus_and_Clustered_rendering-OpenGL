@@ -25,6 +25,10 @@ TutorialGame::TutorialGame() {
 	if (mode == 0 || mode == 3) {
 		prepass = AskPrepass();
 	}
+	else if (mode == 2) {
+		prepass = AskForwardPlus();
+	}
+
 	InitCamera();
 
 	renderer = new GameTechRenderer(*world, resourceManager, mode, prepass);
@@ -172,6 +176,36 @@ bool TutorialGame::AskPrepass() {
 
 }
 
+bool TutorialGame::AskForwardPlus() {
+	int input;
+	int options[4] = { 1, 2, 3, 4 };
+	cout << "\nUse AABBs for light culling? 0 for no, 1 for yes:\n" << endl;
+
+	cin >> input;
+	if (cin.fail()) {
+		cout << "Invalid Input" << endl;
+		cin.clear();
+		cin.ignore(256, '\n');
+		AskForwardPlus();
+	}
+	switch (input) {
+	case 0:
+		cout << "Opted to not use AABBs." << endl;
+		return false;
+		break;
+	case 1:
+		cout << "Opted to use AABBs." << endl;
+		return true;
+		break;
+	default:
+		cout << "Invalid input." << endl;
+		cin.ignore();
+		AskForwardPlus();
+		break;
+	}
+
+	return 0;
+}
 
 void TutorialGame::UpdateGame(float dt) {
 	timeTaken += dt;
