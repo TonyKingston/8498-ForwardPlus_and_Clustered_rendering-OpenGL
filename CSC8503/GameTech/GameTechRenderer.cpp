@@ -5,7 +5,6 @@
 #include "../../Common/Vector2.h"
 #include "../../Common/Vector3.h"
 #include "../../Common/TextureLoader.h"
-//#include "../../UI/GUI.h"
 #include "..//..//Common/Assets.h"
 
 #include "../../Common/stb/stb_image.h"
@@ -512,7 +511,7 @@ void GameTechRenderer::ComputeActiveClusters() {
 }
 
 void GameTechRenderer::CompactClusterList() {
-	OGLShader* activeShader = (OGLShader*)resourceManager->LoadShader("compactClusters.comp");
+	OGLShader* activeShader = (OGLShader*)resourceManager->LoadShader("compactClusters.comp");	
 	BindShader(activeShader);
 
 	glDispatchCompute(CLUSTER_GRID_X, CLUSTER_GRID_Y, CLUSTER_GRID_Z);
@@ -1187,10 +1186,6 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 			glUniformMatrix4fv(j, frameMatrices.size(), false,
 				(float*)frameMatrices.data());
 
-		}
-
-		if (count == 8) {
-			bool a = true;
 		}
 
 		BindAndDraw(i, hasDiff, hasBump);
