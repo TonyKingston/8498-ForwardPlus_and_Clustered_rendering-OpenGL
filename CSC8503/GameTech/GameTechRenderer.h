@@ -17,7 +17,6 @@ namespace NCL {
 	class Maths::Vector4;
 	namespace CSC8503 {
 		class RenderObject;
-		//class D_GUI;
 #define TILE_SIZE 16 // 16x16 tiles
 
 // Using the same values as Doom 2016
@@ -28,7 +27,7 @@ namespace NCL {
 #define MAX_LIGHTS_PER_TILE 2048
 #define LIGHT_RADIUS 40.0 / WORLD_SCALE
 
-		const unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
+		constexpr unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
 		struct Light {
 			Vector4 colour;
@@ -68,7 +67,6 @@ namespace NCL {
 			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
 		};
 
-
 		class GameTechRenderer : public OGLRenderer {
 		public:
 			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0, bool prepass = false);
@@ -84,11 +82,11 @@ namespace NCL {
 			void UpdateLightsGPU(float dt);
 			bool AddLights(int n);
 
-			int GetNumLight() {
+			int GetNumLight() const {
 				return numLights;
 			}
 
-			int GetRenderingMode() {
+			int GetRenderingMode() const {
 				return renderMode;
 			}
 
@@ -126,12 +124,11 @@ namespace NCL {
 			void ClusteredCullLights();
 
 			Matrix4 SetupDebugLineMatrix()	const override;
-			Matrix4 SetupDebugStringMatrix()const override;
+			Matrix4 SetupDebugStringMatrix() const override;
 
 			OGLShader* defaultShader;
 
 			GameWorld& gameWorld;
-			//D_GUI* gameUI;
 
 			void BuildObjectList(Camera* current_camera);
 			void SortObjectList();
