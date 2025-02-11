@@ -4,13 +4,12 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 //layout(local_size_x = 16, local_size_y = 8, local_size_z = 4) in;
 
 layout(std430, binding = 3) buffer activeClusterSSBO {
-	bool activeClusters[];
+	uint activeClusters[];
 };
 
 layout(std430, binding = 5) buffer testSSBO {
 	uint uniqueClusters[];
 };
-
 
 layout(std430, binding = 6) buffer countSSBO {
 	uint activeClusterCount;
@@ -23,7 +22,7 @@ void main() {
 
   //  uint clusterIndex = gl_LocalInvocationIndex + gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z * gl_WorkGroupID.z;
    // atomicAdd(activeClusterCount, 1);
-    if(activeClusters[clusterIndex]){
+    if(activeClusters[clusterIndex] == 1){
        uint offset = atomicAdd(activeClusterCount, 1);
        uniqueClusters[offset] = clusterIndex;
     }
