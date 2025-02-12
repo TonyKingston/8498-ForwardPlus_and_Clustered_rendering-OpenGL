@@ -17,6 +17,7 @@ namespace NCL {
 	class Maths::Vector4;
 	namespace CSC8503 {
 		class RenderObject;
+		//typedef OGLShaderStorageBuffer SSBO;
 #define TILE_SIZE 16 // 16x16 tiles
 
 // Using the same values as Doom 2016
@@ -67,6 +68,12 @@ namespace NCL {
 			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
 		};
 
+		struct ClusterParams {
+			float scaleFactor = 1.0f;
+			float biasFactor = 1.0f;
+			float ratio = 1.0f;
+		};
+
 		class GameTechRenderer : public OGLRenderer {
 		public:
 			GameTechRenderer(GameWorld& w, ResourceManager* rm, int type = 0, bool prepass = false);
@@ -98,8 +105,8 @@ namespace NCL {
 
 
 		protected:
-			void RenderFrame()	override;
-			void BeginFrame() override;
+			virtual void RenderFrame()	override final;
+			virtual void BeginFrame() override final;
 
 			void InitForward(bool withPrepass = false);
 			void InitDeferred();
@@ -123,8 +130,8 @@ namespace NCL {
 			void ForwardPlusCullLights();
 			void ClusteredCullLights();
 
-			Matrix4 SetupDebugLineMatrix()	const override;
-			Matrix4 SetupDebugStringMatrix() const override;
+			virtual Matrix4 SetupDebugLineMatrix()	const override final;
+			virtual Matrix4 SetupDebugStringMatrix() const override final;
 
 			OGLShader* defaultShader;
 
@@ -241,15 +248,14 @@ namespace NCL {
 			Matrix4 viewMat;
 			Matrix4 projMat;
 			float aspect;
-
+			
 			// clustered 
-			float scaleFactor;
-			float biasFactor;
+			ClusterParams clusterParams;
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
-			const Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f) / WORLD_SCALE;
-			const Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;
+			static constexpr Vector3 LIGHT_MIN_BOUNDS = Vector3(560.0f, 0.0f, -230.0f) / WORLD_SCALE;
+			static constexpr Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;
 
 			// Clump lights in center corridor
 			/*const Vector3 LIGHT_MIN_BOUNDS = Vector3(-300.0f, 0.0f, -80.0f) / WORLD_SCALE;

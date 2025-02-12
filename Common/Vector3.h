@@ -34,7 +34,7 @@ namespace NCL {
 			Vector3(const Vector2& v2, float z = 0.0f);
 			Vector3(const Vector4& v4);
 
-			~Vector3(void) {}
+			~Vector3(void) = default;
 
 			Vector3 Normalised() const {
 				Vector3 temp(x, y, z);
@@ -115,7 +115,7 @@ namespace NCL {
 				return Vector3(x / a.x, y / a.y, z / a.z);
 			};
 
-			inline Vector3  operator/(float v) const {
+			inline constexpr Vector3  operator/(float v) const {
 				return Vector3(x / v, y / v, z / v);
 			};
 
