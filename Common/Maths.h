@@ -13,7 +13,11 @@ namespace NCL {
 	namespace Maths {
 		class Vector2;
 		class Vector3;
-
+		class Vector4;
+		class Quaternion;
+		class Matrix3;
+		class Matrix4;
+			
 		//It's pi(ish)...
 		static const float		PI = 3.14159265358979323846f;
 

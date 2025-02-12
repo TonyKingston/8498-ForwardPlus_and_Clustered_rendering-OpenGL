@@ -17,7 +17,10 @@ using namespace CSC8503;
 #define SHADOWSIZE 4096
 
 //const unsigned int MAX_LIGHTS = 49152;
-const unsigned int MAX_LIGHTS = 98304;
+constexpr unsigned int MAX_LIGHTS = 98304;
+
+constexpr Vector3 GameTechRenderer::LIGHT_MIN_BOUNDS;
+constexpr Vector3 GameTechRenderer::LIGHT_MAX_BOUNDS;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
 
@@ -352,8 +355,13 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	float zFar = gameWorld.GetMainCamera()->GetFarPlane();
 	float zNear = gameWorld.GetMainCamera()->GetNearPlane();
 	// Doom 2016
-	scaleFactor = (float)CLUSTER_GRID_Z/ std::log2f(zFar / zNear);
-	biasFactor = -((float)CLUSTER_GRID_Z * std::log2f(zNear) / std::log2f(zFar / zNear));
+
+	clusterParams = [&] 
+	{
+		return ClusterParams{(float)CLUSTER_GRID_Z / std::log2f(zFar / zNear),
+			-((float)CLUSTER_GRID_Z * std::log2f(zNear) / std::log2f(zFar / zNear)),
+			1};
+	}();
 
 	clusterX = (unsigned int)std::ceilf(currentWidth / (float)CLUSTER_GRID_X);
 	clusterY = (unsigned int)std::ceilf(currentHeight / (float)CLUSTER_GRID_Y);
@@ -503,8 +511,8 @@ void GameTechRenderer::ComputeActiveClusters() {
 
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxX"), clusterX);
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxY"), clusterY);
-	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), scaleFactor);
-	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), biasFactor);
+	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), clusterParams.scaleFactor);
+	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), clusterParams.biasFactor);
 
 	glDispatchCompute(currentWidth, currentHeight, 1);
 	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -655,7 +663,6 @@ void GameTechRenderer::LoadPrinter() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	sceneTextures.push_back(print_Tex);
 }
-
 
 void GameTechRenderer::LoadSkybox() {
 	string filenames[6] = {
@@ -1006,8 +1013,8 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 		Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
 		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
 
-		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), scaleFactor);
-		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), biasFactor);
+		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), clusterParams.scaleFactor);
+		glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), clusterParams.biasFactor);
 		//glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "near"), gameWorld.GetMainCamera()->GetNearPlane());
 		//glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "far"), gameWorld.GetMainCamera()->GetFarPlane());
 		glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxX"), clusterX);
@@ -1023,9 +1030,9 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
-		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
-		bool hasBump = textures.size() == layerCount * 2;
-		bool hasSpec = (*i).GetSpecTextures().size() > 0;
+		const bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
+		const bool hasBump = textures.size() == layerCount * 2;
+		const bool hasSpec = (*i).GetSpecTextures().size() > 0;
 		glUniform1i(hasBumpLocation, hasBump);
 		glUniform1i(hasSpecLocation, hasSpec);
 
@@ -1510,9 +1517,9 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
 		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
-		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
-		bool hasBump = textures.size() == layerCount * 2;
-		bool hasSpec = (*i).GetSpecTextures().size() > 0;
+		const bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
+		const bool hasBump = textures.size() == layerCount * 2;
+		const bool hasSpec = (*i).GetSpecTextures().size() > 0;
 		glUniform1i(hasBumpLocation, hasBump);
 		glUniform1i(hasSpecLocation, hasSpec);
 
@@ -1523,7 +1530,7 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			const Matrix4* frameData = i->GetAnimation()->GetJointData(i->GetCurrentFrame());
 
 			for (unsigned int i = 0; i < mesh->GetJointCount(); ++i) {
-				auto matrix = invBindPose[i];
+				auto& matrix = invBindPose[i];
 				frameMatrices.emplace_back(frameData[i] * matrix);
 			}
 
