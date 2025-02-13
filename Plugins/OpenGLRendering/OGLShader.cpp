@@ -11,6 +11,7 @@ https://research.ncl.ac.uk/game/
 #include "../../Common/Maths.h"
 #include <iostream>
 #include <string>
+#include <type_traits>
 
 using namespace NCL;
 using namespace NCL::Rendering;
@@ -147,50 +148,4 @@ GLint OGLShader::GetUniformLocation(const std::string& name) const {
 	GLint location = glGetUniformLocation(programID, name.c_str());
 	uniformCache[name] = location;
 	return location;
-}
-
-// Template specialisation for ints and floats
-template <typename T>
-std::enable_if_t<std::is_arithmetic_v<T>, void> OGLShader::SetUniform(const std::string& name, const T& value) const {
-	if constexpr (std::is_same_v<T, int>) {
-		glUniform1i(GetUniformLocation(name), value);
-	}
-	else if constexpr (std::is_same_v<T, float>) {
-		glUniform1f(GetUniformLocation(name), value);
-	}
-}
-
-// Template specialisation for Vector types
-template <typename VecType>
-std::enable_if_t<NCL::Maths::IsVector<VecType>::value, void> OGLShader::SetUniform(const std::string& name, const VecType& vec) const {
-	constexpr int VecSize = sizeof(VecType) / sizeof(float);
-
-	if constexpr (VecSize == 2) {
-		glUniform2fv(GetUniformLocation(name), 1, (float*)&vec);
-	}
-	else if constexpr (VecSize == 3) {
-		glUniform3fv(GetUniformLocation(name), 1, (float*)&vec);
-	}
-	else if constexpr (VecSize == 4) {
-		glUniform4fv(GetUniformLocation(name), 1, (float*)&vec);
-	}
-}
-
-template <typename... Args>
-std::enable_if_t<(std::is_arithmetic_v<Args> && ...), void> OGLShader::SetVectorUniform(const std::string& name, Args... args) const {
-	static_assert(sizeof...(args) >= 1 && sizeof...(args) <= 4, "SetUniform requires 1 to 4 arguments");
-
-	std::cout << "Not implemented just yet" << std::endl;
-	
-	/*SetUniform(name, MAKE_VECTOR(args...));
-	SetUniform(name, MAKE_VECTOR(4, 10));*/
-}
-
-template <typename MatType>
-std::enable_if_t<std::is_same_v<MatType, Matrix4>> OGLShader::SetUniform(const std::string& name, const MatType& mat) const {
-	constexpr int MatSize = sizeof(MatType) / sizeof(float);
-	
-	if constexpr (MatSize == 16) {
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, mat.array);
-	}
 }
