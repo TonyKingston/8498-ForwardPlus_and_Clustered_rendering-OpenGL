@@ -130,6 +130,7 @@ void OGLRenderer::BindShader(ShaderBase*s) {
 	else if (OGLShader* oglShader = dynamic_cast<OGLShader*>(s)) {
 		glUseProgram(oglShader->programID);
 		boundShader = oglShader;
+		oglShader->ClearCache();
 	}
 	else {
 		std::cout << __FUNCTION__ << " has received invalid shader?!" << std::endl;

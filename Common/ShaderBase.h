@@ -15,11 +15,10 @@ namespace NCL {
 
 		class ShaderBase	{
 		public:
-			ShaderBase() {
-			}
+			ShaderBase() = default;
 			ShaderBase(const string& vertex, const string& fragment, const string& geometry = "", const string& domain = "", const string& hull = "");
 			ShaderBase(const string& compute);
-			virtual ~ShaderBase();
+			virtual ~ShaderBase() = default;
 
 			virtual void ReloadShader() = 0;
 		protected:

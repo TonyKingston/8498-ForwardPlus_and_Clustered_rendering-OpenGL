@@ -8,16 +8,38 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include <algorithm>
+#include <type_traits>
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
+#include "Quaternion.h"
+#include "Matrix4.h"
+
 
 namespace NCL {
 	namespace Maths {
-		class Vector2;
-		class Vector3;
-		class Vector4;
-		class Quaternion;
-		class Matrix3;
-		class Matrix4;
-			
+
+		// This stuff isn't strictly necessary but I wanted practice with macros and type traits.
+		//#define MAKE_VECTOR(...) MAKE_VECTOR_IMPL(__VA_ARGS__, Vector4, Vector3, Vector2)(__VA_ARGS__)
+		//#define MAKE_VECTOR_IMPL(_2, _3, _4, NAME, ...) NAME
+		//#define FORCE_EXPAND(X) X
+		////#define NUMARGS(...)  (sizeof((int[]){__VA_ARGS__})/sizeof(int))
+		//#define MAKE_VECTOR(...) \
+		//	MAKE_VECTOR_IMPL()
+		//#define MAKE_VECTOR_IMPL(N) \
+		//Vector##N \
+
+		template<typename T> struct IsVector : std::false_type {};
+
+		#define DECLARE_VECTOR_TYPE_TRAIT(TYPE) \
+	    template <> struct IsVector<Vector##TYPE> : std::true_type {};
+
+		DECLARE_VECTOR_TYPE_TRAIT(2);
+		DECLARE_VECTOR_TYPE_TRAIT(3);
+		DECLARE_VECTOR_TYPE_TRAIT(4);
+
+		#undef DECLARE_VECTOR_TYPE_TRAITS
+
 		//It's pi(ish)...
 		static const float		PI = 3.14159265358979323846f;
 
@@ -31,6 +53,8 @@ namespace NCL {
 
 		//Degrees to radians
 		inline float DegreesToRadians(float degs) {
+			//MAKE_VECTOR(1.0f, 2.0f);
+
 			return degs * PI / 180.0f;
 		};
 
