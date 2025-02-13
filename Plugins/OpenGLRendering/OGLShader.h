@@ -35,7 +35,7 @@ namespace NCL {
 			std::enable_if_t<NCL::Maths::IsVector<VecType>::value, void> SetUniform(const std::string& name, const VecType& value) const;
 
 			template <typename MatType>
-			std::enable_if_t<std::is_class_v<NCL::Maths::Matrix4>, void> SetUniform(const std::string& name, const MatType& value) const;
+			std::enable_if_t<std::is_same_v<MatType, NCL::Maths::Matrix4>, void> SetUniform(const std::string& name, const MatType& value) const;
 
 			//template <typename... Args, typename = std::enable_if_t<(std::is_arithmetic_v<Args> && ...)>>
 			template <typename... Args>

@@ -10,6 +10,7 @@ https://research.ncl.ac.uk/game/
 #include "../../Common/Assets.h"
 #include "../../Common/Maths.h"
 #include <iostream>
+#include <string>
 
 using namespace NCL;
 using namespace NCL::Rendering;
@@ -186,7 +187,7 @@ std::enable_if_t<(std::is_arithmetic_v<Args> && ...), void> OGLShader::SetVector
 }
 
 template <typename MatType>
-std::enable_if_t<std::is_class_v<Matrix4>, void> OGLShader::SetUniform(const std::string& name, const MatType& mat) const {
+std::enable_if_t<std::is_same_v<MatType, Matrix4>> OGLShader::SetUniform(const std::string& name, const MatType& mat) const {
 	constexpr int MatSize = sizeof(MatType) / sizeof(float);
 	
 	if constexpr (MatSize == 16) {
