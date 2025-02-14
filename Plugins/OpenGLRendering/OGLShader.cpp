@@ -8,10 +8,14 @@ https://research.ncl.ac.uk/game/
 */
 #include "OGLShader.h"
 #include "../../Common/Assets.h"
+#include "../../Common/Maths.h"
 #include <iostream>
+#include <string>
+#include <type_traits>
 
 using namespace NCL;
 using namespace NCL::Rendering;
+using namespace NCL::Maths;
 
 GLuint shaderTypes[(int)ShaderStages::SHADER_MAX] = {
 	GL_VERTEX_SHADER,
@@ -58,6 +62,7 @@ OGLShader::~OGLShader()	{
 
 void OGLShader::ReloadShader() {
 	DeleteIDs();
+	ClearCache();
 	programID = glCreateProgram();
 	string fileContents = "";
 	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
@@ -97,7 +102,7 @@ void OGLShader::ReloadShader() {
 	}
 }
 
-void	OGLShader::DeleteIDs() {
+void OGLShader::DeleteIDs() {
 	if (!programID) {
 		return;
 	}
@@ -118,11 +123,11 @@ void	OGLShader::PrintCompileLog(GLuint object) {
 		char* tempData = new char[logLength];
 		glGetShaderInfoLog(object, logLength, NULL, tempData);
 		std::cout << "Compile Log:\n" << tempData << std::endl;
-		delete tempData;
+		delete[] tempData;
 	}
 }
 
-void	OGLShader::PrintLinkLog(GLuint program) {
+void OGLShader::PrintLinkLog(GLuint program) {
 	int logLength = 0;
 	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
@@ -130,6 +135,17 @@ void	OGLShader::PrintLinkLog(GLuint program) {
 		char* tempData = new char[logLength];
 		glGetProgramInfoLog(program, logLength, NULL, tempData);
 		std::cout << "Link Log:\n" << tempData << std::endl;
-		delete tempData;
+		delete[] tempData;
 	}
+}
+
+GLint OGLShader::GetUniformLocation(const std::string& name) const {
+	auto it = uniformCache.find(name);
+	if (uniformCache.find(name) != uniformCache.end()) {
+		return it->second;
+	}
+
+	GLint location = glGetUniformLocation(programID, name.c_str());
+	uniformCache[name] = location;
+	return location;
 }

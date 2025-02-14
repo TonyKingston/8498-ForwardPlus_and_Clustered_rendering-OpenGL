@@ -14,7 +14,3 @@ ShaderBase::ShaderBase(const string& vertex, const string& fragment, const strin
 ShaderBase::ShaderBase(const string& compute) {
 	shaderFiles[(int)ShaderStages::SHADER_COMPUTE] = compute;
 }
-
-ShaderBase::~ShaderBase()
-{
-}

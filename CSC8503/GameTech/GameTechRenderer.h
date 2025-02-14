@@ -254,7 +254,7 @@ namespace NCL {
 
 			std::mt19937 lightGen;
 			std::uniform_real_distribution<> lightDist;
-			static constexpr Vector3 LIGHT_MIN_BOUNDS = Vector3(560.0f, 0.0f, -230.0f) / WORLD_SCALE;
+			static constexpr Vector3 LIGHT_MIN_BOUNDS = Vector3(-560.0f, 0.0f, -230.0f) / WORLD_SCALE;
 			static constexpr Vector3 LIGHT_MAX_BOUNDS = Vector3(510.0f, 400.0f, 220.0f) / WORLD_SCALE;
 
 			// Clump lights in center corridor
