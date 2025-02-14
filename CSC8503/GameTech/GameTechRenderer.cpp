@@ -960,19 +960,7 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 
 	}
 	OGLShader* activeShader = nullptr;
-	int projLocation = 0;
-	int viewLocation = 0;
-	int modelLocation = 0;
-	int colourLocation = 0;
-	int hasVColLocation = 0;
-	int hasTexLocation = 0;
-	int hasBumpLocation = 0;
-	int hasSpecLocation = 0;
-	int shadowLocation = 0;
 
-	int noOfLightsLocation = 0;
-
-	int cameraLocation = 0;
 	//glActiveTexture(GL_TEXTURE0 + 2);
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
 
@@ -984,25 +972,13 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 		vector<TextureBase*> textures = (*i).GetTextures();
 
 		if (activeShader != shader) {
-			projLocation = glGetUniformLocation(shader->GetProgramID(), "projMatrix");
-			viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
-			modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
-			//shadowLocation = glGetUniformLocation(shader->GetProgramID(), "shadowMatrix");
-			colourLocation = glGetUniformLocation(shader->GetProgramID(), "objectColour");
-			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
-			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
-			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
-			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
+			
+			shader->SetUniform("cameraPos", gameWorld.GetMainCamera()->GetPosition());
 
-			noOfLightsLocation = glGetUniformLocation(shader->GetProgramID(), "noOfLights");
-
-			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
-			glUniform3fv(cameraLocation, 1, (float*)&gameWorld.GetMainCamera()->GetPosition());
-
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
-
-			glUniform1i(noOfLightsLocation, numLights);
+			OGLShader::SetUniforms(shader,
+				"projMatrix", projMat,
+				"viewMatrix", viewMat,
+				"noOfLights", numLights);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 1);*/
@@ -1011,29 +987,27 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 		}
 
 		Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
-		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
-
-		OGLShader::SetUniforms(activeShader, 
-			"scale", clusterParams.scaleFactor,
-			"bias", clusterParams.biasFactor,
-			"tilePxX", clusterX,
-			"tilePxY", clusterY,
-			"inDebug", inDebugMode);
 
 		//Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
 		//glUniformMatrix4fv(shadowLocation, 1, false, (float*)&fullShadowMat);
 
-		glUniform4fv(colourLocation, 1, (float*)&i->GetColour());
-
-		glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
-
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
-		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		const bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		const bool hasBump = textures.size() == layerCount * 2;
 		const bool hasSpec = (*i).GetSpecTextures().size() > 0;
-		glUniform1i(hasBumpLocation, hasBump);
-		glUniform1i(hasSpecLocation, hasSpec);
+
+		OGLShader::SetUniforms(activeShader, 
+			"modelMatrix", modelMatrix,
+			"scale", clusterParams.scaleFactor,
+			"bias", clusterParams.biasFactor,
+			"tilePxX", clusterX,
+			"tilePxY", clusterY,
+			"inDebug", inDebugMode,
+			"objectColour", i->GetColour(),
+			"hasVertexColours", !(*i).GetMesh()->GetColourData().empty(),
+			"hasTexture", (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0,
+			"hasBump", hasBump,
+			"hasSpec", hasSpec);
 
 		if (i->GetAnimation()) {
 			MeshGeometry* mesh = i->GetMesh();
@@ -1049,7 +1023,6 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 			int j = glGetUniformLocation(((OGLShader*)(*i).GetShader())->GetProgramID(), "joints");
 			glUniformMatrix4fv(j, frameMatrices.size(), false,
 				(float*)frameMatrices.data());
-
 		}
 
 		BindAndDraw(i, hasDiff, hasBump);
@@ -1110,18 +1083,6 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 	BindShader(sceneShader);
 
 	OGLShader* activeShader = nullptr;
-	int projLocation = 0;
-	int viewLocation = 0;
-	int modelLocation = 0;
-	int colourLocation = 0;
-	int hasVColLocation = 0;
-	int hasTexLocation = 0;
-	int hasBumpLocation = 0;
-	int hasSpecLocation = 0;
-	int shadowLocation = 0;
-
-	int cameraLocation = 0;
-	int noOfLightsLocation = 0;
 	/*glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);*/
 
@@ -1134,21 +1095,12 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 		vector<TextureBase*> textures = (*i).GetTextures();
 
 		if (activeShader != shader) {
-			projLocation = glGetUniformLocation(shader->GetProgramID(), "projMatrix");
-			viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
-			modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
-			//shadowLocation = glGetUniformLocation(shader->GetProgramID(), "shadowMatrix");
-			colourLocation = glGetUniformLocation(shader->GetProgramID(), "objectColour");
-			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
-			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
-			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
-			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
+			shader->SetUniform("cameraPos", current_camera->GetPosition());
 
-			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
-			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
-
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
+			OGLShader::SetUniforms(shader,
+				"projMatrix", projMat,
+				"viewMatrix", viewMat,
+				"noOfLights", numLights);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 2);*/
@@ -1157,25 +1109,24 @@ void GameTechRenderer::FillBuffers(Camera* current_camera, float depth) {
 		}
 
 		Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
-		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
 
 	/*	Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
 		glUniformMatrix4fv(shadowLocation, 1, false, (float*)&fullShadowMat);*/
 
-		glUniform4fv(colourLocation, 1, (float*)&i->GetColour());
-
-		glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
-
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
-		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		bool hasBump = textures.size() == layerCount * 2;
 		bool hasSpec = (*i).GetSpecTextures().size() > 0;
 
-		glUniform1i(hasBumpLocation, hasBump);
-		glUniform1i(hasSpecLocation, hasSpec);
-
-		glUniform1f(glGetUniformLocation(shader->GetProgramID(), "isDepth"), depth);
+		OGLShader::SetUniforms(activeShader,
+			"modelMatrix", modelMatrix,
+			"inDebug", inDebugMode,
+			"objectColour", i->GetColour(),
+			"hasVertexColours", !(*i).GetMesh()->GetColourData().empty(),
+			"hasTexture", (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0,
+			"hasBump", hasBump,
+			"hasSpec", hasSpec,
+			"isDepth", depth);
 
 		if (i->GetAnimation()) {
 			MeshGeometry* mesh = i->GetMesh();
@@ -1453,19 +1404,7 @@ void GameTechRenderer::RenderSkybox(Camera* current_camera) {
 void GameTechRenderer::RenderCamera(Camera* current_camera) {
 
 	OGLShader* activeShader = nullptr;
-	int projLocation = 0;
-	int viewLocation = 0;
-	int modelLocation = 0;
-	int colourLocation = 0;
-	int hasVColLocation = 0;
-	int hasTexLocation = 0;
-	int hasBumpLocation = 0;
-	int hasSpecLocation = 0;
-	int shadowLocation = 0;
 
-	int noOfLightsLocation = 0;
-
-	int cameraLocation = 0;
 	//glActiveTexture(GL_TEXTURE0 + 2);
 	//glBindTexture(GL_TEXTURE_2D, shadowTex);
 
@@ -1478,25 +1417,13 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 		vector<TextureBase*> textures = (*i).GetTextures();
 
 		if (activeShader != shader) {
-			projLocation = glGetUniformLocation(shader->GetProgramID(), "projMatrix");
-			viewLocation = glGetUniformLocation(shader->GetProgramID(), "viewMatrix");
-			modelLocation = glGetUniformLocation(shader->GetProgramID(), "modelMatrix");
-			//shadowLocation = glGetUniformLocation(shader->GetProgramID(), "shadowMatrix");
-			colourLocation = glGetUniformLocation(shader->GetProgramID(), "objectColour");
-			hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
-			hasTexLocation = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
-			hasBumpLocation = glGetUniformLocation(shader->GetProgramID(), "hasBump");
-			hasSpecLocation = glGetUniformLocation(shader->GetProgramID(), "hasSpec");
 
-			noOfLightsLocation = glGetUniformLocation(shader->GetProgramID(), "noOfLights");
+			shader->SetUniform("cameraPos", current_camera->GetPosition());
 
-			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
-			glUniform3fv(cameraLocation, 1, (float*)&current_camera->GetPosition());
-
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
-
-			glUniform1i(noOfLightsLocation, numLights);
+			OGLShader::SetUniforms(shader,
+				"projMatrix", projMat,
+				"viewMatrix", viewMat,
+				"noOfLights", numLights);
 
 			/*int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
 			glUniform1i(shadowTexLocation, 1);*/
@@ -1505,22 +1432,24 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 		}
 
 		Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
-		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
 
 		//Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
 		//glUniformMatrix4fv(shadowLocation, 1, false, (float*)&fullShadowMat);
 
-		glUniform4fv(colourLocation, 1, (float*)&i->GetColour());
-
-		glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
-
 		int layerCount = (*i).GetMesh()->GetSubMeshCount();
-		glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0);
 		const bool hasDiff = (OGLTexture*)(*i).GetDefaultTexture() ? true : false;
 		const bool hasBump = textures.size() == layerCount * 2;
 		const bool hasSpec = (*i).GetSpecTextures().size() > 0;
-		glUniform1i(hasBumpLocation, hasBump);
-		glUniform1i(hasSpecLocation, hasSpec);
+
+		OGLShader::SetUniforms(activeShader,
+			"modelMatrix", modelMatrix,
+			"inDebug", inDebugMode,
+			"objectColour", i->GetColour(),
+			"hasVertexColours", !(*i).GetMesh()->GetColourData().empty(),
+			"hasTexture", (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0,
+			"hasBump", hasBump,
+			"hasSpec", hasSpec);
+
 
 		if (i->GetAnimation()) {
 			MeshGeometry* mesh = i->GetMesh();
@@ -1536,7 +1465,6 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 			int j = glGetUniformLocation(((OGLShader*)(*i).GetShader())->GetProgramID(), "joints");
 			glUniformMatrix4fv(j, frameMatrices.size(), false,
 				(float*)frameMatrices.data());
-
 		}
 
 		BindAndDraw(i, hasDiff, hasBump);
@@ -1571,7 +1499,7 @@ void GameTechRenderer::RenderCameraPlus(Camera* current_camera) {
 		vector<TextureBase*> textures = (*i).GetTextures();
 
 		if (activeShader != shader) {
-			shader->SetUniform("cameraLocation", current_camera->GetPosition());
+			shader->SetUniform("cameraPos", current_camera->GetPosition());
 
 			OGLShader::SetUniforms(shader,
 				"projMatrix", projMat,
