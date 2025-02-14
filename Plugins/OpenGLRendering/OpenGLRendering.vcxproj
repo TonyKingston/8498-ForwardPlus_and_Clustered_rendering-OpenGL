@@ -158,6 +158,7 @@
     <ClInclude Include="OGLRenderer.h" />
     <ClInclude Include="OGLResourceManager.h" />
     <ClInclude Include="OGLShader.h" />
+    <ClInclude Include="OGLShaderStorageBuffer.h" />
     <ClInclude Include="OGLTexture.h" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClCompile Include="OGLRenderer.cpp" />
     <ClCompile Include="OGLResourceManager.cpp" />
     <ClCompile Include="OGLShader.cpp" />
+    <ClCompile Include="OGLShaderStorageBuffer.cpp" />
     <ClCompile Include="OGLTexture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
