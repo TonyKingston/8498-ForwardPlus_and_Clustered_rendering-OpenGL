@@ -1,5 +1,6 @@
 #include "RenderObject.h"
-#include "../../Common/MeshGeometry.h"
+#include "Common/Math/Maths.h"
+#include "Common/Graphics/MeshGeometry.h"
 #include "../CSC8503Common/Transform.h"
 
 using namespace NCL::CSC8503;

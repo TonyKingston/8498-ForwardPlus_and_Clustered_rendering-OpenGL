@@ -7,9 +7,7 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #include "OGLMesh.h"
-#include "../../Common/Vector2.h"
-#include "../../Common/Vector3.h"
-#include "../../Common/Vector4.h"
+#include "Common/Math/Maths.h"
 
 using namespace NCL;
 using namespace NCL::Rendering;

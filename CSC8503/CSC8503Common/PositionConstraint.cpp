@@ -1,5 +1,5 @@
 #include "PositionConstraint.h"
-#include "../../Common/Vector3.h"
+#include "Common/Math/Vector3.h"
 #include "PhysicsObject.h"
 #include "GameObject.h"
 

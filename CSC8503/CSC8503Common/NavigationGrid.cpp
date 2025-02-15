@@ -1,11 +1,11 @@
 #include "NavigationGrid.h"
-#include "../../Common/Assets.h"
+#include "Common/Resources/Assets.h"
 
 #include <fstream>
 #include <list>
 #include <queue>
 #include "Debug.h"
-#include "../../Common/Quaternion.h"
+#include "Common/Math/Quaternion.h"
 #include "Transform.h"
 
 using namespace NCL;

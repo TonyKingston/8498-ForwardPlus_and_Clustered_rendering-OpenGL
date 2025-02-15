@@ -36,8 +36,8 @@ _-_-_-_-_-_-_-""  ""
 #include <stdio.h>
 #include <fcntl.h>
 
-#include "Win32Mouse.h"
-#include "Win32Keyboard.h"
+#include "Input/Win32Mouse.h"
+#include "Input/Win32Keyboard.h"
 
 namespace NCL {
 	namespace Win32Code {

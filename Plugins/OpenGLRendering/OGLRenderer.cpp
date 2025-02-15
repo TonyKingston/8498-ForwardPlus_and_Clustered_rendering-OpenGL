@@ -11,17 +11,14 @@ https://research.ncl.ac.uk/game/
 #include "OGLMesh.h"
 #include "OGLTexture.h"
 
-#include "../../Common/SimpleFont.h"
-#include "../../Common/TextureLoader.h"
+#include "Common/Math/Maths.h"
+#include "Common/Graphics/SimpleFont.h"
+#include "Common/Graphics/TextureLoader.h"
+#include "Common/Graphics/MeshGeometry.h"
 
-#include "../../Common/Vector2.h"
-#include "../../Common/Vector3.h"
-#include "../../Common/Matrix4.h"
-
-#include "../../Common/MeshGeometry.h"
 
 #ifdef _WIN32
-#include "../../Common/Win32Window.h"
+#include "Common/Graphics/Win32Window.h"
 
 #include "KHR\khrplatform.h"
 #include "glad\glad.h"

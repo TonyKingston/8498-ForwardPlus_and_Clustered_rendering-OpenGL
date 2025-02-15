@@ -1,3 +1,3 @@
 #include "QuadTree.h"
-#include "../../Common/Vector3.h"
+#include "Common/Math/Vector3.h"
 using namespace NCL;

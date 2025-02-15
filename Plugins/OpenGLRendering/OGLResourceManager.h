@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common/ResourceManager.h"
+#include "Common/Graphics/ResourceManager.h"
 
 namespace NCL {
 	namespace Rendering {

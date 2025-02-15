@@ -1,7 +1,7 @@
 #include "Model.h"
 #include "OGLResourceManager.h"
 #include <fstream>
-#include "../Common/Assets.h"
+#include "Common/Resources/Assets.h"
 #include "../CSC8503/CSC8503Common/Transform.h"
 #include "../CSC8503/CSC8503Common/GameObject.h"
 #include "../CSC8503/CSC8503Common/RenderObject.h"

@@ -1,11 +1,11 @@
 #include "GameTechRenderer.h"
 
 #include "../CSC8503Common/GameObject.h"
-#include "../../Common/Camera.h"
-#include "../../Common/Vector2.h"
-#include "../../Common/Vector3.h"
-#include "../../Common/TextureLoader.h"
-#include "..//..//Common/Assets.h"
+#include "Common/Math/Maths.h"
+#include "Common/Graphics/Camera.h"
+#include "Common/Graphics/TextureLoader.h"
+#include "Common/Resources/Assets.h"
+#include <cstddef>
 
 #include "../../Common/stb/stb_image.h"
 #include <random>
@@ -1383,7 +1383,6 @@ void GameTechRenderer::RenderSkybox(Camera* current_camera) {
 	int projLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "projMatrix");
 	int viewLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "viewMatrix");
 	int texLocation = glGetUniformLocation(skyboxShader->GetProgramID(), "cubeTex");
-
 	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMat);
 	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMat);
 

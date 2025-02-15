@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common/Vector2.h"
+#include "Common/Math/Vector2.h"
 #include "../CSC8503Common/CollisionDetection.h"
 #include "Debug.h"
 #include <list>

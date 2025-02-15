@@ -1,4 +1,4 @@
-#include "../../Common/Window.h"
+#include "Common/Graphics/Window.h"
 #include "../GameTech/TutorialGame.h"
 #include <iostream>
 #include <fstream>

@@ -8,12 +8,12 @@ https://research.ncl.ac.uk/game/
 */
 #include "SimpleFont.h"
 #include "TextureLoader.h"
-#include "Assets.h"
+#include "Resources/Assets.h"
 #include <fstream>
 
-#include "../Common/Vector2.h"
-#include "../Common/Vector3.h"
-#include "../Common/Vector4.h"
+#include "Math/Vector2.h"
+#include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 using namespace NCL;
 using namespace Rendering;

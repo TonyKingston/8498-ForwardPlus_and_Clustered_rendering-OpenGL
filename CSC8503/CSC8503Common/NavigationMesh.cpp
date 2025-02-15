@@ -1,5 +1,5 @@
 #include "NavigationMesh.h"
-#include "../../Common/Assets.h"
+#include "Common/Resources/Assets.h"
 #include <fstream>
 using namespace NCL;
 using namespace CSC8503;

@@ -1,8 +1,8 @@
 #pragma once
-#include "../../Common/Matrix4.h"
-#include "../../Common/Matrix3.h"
-#include "../../Common/Vector3.h"
-#include "../../Common/Quaternion.h"
+#include "Common/Math/Matrix4.h"
+#include "Common/Math/Matrix3.h"
+#include "Common/Math/Vector3.h"
+#include "Common/Math/Quaternion.h"
 
 #include <vector>
 

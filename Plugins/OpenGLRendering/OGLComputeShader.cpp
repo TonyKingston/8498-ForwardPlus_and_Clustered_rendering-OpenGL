@@ -8,7 +8,7 @@ https://research.ncl.ac.uk/game/
 */
 #include "OGLComputeShader.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
-#include "../../Common/Assets.h"
+#include "Common/Resources/Assets.h"
 #include <iostream>
 
 using namespace NCL;

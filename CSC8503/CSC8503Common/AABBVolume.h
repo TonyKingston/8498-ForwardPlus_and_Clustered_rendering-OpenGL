@@ -1,6 +1,6 @@
 #pragma once
 #include "CollisionVolume.h"
-#include "../../Common/Vector4.h"
+#include "Common/Math/Vector4.h"
 #include "Debug.h"
 
 namespace NCL {

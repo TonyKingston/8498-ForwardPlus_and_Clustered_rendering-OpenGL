@@ -4,7 +4,7 @@
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
-#include "../../Common/Frustum.h"
+#include "Common/Math/Frustum.h"
 
 #include "../CSC8503Common/GameWorld.h"
 #include "../CSC8503Common/NavigationMesh.h"

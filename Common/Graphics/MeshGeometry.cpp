@@ -1,9 +1,6 @@
 #include "MeshGeometry.h"
-#include "Assets.h"
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix4.h"
+#include "Math/Maths.h"
+#include "Resources/Assets.h"
 
 #include <fstream>
 #include <string>

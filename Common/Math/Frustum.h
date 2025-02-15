@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "Plane.h"
 
 namespace NCL {
@@ -10,6 +11,7 @@ namespace NCL {
 
 	namespace CSC8503 {
 		class RenderObject;
+		class Transform;
 	}
 
 	using namespace Maths;
@@ -19,13 +21,14 @@ namespace NCL {
 
 		class Frustum {
 		public:
-			Frustum(void) {};
-			~Frustum(void) {};
+			Frustum() = default;
+			~Frustum() = default;
 
 			void FromMatrix(const Matrix4& mvp);
-			bool InsideFrustum(RenderObject& n);
+			bool IsInsideFrustum(const Vector3& position, float boundingRadius);
 		protected:
-			Plane planes[6];
+			static constexpr size_t PlaneCount = 6;
+			std::array<Plane, PlaneCount> planes;
 		};
 
 	}

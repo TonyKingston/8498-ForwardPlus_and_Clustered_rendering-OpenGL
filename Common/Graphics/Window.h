@@ -12,11 +12,11 @@ _-_-_-_-_-_-_-""  ""
 *//////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "Keyboard.h"
-#include "Mouse.h"
-#include "GameTimer.h"
+#include "Input/Keyboard.h"
+#include "Input/Mouse.h"
+#include "Core/GameTimer.h"
 
-#include "Vector2.h"
+#include "Math/Vector2.h"
 
 #include <string>
 
