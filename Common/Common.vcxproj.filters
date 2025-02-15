@@ -30,178 +30,172 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Windowing and Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Windowing and Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Matrix4.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>Windowing and Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Windowing and Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Matrix2.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="Matrix3.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="Quaternion.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="Plane.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32Keyboard.cpp">
-      <Filter>Windowing and Input\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32Mouse.cpp">
-      <Filter>Windowing and Input\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32Window.cpp">
-      <Filter>Windowing and Input\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="RendererBase.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderBase.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Maths.cpp">
-      <Filter>Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureBase.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshGeometry.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Assets.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureWriter.cpp">
+    <ClCompile Include="Resources\Assets.cpp">
       <Filter>Asset Handling</Filter>
     </ClCompile>
-    <ClCompile Include="SimpleFont.cpp">
-      <Filter>Asset Handling</Filter>
+    <ClCompile Include="Input\Keyboard.cpp">
+      <Filter>Windowing and Input</Filter>
     </ClCompile>
-    <ClCompile Include="TextureLoader.cpp">
-      <Filter>Asset Handling</Filter>
+    <ClCompile Include="Input\Mouse.cpp">
+      <Filter>Windowing and Input</Filter>
     </ClCompile>
-    <ClCompile Include="Vector4.cpp">
+    <ClCompile Include="Input\Win32Keyboard.cpp">
+      <Filter>Windowing and Input\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Win32Mouse.cpp">
+      <Filter>Windowing and Input\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Frustum.cpp">
       <Filter>Maths</Filter>
     </ClCompile>
-    <ClCompile Include="Vector2.cpp">
+    <ClCompile Include="Math\Maths.cpp">
       <Filter>Maths</Filter>
     </ClCompile>
-    <ClCompile Include="Vector3.cpp">
+    <ClCompile Include="Math\Matrix2.cpp">
       <Filter>Maths</Filter>
     </ClCompile>
-    <ClCompile Include="MeshAnimation.cpp">
+    <ClCompile Include="Math\Matrix3.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Matrix4.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Plane.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Quaternion.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vector2.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vector3.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vector4.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Camera.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="MeshMaterial.cpp">
+    <ClCompile Include="Graphics\MeshAnimation.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Frustum.cpp">
+    <ClCompile Include="Graphics\MeshGeometry.cpp">
       <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\MeshMaterial.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RendererBase.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ShaderBase.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\SimpleFont.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\TextureBase.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\TextureLoader.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\TextureWriter.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Win32Window.cpp">
+      <Filter>Windowing and Input\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Window.cpp">
+      <Filter>Windowing and Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resources\Assets.h">
+      <Filter>Asset Handling</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="Input\Keyboard.h">
       <Filter>Windowing and Input</Filter>
     </ClInclude>
-    <ClInclude Include="Vector3.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector4.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector2.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.h">
+    <ClInclude Include="Input\Mouse.h">
       <Filter>Windowing and Input</Filter>
     </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>Windowing and Input</Filter>
-    </ClInclude>
-    <ClInclude Include="GameTimer.h">
-      <Filter>Windowing and Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix4.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix2.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix3.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Plane.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Quaternion.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Win32Window.h">
+    <ClInclude Include="Input\Win32Mouse.h">
       <Filter>Windowing and Input\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="Win32Keyboard.h">
+    <ClInclude Include="Input\Win32Keyboard.h">
       <Filter>Windowing and Input\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="Win32Mouse.h">
-      <Filter>Windowing and Input\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="Maths.h">
+    <ClInclude Include="Math\Frustum.h">
       <Filter>Maths</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderBase.h">
+    <ClInclude Include="Math\Maths.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix2.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix3.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix4.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Plane.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Quaternion.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector2.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector3.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector4.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Camera.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="RendererBase.h">
+    <ClInclude Include="Graphics\MeshAnimation.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="TextureBase.h">
+    <ClInclude Include="Graphics\MeshGeometry.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="MeshGeometry.h">
+    <ClInclude Include="Graphics\MeshMaterial.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Assets.h">
-      <Filter>Asset Handling</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureWriter.h">
-      <Filter>Asset Handling</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleFont.h">
-      <Filter>Asset Handling</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureLoader.h">
-      <Filter>Asset Handling</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshAnimation.h">
+    <ClInclude Include="Graphics\RendererBase.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="MeshMaterial.h">
+    <ClInclude Include="Graphics\ResourceManager.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Frustum.h">
+    <ClInclude Include="Graphics\ShaderBase.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.h">
+    <ClInclude Include="Graphics\SimpleFont.h">
       <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\TextureBase.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\TextureLoader.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\TextureWriter.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Win32Window.h">
+      <Filter>Windowing and Input\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Window.h">
+      <Filter>Windowing and Input</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
