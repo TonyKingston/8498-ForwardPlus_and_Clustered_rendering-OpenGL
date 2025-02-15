@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "Constraint.h"
 #include "CollisionDetection.h"
-#include "../../Common/Camera.h"
+#include "Common/Graphics/Camera.h"
 #include <algorithm>
 #include "PhysicsSystem.h"
 

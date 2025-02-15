@@ -3,9 +3,8 @@
 #include "AABBVolume.h"
 #include "OBBVolume.h"
 #include "SphereVolume.h"
-#include "../../Common/Vector2.h"
-#include "../../Common/Window.h"
-#include "../../Common/Maths.h"
+#include "Common/Graphics/Window.h"
+#include "Common/Math/Maths.h"
 #include "Debug.h"
 
 #include <list>

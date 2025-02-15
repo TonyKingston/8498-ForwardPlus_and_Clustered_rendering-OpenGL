@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../Common/Camera.h"
-#include "../../Common/Plane.h"
+#include "Common/Graphics/Camera.h"
+#include "Common/Math/Plane.h"
 
 #include "Transform.h"
 #include "GameObject.h"

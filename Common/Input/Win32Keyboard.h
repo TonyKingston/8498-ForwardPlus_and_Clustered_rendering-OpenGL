@@ -13,7 +13,7 @@ _-_-_-_-_-_-_-""  ""
 #pragma once
 #ifdef _WIN32
 #include "Keyboard.h"
-#include "Win32Window.h"
+#include "Graphics/Win32Window.h"
 
 namespace NCL {
 	namespace Win32Code {

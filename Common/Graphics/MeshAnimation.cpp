@@ -1,6 +1,6 @@
 #include "MeshAnimation.h"
-#include "Matrix4.h"
-#include "Assets.h"
+#include "Math/Matrix4.h"
+#include "Resources/Assets.h"
 
 #include <fstream>
 #include <string>

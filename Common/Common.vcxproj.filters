@@ -22,11 +22,11 @@
     <Filter Include="Windowing and Input\Win32">
       <UniqueIdentifier>{6c4f3ce4-6425-4d48-bb36-05ba6e237747}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Rendering">
-      <UniqueIdentifier>{92093c3d-690f-4bb0-9dda-1fb247f863de}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Asset Handling">
       <UniqueIdentifier>{1d0b54c1-f5de-4083-b62a-78e5b7ec9b10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{92093c3d-690f-4bb0-9dda-1fb247f863de}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -76,34 +76,34 @@
       <Filter>Maths</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Camera.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\MeshAnimation.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\MeshGeometry.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\MeshMaterial.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RendererBase.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\ShaderBase.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\SimpleFont.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\TextureBase.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\TextureLoader.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\TextureWriter.cpp">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Win32Window.cpp">
       <Filter>Windowing and Input\Win32</Filter>
@@ -159,37 +159,37 @@
       <Filter>Maths</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Camera.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\MeshAnimation.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\MeshGeometry.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\MeshMaterial.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RendererBase.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\ResourceManager.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\ShaderBase.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\SimpleFont.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\TextureBase.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\TextureLoader.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\TextureWriter.h">
-      <Filter>Rendering</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Win32Window.h">
       <Filter>Windowing and Input\Win32</Filter>

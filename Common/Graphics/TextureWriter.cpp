@@ -9,8 +9,8 @@ https://research.ncl.ac.uk/game/
 #include "TextureWriter.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include "./stb/stb_image_write.h"
-#include "Assets.h"
+#include "../stb/stb_image_write.h"
+#include "Resources/Assets.h"
 using namespace NCL;
 
 void TextureWriter::WritePNG(const std::string& filename, char* data, int width, int height, int channels) {

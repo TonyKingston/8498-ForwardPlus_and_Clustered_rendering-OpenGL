@@ -1,7 +1,7 @@
 #include "PositionOrientationConstraint.h"
 #include "PhysicsObject.h"
 #include "GameObject.h"
-#include "../../Common/Maths.h"
+#include "Common/Math/Maths.h"
 
 void NCL::CSC8503::PositionOrientationConstraint::UpdateConstraint(float dt)
 {

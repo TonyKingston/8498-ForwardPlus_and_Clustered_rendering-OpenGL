@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
+#include "Math/Maths.h"
 using std::vector;
 
 namespace NCL {

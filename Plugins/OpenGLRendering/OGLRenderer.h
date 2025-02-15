@@ -7,10 +7,8 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #pragma once
-#include "../../Common/RendererBase.h"
-
-#include "../../Common/Vector3.h"
-#include "../../Common/Vector4.h"
+#include "Common/Graphics/RendererBase.h"
+#include "Common/Math/Maths.h"
 
 
 #ifdef _WIN32

@@ -1,5 +1,5 @@
 #include "MeshMaterial.h"
-#include "Assets.h"
+#include "Resources/Assets.h"
 #include "TextureLoader.h"
 #include "ResourceManager.h"
 #include <fstream>

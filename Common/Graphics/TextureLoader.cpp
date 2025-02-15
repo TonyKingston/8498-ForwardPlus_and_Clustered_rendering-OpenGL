@@ -12,7 +12,7 @@ https://research.ncl.ac.uk/game/
 
 #include "./stb/stb_image.h"
 
-#include "Assets.h"
+#include "Resources/Assets.h"
 
 #ifdef WIN32
 #include <filesystem>

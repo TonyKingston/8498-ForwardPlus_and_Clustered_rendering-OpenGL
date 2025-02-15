@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common/Vector3.h"
+#include "Common/Math/Vector3.h"
 #include <vector>
 
 namespace NCL {

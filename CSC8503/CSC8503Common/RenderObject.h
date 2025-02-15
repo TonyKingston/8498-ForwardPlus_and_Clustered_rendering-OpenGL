@@ -1,17 +1,20 @@
 #pragma once
-#include "../../Common/Matrix4.h"
-#include "../../Common/TextureBase.h"
-#include "../../Common/ShaderBase.h"
-#include "../../Common/Vector4.h"
-#include "../../Common/MeshMaterial.h"
-#include "../../Common/MeshAnimation.h"
-#include "../../Common/ResourceManager.h"
+#include "Common/Graphics/TextureBase.h"
+#include "Common/Graphics/ShaderBase.h"
+#include "Common/Graphics/MeshMaterial.h"
+#include "Common/Graphics/MeshAnimation.h"
+#include "Common/Graphics/ResourceManager.h"
+#include "Common/Math/Maths.h"
 #include <vector>
 
 namespace NCL {
 	using namespace NCL::Rendering;
 	using std::vector;
 	class MeshGeometry;
+
+	namespace Maths {
+		class Vector4;
+	}
 	namespace CSC8503 {
 		class Transform;
 

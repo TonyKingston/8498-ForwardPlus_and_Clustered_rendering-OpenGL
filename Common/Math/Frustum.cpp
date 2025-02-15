@@ -1,7 +1,6 @@
 #include "Frustum.h"
 #include "Matrix4.h"
-#include "../CSC8503/CSC8503Common/RenderObject.h"
-#include "../CSC8503/CSC8503Common/Transform.h"
+#include <algorithm>
 
 using namespace NCL::CSC8503;
 
@@ -31,12 +30,8 @@ void NCL::Rendering::Frustum::FromMatrix(const Matrix4& mat) {
 		(mat.array[15] - mat.array[14]), true);
 }
 
-bool NCL::Rendering::Frustum::InsideFrustum(RenderObject& n) {
-	for (int p = 0; p < 6; ++p) {
-		if (!planes[p].SphereInPlane(n.GetTransform()->GetPosition(), n.GetBoundingRadius())) {
-			return false; // RenderObject is outside this plane.
-
-		}
-	}
-	return true;
+bool NCL::Rendering::Frustum::IsInsideFrustum(const Vector3& position, float boundingRadius) {
+	return std::all_of(planes.begin(), planes.end(), [&](const auto& plane) {
+		return plane.SphereInPlane(position, boundingRadius);
+	});
 }

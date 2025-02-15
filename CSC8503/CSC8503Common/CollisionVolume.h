@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Common/Vector4.h"
-#include "../../Common/MeshGeometry.h"
+#include "Common/Math/Vector4.h"
+#include "Common/Graphics/MeshGeometry.h"
 #include "Debug.h"
 
 

@@ -1,8 +1,8 @@
 #include "PhysicsSystem.h"
 #include "PhysicsObject.h"
 #include "GameObject.h"
-#include "../../Common/Quaternion.h"
-#include "../../Common/Maths.h"
+#include "Common/Math/Quaternion.h"
+#include "Common/Math/Maths.h"
 #include "Constraint.h"
 
 #include "Debug.h"

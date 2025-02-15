@@ -3,11 +3,11 @@
 #include "OGLMesh.h"
 #include "OGLTexture.h"
 #include "OGLShader.h";
-#include "../../Common/MeshMaterial.h"
-#include "../../Common/MeshGeometry.h"
-#include "../../Common/MeshAnimation.h"
-#include "../../Common/TextureLoader.h"
-#include "../../Common/Assets.h"
+#include "Common/Graphics/MeshMaterial.h"
+#include "Common/Graphics/MeshGeometry.h"
+#include "Common/Graphics/MeshAnimation.h"
+#include "Common/Graphics/TextureLoader.h"
+#include "Common/Resources/Assets.h"
 #include <filesystem>
 
 

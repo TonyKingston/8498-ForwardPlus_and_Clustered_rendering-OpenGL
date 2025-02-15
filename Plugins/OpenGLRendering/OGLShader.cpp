@@ -7,8 +7,8 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #include "OGLShader.h"
-#include "../../Common/Assets.h"
-#include "../../Common/Maths.h"
+#include "Common/Resources/Assets.h"
+#include "Common/Math/Maths.h"
 #include <iostream>
 #include <string>
 #include <type_traits>
