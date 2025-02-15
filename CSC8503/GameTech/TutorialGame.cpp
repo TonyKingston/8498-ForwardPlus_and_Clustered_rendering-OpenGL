@@ -3,10 +3,10 @@
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
-#include "../../Common/TextureLoader.h"
+#include "Common/Graphics/TextureLoader.h"
+#include "Common/Resources/Assets.h"
 #include "..//CSC8503Common/PositionConstraint.h"
 #include "..//CSC8503Common/PositionOrientationConstraint.h"
-#include "../../Common/Assets.h"
 #include <fstream>
 
 using namespace NCL;

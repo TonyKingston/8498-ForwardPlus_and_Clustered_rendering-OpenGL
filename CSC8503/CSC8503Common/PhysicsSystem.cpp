@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Common/Math/Quaternion.h"
 #include "Common/Math/Maths.h"
+#include "Core/GameTimer.h"
 #include "Constraint.h"
 
 #include "Debug.h"

@@ -16,7 +16,7 @@ namespace NCL {
 	class GameTimer {
 	public:
 		GameTimer(void);
-		~GameTimer(void) {}
+		~GameTimer(void) = default;
 
 		double	GetTotalTimeSeconds()	const;
 		double	GetTotalTimeMSec()		const;
@@ -24,7 +24,7 @@ namespace NCL {
 		float	GetTimeDeltaSeconds()	const { return timeDelta; };
 		float	GetTimeDeltaMSec()		const { return timeDelta * 1000.0f; };
 
-		void	Tick();
+		void Tick();
 	protected:
 		float		timeDelta;
 		Timepoint	firstPoint;

@@ -80,11 +80,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)libs\assimp\$(Configuration)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Plugins\OpenGLRendering;$(SolutionDir)include\;$(IncludePath);$(SolutionDir)\Plugins\GLTFLoader</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Common;$(SolutionDir)\Plugins\OpenGLRendering;$(SolutionDir)include\;$(IncludePath);$(SolutionDir)\Plugins\GLTFLoader</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)libs\assimp\$(Configuration)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Plugins\OpenGLRendering;$(SolutionDir)include\;$(IncludePath);$(SolutionDir)\Plugins\GLTFLoader</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Common;$(SolutionDir)\Plugins\OpenGLRendering;$(SolutionDir)include\;$(IncludePath);$(SolutionDir)\Plugins\GLTFLoader</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

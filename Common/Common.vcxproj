@@ -196,6 +196,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\GameTimer.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\MeshAnimation.cpp" />
     <ClCompile Include="Graphics\MeshGeometry.cpp" />
@@ -225,6 +226,7 @@
     <ClCompile Include="Resources\Assets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\GameTimer.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
     <ClInclude Include="Graphics\MeshGeometry.h" />

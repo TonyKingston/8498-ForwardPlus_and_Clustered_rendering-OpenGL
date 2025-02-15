@@ -1,9 +1,8 @@
 #include "GamePushdownState.h"
-#include "../CSC8503Common/Debug.h"
 #include "GameState.h"
-#include "../../Common/Window.cpp"
+#include "../CSC8503Common/Debug.h"
+#include "Common/Graphics/Window.h"
 #include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
-
 
 using namespace NCL::CSC8503;
 
@@ -152,7 +151,7 @@ void NCL::CSC8503::GamePushdownState::InitGameState() {
 	gameState = new GameState();
 }
 
-Window* NCL::CSC8503::GamePushdownState::GetGameWindow() {
+NCL::Window* NCL::CSC8503::GamePushdownState::GetGameWindow() {
 	return gameState->GetWindow();
 }
 

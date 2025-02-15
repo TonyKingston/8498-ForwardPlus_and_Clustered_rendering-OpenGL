@@ -8,6 +8,7 @@
 #include "TutorialGame.h"
 
 namespace NCL {
+	class Window;
 
 	namespace CSC8503 {
 		class GameState;
@@ -15,7 +16,7 @@ namespace NCL {
 		public:
 			static void InitGameState();
 
-			static Window* GetGameWindow();
+			static NCL::Window* GetGameWindow();
 		protected:
 			static GameState* gameState;
 		};

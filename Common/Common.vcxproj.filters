@@ -28,6 +28,9 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{92093c3d-690f-4bb0-9dda-1fb247f863de}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{0d94427e-e387-4642-969f-1ac25be27fa4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Resources\Assets.cpp">
@@ -110,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\Window.cpp">
       <Filter>Windowing and Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GameTimer.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="Graphics\Window.h">
       <Filter>Windowing and Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameTimer.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
