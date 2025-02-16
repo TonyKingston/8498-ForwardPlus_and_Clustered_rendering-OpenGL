@@ -27,6 +27,13 @@ https://research.ncl.ac.uk/game/
 #include "KHR/WGLext.h"
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+
+extern "C"
+{
+	// Use GPU instead of my integrated graphics please! 
+	_declspec(dllexport) DWORD NvOptimusEnablement = 1;
+	_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
 #endif
 
 using namespace NCL;
