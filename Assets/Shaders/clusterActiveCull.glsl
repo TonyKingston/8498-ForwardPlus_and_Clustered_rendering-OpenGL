@@ -41,7 +41,7 @@ layout(std430, binding = COMPUTE_BINDING_ACTIVE_CLUSTERS_BUFFER) buffer activeCl
 	int activeClusters[];
 };
 
-layout(std430, binding = COMPUTE_BINDING_TEST3) buffer countSSBO {
+layout(std430, binding = COMPUTE_BINDING_TEST6) buffer countSSBO {
 	uint activeClusterCount;
 };
 

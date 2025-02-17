@@ -115,6 +115,7 @@ void OGLShader::ReloadShader() {
 		std::cout << "This shader has failed!" << std::endl;
 	}
 	else {
+		CacheUniforms();
 		std::cout << "Shader loaded!" << std::endl;
 	}
 }
@@ -159,10 +160,37 @@ void OGLShader::PrintLinkLog(GLuint program) {
 GLint OGLShader::GetUniformLocation(const std::string& name) const {
 	auto it = uniformCache.find(name);
 	if (uniformCache.find(name) != uniformCache.end()) {
-		return it->second;
+		return it->second.location;
 	}
 
 	GLint location = glGetUniformLocation(programID, name.c_str());
-	uniformCache[name] = location;
+	uniformCache[name].location = location;
 	return location;
+}
+
+// From Guide to Modern OpenGL
+void NCL::Rendering::OGLShader::CacheUniforms() {
+	GLint uniform_count = 0;
+
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &uniform_count);
+
+	if (uniform_count != 0) {
+		GLint 	maxNameLen = 0;
+		GLsizei length = 0;
+		GLsizei count = 0;
+		GLenum 	type = GL_NONE;
+		glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
+
+		auto uniform_name = std::make_unique<char[]>(maxNameLen);
+
+		for (GLint i = 0; i < uniform_count; ++i) {
+			glGetActiveUniform(programID, i, maxNameLen, &length, &count, &type, uniform_name.get());
+
+			UniformEntry uniform_info = {};
+			uniform_info.location = glGetUniformLocation(programID, uniform_name.get());
+			uniform_info.count = count;
+
+			uniformCache.emplace(std::make_pair(std::string(uniform_name.get(), length), uniform_info));
+		}
+	}
 }

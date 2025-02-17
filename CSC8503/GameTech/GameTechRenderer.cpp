@@ -322,14 +322,14 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(int) * MAX_LIGHTS_PER_TILE, NULL, GL_STATIC_COPY);
 
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, lightGridSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(struct ClusterFrustum), NULL, GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	glGenBuffers(1, &globalListSSBO);

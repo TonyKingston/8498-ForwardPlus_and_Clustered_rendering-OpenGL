@@ -13,6 +13,12 @@ namespace NCL {
 
 		//#define SET_UNIFORMS(shader, ...) OGLShader::SetUniforms(shader, { __VA_ARGS__ })
 
+		struct UniformEntry {
+			GLint location;
+			// Equals number of elements for an array or 1
+			GLint count;
+		};
+
 		class OGLShader : public ShaderBase
 		{
 		public:
@@ -109,9 +115,12 @@ namespace NCL {
 			int		shaderValid[(int)ShaderStages::SHADER_MAX];
 			int		programValid;
 
-			mutable std::unordered_map<std::string, GLint> uniformCache;
+			//mutable std::unordered_map<std::string, GLint> uniformCache;
+			mutable std::unordered_map<std::string, UniformEntry> uniformCache;
 
 			GLint GetUniformLocation(const std::string& name) const;
+			
+			void CacheUniforms();
 
 		private:
 
