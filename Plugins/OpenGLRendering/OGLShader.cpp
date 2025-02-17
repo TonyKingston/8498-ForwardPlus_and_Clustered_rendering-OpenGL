@@ -12,6 +12,11 @@ https://research.ncl.ac.uk/game/
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <memory>
+
+#define STB_INCLUDE_IMPLEMENTATION
+#define STB_INCLUDE_LINE_GLSL
+#include "Common/stb/stb_include.h"
 
 using namespace NCL;
 using namespace NCL::Rendering;
@@ -68,12 +73,24 @@ void OGLShader::ReloadShader() {
 	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
 		if (!shaderFiles[i].empty()) {
 			if (Assets::ReadTextFile(Assets::SHADERDIR + shaderFiles[i], fileContents)) {
+
+				char error[256]{};
+
+				auto deleter = [](char* p) {free(p); };
+				auto processed_ptr = std::unique_ptr<char, decltype(deleter) >(stb_include_string(fileContents.c_str(), nullptr, Assets::SHADERDIR.c_str(), nullptr, error), deleter);
+				
+				if (!processed_ptr) {
+					std::cerr << "Failed to process includes." << std::endl;
+					return;
+				}
+
+				std::string_view processedContents(processed_ptr.get());
 				shaderIDs[i] = glCreateShader(shaderTypes[i]);
 
 				std::cout << "Reading " << ShaderNames[i] << " shader " << shaderFiles[i] << std::endl;
 
-				const char* stringData	 = fileContents.c_str();
-				int			stringLength = (int)fileContents.length();
+				const char* stringData	 = processedContents.data();
+				int			stringLength = (int)processedContents.length();
 				glShaderSource(shaderIDs[i], 1, &stringData, &stringLength);
 				glCompileShader(shaderIDs[i]);
 
