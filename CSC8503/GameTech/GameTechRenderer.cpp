@@ -7,8 +7,10 @@
 #include "Common/Resources/Assets.h"
 #include <cstddef>
 
-#include "../../Common/stb/stb_image.h"
+#include "Common/stb/stb_image.h"
 #include <random>
+
+#include "../../Assets/Shaders/Shared/ComputeBindings.h"
 
 using namespace NCL;
 using namespace Rendering;
@@ -280,7 +282,7 @@ void GameTechRenderer::InitForwardPlus() {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, globalCountSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_LIGHT_BUFFER, lightSSBO);
 
 	sceneBuffers.push_back(aabbGridSSBO);
 	sceneBuffers.push_back(globalListSSBO);
@@ -298,13 +300,13 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 		glGenBuffers(1, &activeClusterSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, activeClusterSSBO);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(unsigned int), NULL, GL_STATIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, activeClusterSSBO);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_TEST5, activeClusterSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 		glGenBuffers(1, &activeCountSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, activeCountSSBO);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, activeCountSSBO);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_TEST6, activeCountSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterActiveCull.glsl");
 	}
@@ -320,7 +322,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(int) * MAX_LIGHTS_PER_TILE, NULL, GL_STATIC_COPY);
 
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightGridSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, lightGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 
@@ -346,7 +348,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, globalCountSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_LIGHT_BUFFER, lightSSBO);
 
 	sceneBuffers.push_back(aabbGridSSBO);
 	sceneBuffers.push_back(globalListSSBO);
@@ -447,7 +449,7 @@ void GameTechRenderer::ComputeTileGrid() {
 
 	Camera* current = gameWorld.GetMainCamera();
 	
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, aabbGridSSBO);
 	BindShader(forwardPlusGridShader);
 
 	Matrix4 invProj = (projMat).Inverse();
@@ -474,7 +476,7 @@ void GameTechRenderer::ComputeClusterGrid() {
 
 	Camera* current = gameWorld.GetMainCamera();
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, aabbGridSSBO);
 	BindShader(forwardPlusGridShader);
 
 	Matrix4 invProj = (projMat).Inverse();
@@ -500,8 +502,7 @@ void GameTechRenderer::ComputeActiveClusters() {
 	BindShader(activeShader);
 
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "depthTex"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	BIND_TEXTURE(0, bufferDepthTex);
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -581,8 +582,8 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	BindShader(forwardPlusCullShader);
 
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "depthTex"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	BIND_TEXTURE(0, bufferDepthTex);
+
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -870,8 +871,7 @@ void GameTechRenderer::RenderForward(bool withPrepass) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		BindShader(printShader);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+		BIND_TEXTURE(0, bufferColourTex);
 		glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
 		quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
@@ -930,8 +930,7 @@ void GameTechRenderer::RenderForwardPlus() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	BindShader(printShader);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+	BIND_TEXTURE(0, bufferColourTex);
 	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
 	quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
@@ -1033,8 +1032,8 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		BindShader(printShader);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+		BIND_TEXTURE(0, bufferColourTex);
+
 		glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
 		quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
@@ -1171,12 +1170,10 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	glDepthMask(GL_FALSE);
 
 	glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "depthTex"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	BIND_TEXTURE(0, bufferDepthTex);
 
 	glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "normTex"), 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+	BIND_TEXTURE(1, bufferNormalTex);
 
 	//glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "shadowTex"), 2);
 	//glActiveTexture(GL_TEXTURE2);
@@ -1232,16 +1229,13 @@ void GameTechRenderer::CombineBuffers(Camera* current) {
 	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 	glUniformMatrix4fv(modelLocation, 1, false, (float*)&identity);
 	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "diffuseTex"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+	BIND_TEXTURE(0, bufferColourTex);
 
 	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "diffuseLight"), 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, lightDiffuseTex);
+	BIND_TEXTURE(1, lightDiffuseTex);
 
 	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "specularLight"), 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
+	BIND_TEXTURE(2, lightSpecularTex);
 
 	//glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "skyboxTex"), 3);
 	//glActiveTexture(GL_TEXTURE3);
@@ -1272,8 +1266,7 @@ void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
 		activeShader = printShader;
 	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferFinalTex);
+	BIND_TEXTURE(0, bufferFinalTex);
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "diffuseTex"), 0);
 
 	BindMesh(quad);
@@ -1610,8 +1603,7 @@ void GameTechRenderer::RenderStartView() {
 	///////////
 	BindShader(printShader);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, background_tex);
+	BIND_TEXTURE(0, background_tex);
 	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
 	BindMesh(printer);
 	DrawBoundMesh();
@@ -1620,8 +1612,7 @@ void GameTechRenderer::RenderStartView() {
 	if (loading) {
 		BindShader(loading_shader);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, loading_tex);
+		BIND_TEXTURE(0, loading_tex);
 		glUniform1i(glGetUniformLocation(loading_shader->GetProgramID(), "nyan"), 0);
 		glUniform1f(glGetUniformLocation(loading_shader->GetProgramID(), "movement"), movement);
 		BindMesh(printer);

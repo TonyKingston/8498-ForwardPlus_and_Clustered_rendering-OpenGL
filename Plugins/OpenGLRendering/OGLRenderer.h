@@ -65,6 +65,14 @@ namespace NCL {
 			virtual Matrix4 SetupDebugLineMatrix()	const;
 			virtual Matrix4 SetupDebugStringMatrix()const;
 
+			#ifdef GL_VERSION_4_5
+			#define BIND_TEXTURE(unit, texture) glBindTextureUnit(unit, texture)
+			#else
+			#define BIND_TEXTURE(unit, texture) \
+				glActiveTexture(GL_TEXTURE0 + unit); \
+				glBindTexture(GL_TEXTURE_2D, texture)
+			#endif
+
 		protected:			
 			void BeginFrame()	override;
 			void RenderFrame()	override;
