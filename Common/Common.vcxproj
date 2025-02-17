@@ -140,7 +140,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NCL_DEBUG</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
@@ -226,6 +226,7 @@
     <ClCompile Include="Resources\Assets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Build.h" />
     <ClInclude Include="Core\GameTimer.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
@@ -254,6 +255,7 @@
     <ClInclude Include="Math\Vector2.h" />
     <ClInclude Include="Math\Vector3.h" />
     <ClInclude Include="Math\Vector4.h" />
+    <ClInclude Include="Misc.h" />
     <ClInclude Include="Resources\Assets.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
