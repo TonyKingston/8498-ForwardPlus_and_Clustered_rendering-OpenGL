@@ -168,8 +168,17 @@ GLint OGLShader::GetUniformLocation(const std::string& name) const {
 	return location;
 }
 
+std::optional<UniformEntry> OGLShader::GetUniformEntry(const std::string& name) const {
+	/*auto it = uniformCache.find(name);
+	if (uniformCache.find(name) != uniformCache.end()) {
+		return { it->second };
+	}
+	return {};*/
+	return {};
+}
+
 // From Guide to Modern OpenGL
-void NCL::Rendering::OGLShader::CacheUniforms() {
+void OGLShader::CacheUniforms() {
 	GLint uniform_count = 0;
 
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &uniform_count);

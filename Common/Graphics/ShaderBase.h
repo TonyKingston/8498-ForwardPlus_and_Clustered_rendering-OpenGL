@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <memory>
+
 using std::string;
 namespace NCL {
 	namespace Rendering {
@@ -22,6 +24,15 @@ namespace NCL {
 
 			virtual void ReloadShader() = 0;
 		protected:
+
+			ShaderBase(ShaderBase&& other) noexcept {
+				std::move(std::begin(other.shaderFiles), std::end(other.shaderFiles), std::begin(shaderFiles));
+			};
+
+			ShaderBase& operator=(ShaderBase&& other) noexcept {
+				std::move(std::begin(other.shaderFiles), std::end(other.shaderFiles), std::begin(shaderFiles));
+				return *this;
+			};
 
 			string shaderFiles[(int)ShaderStages::SHADER_MAX];
 		};
