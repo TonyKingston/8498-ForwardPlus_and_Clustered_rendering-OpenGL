@@ -19,7 +19,7 @@ using std::cin;
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	
-	resourceManager = new OGLResourceManager();
+	resourceManager = &OGLResourceManager::Get();
 	bool prepass = false;
 	int mode = AskRenderingMode();
 	if (mode == 0 || mode == 3) {

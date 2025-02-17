@@ -7,19 +7,19 @@ namespace NCL {
 		using std::map;
 		using std::string;
 
-		class OGLResourceManager : public ResourceManager {
+		class OGLResourceManager : public Singleton<OGLResourceManager>, public ResourceManager {
 		public:
-			OGLResourceManager() {}
-			~OGLResourceManager();
-			NCL::MeshGeometry* LoadMesh(string filename);
-			NCL::MeshMaterial* LoadMaterial(const string filename, vector<TextureBase*>& textureBuffer);
-			TextureBase* LoadTexture(string filename);
-			ShaderBase* LoadShader(string shaderVert, string shaderFrag, string shaderGeom = "");
+
+			NCL::MeshGeometry* LoadMesh(string filename) override;
+			NCL::MeshMaterial* LoadMaterial(const string filename, vector<TextureBase*>& textureBuffer) override;
+			TextureBase* LoadTexture(string filename) override;
+			ShaderBase* LoadShader(string shaderVert, string shaderFrag, string shaderGeom = "") override;
 			ShaderBase* LoadShader(string shaderCompute);
-			NCL::MeshAnimation* LoadAnimation(string filename);
+			NCL::MeshAnimation* LoadAnimation(string filename) override;
 
-		private:
-
+			friend class Singleton<OGLResourceManager>;
+		protected:
+			OGLResourceManager() = default;
 		};
 	}
 }

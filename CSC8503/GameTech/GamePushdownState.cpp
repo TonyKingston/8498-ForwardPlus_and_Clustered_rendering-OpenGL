@@ -46,7 +46,7 @@ PushdownState::PushdownResult MainMenu::OnUpdate(float dt, PushdownState** newSt
 
 void MainMenu::OnAwake() {
 	gameWorld = new GameWorld();
-	renderer = new GameTechRenderer(*gameWorld, new OGLResourceManager());
+	renderer = new GameTechRenderer(*gameWorld, &OGLResourceManager::Get());
 	Debug::SetRenderer(renderer);
 	DrawMenu();
 }
