@@ -206,5 +206,11 @@
     <ClInclude Include="Core\GameTimer.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Build.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

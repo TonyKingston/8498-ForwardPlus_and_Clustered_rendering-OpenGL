@@ -13,9 +13,6 @@
 
 using namespace NCL::Rendering;
 
-OGLResourceManager::~OGLResourceManager() {
-}
-
 NCL::MeshGeometry* OGLResourceManager::LoadMesh(string filename) {
 	std::filesystem::path path = Assets::MESHDIR + filename;
 	if (!std::filesystem::exists(path)) {

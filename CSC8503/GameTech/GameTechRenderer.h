@@ -195,10 +195,13 @@ namespace NCL {
 			GLuint lightSSBO;
 			GLuint lightGridSSBO;
 			GLuint aabbGridSSBO;
+			GLuint activeClusterSSBO;
+
+			// Test/debug buffers.
 			GLuint globalListSSBO;
 			GLuint globalCountSSBO;
-			GLuint activeClusterSSBO;
 			GLuint activeCountSSBO;
+
 			int tilesX;
 			int tilesY;
 			int clusterX;

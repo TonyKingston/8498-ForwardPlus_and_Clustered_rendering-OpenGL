@@ -2,6 +2,8 @@
 
 #define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
+#include "Shared/ComputeBindings.h"
+
 layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 
 uniform mat4 viewMatrix;
@@ -23,23 +25,23 @@ struct Frustum {
 	vec4 nearFar;
 };
 
-layout(std430, binding = 0) readonly buffer lightSSBO {
+layout(std430, binding = COMPUTE_BINDING_LIGHT_BUFFER) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
-layout(std430, binding = 1) buffer tileGrid {
+layout(std430, binding = COMPUTE_BINDING_GRID_BUFFER) buffer tileGrid {
 	Frustum tile[];
 };
 
-layout(std430, binding = 2) buffer lightGridSSBO {
+layout(std430, binding = COMPUTE_BINDING_LIGHT_INDEX_BUFFER) buffer lightGridSSBO {
 	int lightIndices[];
 };
 
-layout(std430, binding = 3) buffer activeClusterSSBO {
+layout(std430, binding = COMPUTE_BINDING_ACTIVE_CLUSTERS_BUFFER) buffer activeClusterSSBO {
 	int activeClusters[];
 };
 
-layout(std430, binding = 6) buffer countSSBO {
+layout(std430, binding = COMPUTE_BINDING_TEST6) buffer countSSBO {
 	uint activeClusterCount;
 };
 

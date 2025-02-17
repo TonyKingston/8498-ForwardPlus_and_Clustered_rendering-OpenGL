@@ -36,7 +36,7 @@ layout(std430, binding = 2) buffer lightGridSSBO {
 };
 
 layout(std430, binding = 3) buffer activeClusterSSBO {
-	bool activeClusters[];
+	uint activeClusters[];
 };
 
 layout(std430, binding = 4) buffer globalIndexCountSSBO {

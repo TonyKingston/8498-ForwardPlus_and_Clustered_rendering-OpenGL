@@ -7,11 +7,19 @@
 #include <variant>
 #include <utility>
 #include <type_traits>
+#include <optional>
 
 namespace NCL {
 	namespace Rendering {
 
 		//#define SET_UNIFORMS(shader, ...) OGLShader::SetUniforms(shader, { __VA_ARGS__ })
+
+		// Represents a cached uniform
+		struct UniformEntry {
+			GLint location;
+			// Equals number of elements for an array otherwise 1 (for a singular vec3 etc.)
+			GLint count;
+		};
 
 		class OGLShader : public ShaderBase
 		{
@@ -19,7 +27,29 @@ namespace NCL {
 			friend class OGLRenderer;
 			OGLShader(const string& vertex, const string& fragment, const string& geometry = "", const string& domain = "", const string& hull = "");
 			OGLShader(const string& compute);
+			OGLShader(OGLShader& other) = delete;
+			OGLShader& operator=(OGLShader& other) = delete;
 			~OGLShader();
+
+			OGLShader(OGLShader&& other) noexcept :
+				ShaderBase(std::move(other)),
+				programID(std::exchange(other.programID, 0)),
+				programValid(std::exchange(other.programValid, 0)),
+				uniformCache(std::move(other.uniformCache))
+			{
+				std::move(std::begin(other.shaderIDs), std::end(other.shaderIDs), std::begin(shaderIDs));
+				std::move(std::begin(other.shaderValid), std::end(other.shaderValid), std::begin(shaderValid));
+			}
+
+			OGLShader& operator=(OGLShader&& other) noexcept {
+				ShaderBase::operator=(std::move(other));
+				programID = std::exchange(other.programID, 0);
+				programValid = std::exchange(other.programValid, 0);
+				uniformCache = std::move(other.uniformCache);
+				std::move(std::begin(other.shaderIDs), std::end(other.shaderIDs), std::begin(shaderIDs));
+				std::move(std::begin(other.shaderValid), std::end(other.shaderValid), std::begin(shaderValid));
+				return *this;
+			}
 
 			void ReloadShader() override;
 
@@ -27,7 +57,7 @@ namespace NCL {
 
 			bool LoadSuccess() const {
 				return programValid == GL_TRUE;
-			}
+			}	
 
 			int GetProgramID() const {
 				return programID;
@@ -109,9 +139,15 @@ namespace NCL {
 			int		shaderValid[(int)ShaderStages::SHADER_MAX];
 			int		programValid;
 
-			mutable std::unordered_map<std::string, GLint> uniformCache;
+			//mutable std::unordered_map<std::string, GLint> uniformCache;
+			mutable std::unordered_map<std::string, UniformEntry> uniformCache;
 
 			GLint GetUniformLocation(const std::string& name) const;
+
+			// @return If found, a uniform entry struct containing the location and size of the uniform.
+			std::optional<UniformEntry> GetUniformEntry(const std::string& name) const;
+			
+			void CacheUniforms();
 
 		private:
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad\glad.h"
+#include <memory>
 
 /* Thin wrapper around an OpenGL SSBO. Should only be created via the factory down below.*/
 namespace NCL {
@@ -38,15 +39,11 @@ namespace NCL {
             OGLShaderStorageBuffer& operator=(const OGLShaderStorageBuffer&) = delete;
 
             // Allow move semantics
-            OGLShaderStorageBuffer(OGLShaderStorageBuffer&& other) noexcept : id(other.id) {
-                other.id = 0;
-            }
-
+            OGLShaderStorageBuffer(OGLShaderStorageBuffer&& other) noexcept : id(std::exchange(other.id, 0)) {}
             OGLShaderStorageBuffer& operator=(OGLShaderStorageBuffer&& other) noexcept {
                 if (this != &other) {
                     glDeleteBuffers(1, &id);
-                    id = other.id;
-                    other.id = 0;
+                    id = std::exchange(other.id, 0);
                 }
                 return *this;
             }
