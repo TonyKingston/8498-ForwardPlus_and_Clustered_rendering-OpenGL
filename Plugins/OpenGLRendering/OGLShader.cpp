@@ -76,9 +76,8 @@ void OGLShader::ReloadShader() {
 
 				char error[256]{};
 
-				auto deleter = [](char* p) {free(p); };
-				auto processed_ptr = std::unique_ptr<char, decltype(deleter) >(stb_include_string(fileContents.c_str(), nullptr, Assets::SHADERDIR.c_str(), nullptr, error), deleter);
-				
+				auto processed_ptr = std::unique_ptr<char, decltype([](char* p) {free(p); })>(
+					stb_include_string(fileContents.c_str(), nullptr, Assets::SHADERDIR.c_str(), nullptr, error));
 				if (!processed_ptr) {
 					std::cerr << "Failed to process includes." << std::endl;
 					return;

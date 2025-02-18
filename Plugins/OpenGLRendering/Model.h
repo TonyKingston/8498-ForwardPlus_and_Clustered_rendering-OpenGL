@@ -27,9 +27,9 @@ namespace NCL {
         using std::vector;
 		class Model {
         public:
-            Model(char* path, ResourceManager* manager) {
+            Model(string path, ResourceManager* manager) {
                 resourceManager = (OGLResourceManager*)manager;
-                LoadModel(path);
+                LoadModel(std::move(path));
             }
 
             ~Model() {

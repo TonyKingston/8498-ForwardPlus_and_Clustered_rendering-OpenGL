@@ -59,6 +59,8 @@ namespace NCL {
 
 			virtual bool SetVerticalSync(VerticalSyncState s);
 
+			Vector2 GetDimensions() const { return Vector2(currentWidth, currentHeight); }
+
 			void DrawString(const std::string& text, const Vector2&pos, const Vector4& colour = Vector4(0.75f, 0.75f, 0.75f,1), float size = 20.0f );
 			void DrawLine(const Vector3& start, const Vector3& end, const Vector4& colour);
 

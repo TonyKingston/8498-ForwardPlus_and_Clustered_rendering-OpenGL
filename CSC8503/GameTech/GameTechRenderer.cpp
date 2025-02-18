@@ -588,13 +588,14 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	Matrix4 invProj = (projMat).Inverse();
+	const Vector2 dimensions = GetDimensions();
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMat);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMat);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "invProj"), 1, false, (float*)&invProj);
 
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
-	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
+	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&dimensions);
 	glUniform2f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 
 	glDispatchCompute(tilesX, tilesY, 1);
@@ -607,13 +608,14 @@ void GameTechRenderer::ClusteredCullLights() {
 	BindShader(forwardPlusCullShader);
 
 	Matrix4 invProj = (projMat).Inverse();
+	const Vector2 dimensions = GetDimensions();
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMat);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMat);
 	glUniformMatrix4fv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "invProj"), 1, false, (float*)&invProj);
 
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "noOfLights"), numLights);
 	glUniform1ui(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "totalNumLights"), totalNumLights);
-	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&Vector2(currentWidth, currentHeight));
+	glUniform2iv(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "screenSize"), 1, (int*)&dimensions);
 	glUniform2f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 	glUniform1f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "near"), gameWorld.GetMainCamera()->GetNearPlane());
 	glUniform1f(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "far"), gameWorld.GetMainCamera()->GetFarPlane());
@@ -1178,8 +1180,8 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	//glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "shadowTex"), 2);
 	//glActiveTexture(GL_TEXTURE2);
 	//glBindTexture(GL_TEXTURE_2D, bufferShadowTex);
-
-	glUniform3fv(glGetUniformLocation(pointLightShader->GetProgramID(), "cameraPos"), 1, (float*)&current_camera->GetPosition());
+	const Vector2 cameraPos = current_camera->GetPosition();
+	glUniform3fv(glGetUniformLocation(pointLightShader->GetProgramID(), "cameraPos"), 1, (float*)&cameraPos);
 	//std::cout << current_camera->GetPosition() << std::endl;
 
 	glUniform2f(glGetUniformLocation(pointLightShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);

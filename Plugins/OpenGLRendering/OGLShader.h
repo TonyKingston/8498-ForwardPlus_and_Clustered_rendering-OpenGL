@@ -119,14 +119,11 @@ namespace NCL {
 				auto uniformPairs = std::make_tuple(std::forward<Args>(args)...);
 				constexpr std::size_t numPairs = sizeof...(args) / 2;
 
-				SetUniformsImpl(shader, uniformPairs, std::make_index_sequence<numPairs>{});
-
-				// I think this would be C++ 20 version. Need to test:
-			/*	auto apply = [&] <std::size_t... I>(std::index_sequence<I...>) {
+				auto applyUniforms = [&]<typename std::size_t... I>(std::index_sequence<I...>) {
 					(shader->SetUniform(std::get<I * 2>(uniformPairs), std::get<I * 2 + 1>(uniformPairs)), ...);
-				}(std::make_index_sequence<numPairs>{});
+				};
 
-				apply(std::make_index_sequence<numPairs>{});*/
+				applyUniforms(std::make_index_sequence<numPairs>{});
 			}
 
 			static void	PrintCompileLog(GLuint object);
@@ -151,7 +148,7 @@ namespace NCL {
 
 		private:
 
-			// Helper function to apply the uniforms since I'm not using C++ 20 (no templated lambdas)
+			// Helper function to apply the uniforms since (pre C++ 20 i.e. no templated lambdas)
 			template <typename Tuple, std::size_t... I>
 			static void SetUniformsImpl(OGLShader* shader, const Tuple& uniformPairs, std::index_sequence<I...>) {
 				(shader->SetUniform(std::get<I * 2>(uniformPairs), std::get<I * 2 + 1>(uniformPairs)), ...);
