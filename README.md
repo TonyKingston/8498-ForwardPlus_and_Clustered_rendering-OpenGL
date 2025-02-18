@@ -1,6 +1,6 @@
 # README
 ## Intro
-This is my OpenGL rendering project from university, though I've some what taken an interest in trying to clean it up a bit lately.
+This is my OpenGL rendering project from university, though I've somewhat taken an interest in trying to clean it up a bit lately.
 There are a couple of optimisations and techniques that I've been wanting to implement for a while, and I figured that just using this as a base wouldn't hurt too much.
 I might get round to developing it further (or not...)
 
