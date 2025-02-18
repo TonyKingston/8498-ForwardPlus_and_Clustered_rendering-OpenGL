@@ -66,10 +66,10 @@ namespace NCL {
 			template <typename T>
 			std::enable_if_t<std::is_arithmetic_v<T>, void> SetUniform(const std::string& name, const T& value) const
 			{
-				if constexpr (std::is_same_v<T, int>) {
+				if constexpr (std::is_integral_v<T>) {
 					glUniform1i(GetUniformLocation(name), value);
-				}
-				else if constexpr (std::is_same_v<T, float>) {
+				}	
+				else if constexpr (std::is_floating_point_v<T>) {
 					glUniform1f(GetUniformLocation(name), value);
 				}
 			}
@@ -128,6 +128,7 @@ namespace NCL {
 
 			static void	PrintCompileLog(GLuint object);
 			static void	PrintLinkLog(GLuint program);
+			void PrintUniformCache();
 
 		protected:
 			void	DeleteIDs();
@@ -149,6 +150,7 @@ namespace NCL {
 		private:
 
 			// Helper function to apply the uniforms since (pre C++ 20 i.e. no templated lambdas)
+			// Not used anymore.
 			template <typename Tuple, std::size_t... I>
 			static void SetUniformsImpl(OGLShader* shader, const Tuple& uniformPairs, std::index_sequence<I...>) {
 				(shader->SetUniform(std::get<I * 2>(uniformPairs), std::get<I * 2 + 1>(uniformPairs)), ...);

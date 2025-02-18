@@ -156,6 +156,15 @@ void OGLShader::PrintLinkLog(GLuint program) {
 	}
 }
 
+void OGLShader::PrintUniformCache() {
+	std::cout << "Uniform Log:\n" << std::endl;
+	for (auto& [name, entry] : uniformCache) {
+		std::cout << "Name: " << name << std::endl;
+		std::cout << "\tLocation: " << entry.location << std::endl;
+		std::cout << "\tCount: " << entry.count << std::endl;
+	}
+}
+
 GLint OGLShader::GetUniformLocation(const std::string& name) const {
 	auto it = uniformCache.find(name);
 	if (uniformCache.find(name) != uniformCache.end()) {
@@ -168,11 +177,10 @@ GLint OGLShader::GetUniformLocation(const std::string& name) const {
 }
 
 std::optional<UniformEntry> OGLShader::GetUniformEntry(const std::string& name) const {
-	/*auto it = uniformCache.find(name);
+	auto it = uniformCache.find(name);
 	if (uniformCache.find(name) != uniformCache.end()) {
 		return { it->second };
 	}
-	return {};*/
 	return {};
 }
 
