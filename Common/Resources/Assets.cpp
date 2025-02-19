@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Assets.h"
 #include <fstream>
 #include <sstream>

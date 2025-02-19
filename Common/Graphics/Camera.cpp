@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Camera.h"
 #include "Window.h"
 #include <algorithm>

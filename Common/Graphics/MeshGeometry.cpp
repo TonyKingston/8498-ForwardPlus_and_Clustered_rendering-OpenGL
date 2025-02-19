@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MeshGeometry.h"
 #include "Math/Maths.h"
 #include "Resources/Assets.h"

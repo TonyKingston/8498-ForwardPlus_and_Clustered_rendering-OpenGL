@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Win32Keyboard.h"
 #ifdef _WIN32
 

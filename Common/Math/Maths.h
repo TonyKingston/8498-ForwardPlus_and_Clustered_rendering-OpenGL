@@ -40,6 +40,18 @@ namespace NCL {
 
 		#undef DECLARE_VECTOR_TYPE_TRAITS
 
+		struct Extents
+		{
+			union {
+				struct {
+					int x;
+					int y;
+					int z;
+				};
+			};
+			int array[3];
+		};
+
 		//It's pi(ish)...
 		static const float		PI = 3.14159265358979323846f;
 
