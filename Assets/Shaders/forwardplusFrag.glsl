@@ -3,6 +3,8 @@
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 2048
 
+#include "Shared/Debug.h"
+
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
 uniform sampler2D   specTex;
@@ -56,17 +58,6 @@ in Vertex
 } IN;
 
 out vec4 fragColor;
-
-
-float remap(float minval, float maxval, float curval) {
-	return (curval - minval) / (maxval - minval);
-}
-
-
-vec3 colors[8] = vec3[](
-	vec3(0, 0, 0), vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 1, 1),
-	vec3(1, 0, 0), vec3(1, 0, 1), vec3(1, 1, 0), vec3(1, 1, 1)
-);
 
 void main(void)
 {
@@ -152,32 +143,7 @@ void main(void)
 	//fragColor.rgb = vec3(0.1, 0.1, 0.2);
 
 	if (inDebug) {
-	   vec3 colour;
-	   if (lightCount == 0) {
-	      colour = vec3(0);
-	   }
-	   else if (lightCount >= 1 && lightCount <= 3) {
-	      colour = vec3(0,0,1);
-	   }
-	   else if (lightCount < 6) {
-	      colour = vec3(0.2, 0.68, 1);
-	   }
-	   else if (lightCount < 10) {
-	      colour = vec3(0,1,0);
-	   } else if (lightCount < 25) {
-		  colour = vec3(0.725, 0.96, 0.26);
-	   } else if (lightCount < 35) {
-	      colour = vec3(0.95, 0.95, 0.3);
-	   } else if (lightCount < 50) {
-	      colour = vec3(1,0.65,0);
-	   } else if (lightCount < 100) {
-	      colour = vec3(1,0,0);
-	   } else {
-	      colour = vec3(0.8,0.8,0.8);
-	   }
-	   
-	   fragColor.rgb = colour;
-
+		fragColor.rgb = getDebugColour(lightCount);
 	}
 
 	fragColor.a = 1.0;
