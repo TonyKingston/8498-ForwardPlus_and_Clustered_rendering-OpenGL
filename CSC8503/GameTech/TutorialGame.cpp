@@ -8,6 +8,7 @@
 #include "..//CSC8503Common/PositionConstraint.h"
 #include "..//CSC8503Common/PositionOrientationConstraint.h"
 #include <fstream>
+#include <algorithm>
 
 using namespace NCL;
 using namespace CSC8503;
@@ -243,13 +244,12 @@ void TutorialGame::UpdateKeys() {
 		renderer->ToggleDebugMode();
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
-		lightsToAdd = lightsToAdd / 2;
+		lightsToAdd = (std::max)(lightsToAdd / 2, 1u);
 		cout << "Decreased lights to " << lightsToAdd << endl;
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {
 		lightsToAdd = lightsToAdd * 2;
 		cout << "Increased lights to " << lightsToAdd << endl;
-
 	}
 }
 
