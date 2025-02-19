@@ -2,6 +2,8 @@
 
 #define MAX_LIGHTS_PER_TILE 2048
 
+#include "Shared/Debug.h"
+
 uniform sampler2D 	mainTex;
 uniform sampler2D   bumpTex;
 uniform sampler2D   specTex;
@@ -73,15 +75,6 @@ in Vertex
 } IN;
 
 out vec4 fragColor;
-
-vec3 colors[8] = vec3[](
-	vec3(0, 0, 0), vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 1, 1),
-	vec3(1, 0, 0), vec3(1, 0, 1), vec3(1, 1, 0), vec3(1, 1, 1)
-);
-
-float remap(float minval, float maxval, float curval) {
-	return (curval - minval) / (maxval - minval);
-}
 
 float linearDepth(float depthSample){
     float depthRange = depthSample * 2.0 - 1.0;
@@ -174,40 +167,15 @@ void main(void)
 	fragColor.rgb += specularLight.rgb;
 
 	if (inDebug) {
-		vec3 colour;
-		if (lightCount == 0) {
-			colour = vec3(0);
-		}
-		else if (lightCount >= 1 && lightCount <= 3) {
-			colour = vec3(0, 0, 1);
-		}
-		else if (lightCount < 6) {
-			colour = vec3(0.2, 0.68, 1);
-		}
-		else if (lightCount < 10) {
-			colour = vec3(0, 1, 0);
-		}
-		else if (lightCount < 25) {
-			colour = vec3(0.725, 0.96, 0.26);
-		}
-		else if (lightCount < 35) {
-			colour = vec3(0.95, 0.95, 0.3);
-		}
-		else if (lightCount < 50) {
-			colour = vec3(1, 0.65, 0);
-		}
-		else if (lightCount < 100) {
-			colour = vec3(1, 0, 0);
-		}
-		else {
-			colour = vec3(0.8, 0.8, 0.8);
-		}
+#if CLUSTER_DEBUG
+		fragColor.rgb = clusterColours[uint(mod(zTile, 8))];
+#else
+		fragColor.rgb = getDebugColour(lightCount);
 
-		fragColor.rgb = colour;
-
-	/*	if (activeClusters[tileIndex]) {
+		/*if (activeClusters[tileIndex] == 1) {
 			fragColor.rgb = vec3(1, 0, 0);
 		}*/
+#endif
 	}
 
 	fragColor.a = 1.0;
