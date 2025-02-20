@@ -70,7 +70,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		debugShader = new OGLShader("debugVert.glsl", "debugFrag.glsl");
+		debugShader = new OGLShader("debugVert.vert", "debugFrag.frag");
 	}
 
 	forceValidDebugState = false;

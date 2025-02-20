@@ -169,10 +169,10 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	oglMesh->SetPrimitiveType(GeometryPrimitive::Triangles);
 	oglMesh->UploadToGPU();
 
-	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl")));
+	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.vert", "GameTechFrag.frag")));
 	obj->GetRenderObject()->SetHasMask(mask);
 	obj->GetRenderObject()->SetSpecularTextures(specTex);
-//	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl")));
+//	obj->SetRenderObject(new RenderObject(&obj->GetTransform(), oglMesh, textures, resourceManager->LoadShader("GameTechVert.vert", "forwardPlusFrag.frag")));
 	meshes.push_back(oglMesh);
 	return obj;
 
