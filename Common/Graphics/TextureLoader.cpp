@@ -6,6 +6,7 @@ Use as you see fit!
 Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
+#include "pch.h"
 #include "TextureLoader.h"
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
@@ -15,8 +16,7 @@ https://research.ncl.ac.uk/game/
 #include "Resources/Assets.h"
 
 #ifdef WIN32
-#include <filesystem>
-using namespace std::experimental::filesystem::v1;
+using namespace std::filesystem;
 #endif
 
 using namespace NCL;

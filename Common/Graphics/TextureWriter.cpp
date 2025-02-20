@@ -6,6 +6,7 @@ Use as you see fit!
 Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
+#include "pch.h"
 #include "TextureWriter.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 

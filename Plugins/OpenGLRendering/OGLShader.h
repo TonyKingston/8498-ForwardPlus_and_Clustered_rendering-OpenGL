@@ -25,6 +25,8 @@ namespace NCL {
 		{
 		public:
 			friend class OGLRenderer;
+			friend class OGLShaderBuilder;
+
 			OGLShader(const string& vertex, const string& fragment, const string& geometry = "", const string& domain = "", const string& hull = "");
 			OGLShader(const string& compute);
 			OGLShader(OGLShader& other) = delete;
@@ -131,6 +133,11 @@ namespace NCL {
 			void PrintUniformCache();
 
 		protected:
+			OGLShader();
+
+			void AddBinaryShaderModule(const string& fromFile, ShaderStages stage);
+			//static bool CreateShaderModule(char* data, size_t size, vk::ShaderModule& into, vk::Device& device);
+
 			void	DeleteIDs();
 			GLuint	programID;
 			GLuint	shaderIDs[(int)ShaderStages::SHADER_MAX];
@@ -155,6 +162,30 @@ namespace NCL {
 			static void SetUniformsImpl(OGLShader* shader, const Tuple& uniformPairs, std::index_sequence<I...>) {
 				(shader->SetUniform(std::get<I * 2>(uniformPairs), std::get<I * 2 + 1>(uniformPairs)), ...);
 			}
+		};
+
+		class OGLShaderBuilder
+		{
+		public:
+			OGLShaderBuilder() = default;
+			~OGLShaderBuilder() = default;
+
+			OGLShaderBuilder& With(ShaderStages stage, const std::string& shaderPath);
+			OGLShaderBuilder& WithDebugName(const string& name);
+
+			std::optional<OGLShader*> Build();
+
+		private:
+			int CompileStage(const uint32_t id, const std::string& shaderCode);
+			void Compile(const uint32_t id, const char* shaderCode);
+
+			int Link(const uint32_t id);
+			int Validate(const uint32_t id);
+
+		private:
+			string shaderFiles[(int)ShaderStages::SHADER_MAX];
+			string debugName;
+
 		};
 	}
 }

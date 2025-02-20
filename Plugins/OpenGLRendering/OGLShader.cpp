@@ -23,12 +23,12 @@ using namespace NCL::Rendering;
 using namespace NCL::Maths;
 
 GLuint shaderTypes[(int)ShaderStages::SHADER_MAX] = {
-	GL_VERTEX_SHADER,
-	GL_FRAGMENT_SHADER,
-	GL_GEOMETRY_SHADER,
-	GL_TESS_CONTROL_SHADER,
-	GL_TESS_EVALUATION_SHADER,
-	GL_COMPUTE_SHADER,
+			GL_VERTEX_SHADER,
+			GL_FRAGMENT_SHADER,
+			GL_GEOMETRY_SHADER,
+			GL_TESS_CONTROL_SHADER,
+			GL_TESS_EVALUATION_SHADER,
+			GL_COMPUTE_SHADER,
 };
 
 string ShaderNames[(int)ShaderStages::SHADER_MAX] = {
@@ -117,6 +117,18 @@ void OGLShader::ReloadShader() {
 		CacheUniforms();
 		std::cout << "Shader loaded!" << std::endl;
 	}
+}
+
+OGLShader::OGLShader() {
+	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
+		shaderIDs[i] = 0;
+		shaderValid[i] = 0;
+	}
+	programID = 0;
+}
+
+void OGLShader::AddBinaryShaderModule(const string& fromFile, ShaderStages stage) {
+	shaderFiles[(int)stage] = fromFile;
 }
 
 void OGLShader::DeleteIDs() {
@@ -209,4 +221,68 @@ void OGLShader::CacheUniforms() {
 			uniformCache.emplace(std::make_pair(std::string(uniform_name.get(), length), uniform_info));
 		}
 	}
+}
+
+OGLShaderBuilder& NCL::Rendering::OGLShaderBuilder::With(ShaderStages stage, const std::string& shaderPath) {
+	shaderFiles[(int)stage] = shaderPath;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithDebugName(const string& name) {
+	debugName = name;
+}
+
+std::optional<OGLShader*> OGLShaderBuilder::Build() {
+	OGLShader* newShader = new OGLShader();
+
+	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
+		if (!shaderFiles[i].empty()) {
+			newShader->AddBinaryShaderModule(shaderFiles[i], (ShaderStages)i);
+
+			//if (!debugName.empty()) {
+			//	renderer.SetDebugName(vk::ObjectType::eShaderModule, (uint64_t)newShader->shaderModules[i].operator VkShaderModule(), debugName);
+			//}
+		}
+	};
+	newShader->ReloadShader();
+	return { newShader };
+}
+
+int OGLShaderBuilder::CompileStage(const uint32_t id, const std::string& shaderCode) {
+	return 0;
+}
+
+void OGLShaderBuilder::Compile(const uint32_t id, const char* shaderCode) {
+	glShaderSource(id, 1, &shaderCode, nullptr);
+	glCompileShader(id);
+}
+
+int OGLShaderBuilder::Link(const uint32_t id) {
+	int success = 0;
+	char infoLog[512];
+
+	glLinkProgram(id);
+	glGetProgramiv(id, GL_LINK_STATUS, &success);
+	glGetProgramInfoLog(id, 512, NULL, infoLog);
+
+	if (!success) {
+		std::cerr << "Failed to link shader: " << infoLog << std::endl;
+	}
+
+	return success;
+}
+
+int NCL::Rendering::OGLShaderBuilder::Validate(const uint32_t id) {
+	int success = 0;
+	char infoLog[512];
+
+	glValidateProgram(id);
+	glGetProgramiv(id, GL_LINK_STATUS, &success);
+	glGetProgramInfoLog(id, 512, NULL, infoLog);
+
+	if (!success) {
+		std::cerr << "Failed to validate shader: " << infoLog << std::endl;
+	}
+
+	return success;
 }

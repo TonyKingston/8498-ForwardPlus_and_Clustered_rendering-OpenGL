@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MeshAnimation.h"
 #include "Math/Matrix4.h"
 #include "Resources/Assets.h"

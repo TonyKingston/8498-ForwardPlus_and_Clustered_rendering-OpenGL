@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MeshMaterial.h"
 #include "Resources/Assets.h"
 #include "TextureLoader.h"

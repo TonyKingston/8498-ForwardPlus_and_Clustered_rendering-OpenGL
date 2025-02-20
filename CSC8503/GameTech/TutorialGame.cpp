@@ -78,7 +78,7 @@ void TutorialGame::InitialiseAssets(int level) {
 	sphereMesh = resourceManager->LoadMesh("sphere.msh");
 	capsuleMesh = resourceManager->LoadMesh("capsule.msh");
 	basicTex = (OGLTexture*)resourceManager->LoadTexture("checkerboard.png");
-	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	basicShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.vert", "GameTechFrag.frag");
 
 	InitSponza();
 }

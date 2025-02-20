@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ShaderBase.h"
 using namespace NCL;
 using namespace Rendering;

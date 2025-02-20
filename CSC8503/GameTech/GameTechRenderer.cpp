@@ -35,15 +35,15 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, 
 
 	quad = OGLMesh::GenerateQuad();
 
-	shadowShader = new OGLShader("GameTechShadowVert.glsl", "GameTechShadowFrag.glsl");
-	printShader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
+	shadowShader = new OGLShader("GameTechShadowVert.vert", "GameTechShadowFrag.frag");
+	printShader = new OGLShader("PrinterVertex.vert", "PrinterFragment.frag");
 
 	//GenerateShadowBuffer(shadowFBO);
 
 	glClearColor(1, 1, 1, 1);
 
 	//Skybox!
-	skyboxShader = new OGLShader("skyboxVertex.glsl", "skyboxFragment.glsl");
+	skyboxShader = new OGLShader("skyboxVertex.vert", "skyboxFragment.frag");
 	skyboxMesh = new OGLMesh();
 	skyboxMesh->SetVertexPositions({ Vector3(-1, 1,-1), Vector3(-1,-1,-1) , Vector3(1,-1,-1) , Vector3(1,1,-1) });
 	skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
@@ -162,16 +162,16 @@ void GameTechRenderer::InitForward(bool withPrepass) {
 		sceneBuffers.push_back(forwardPlusFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
+		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.vert", "DepthPassFrag.frag");
 	}
 }
 
 void GameTechRenderer::InitDeferred() {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
-	sceneShader = (OGLShader*) resourceManager->LoadShader("GameTechVert.glsl", "bufferFragment.glsl");
-	pointLightShader = new OGLShader("pointlightvertex.glsl", "pointlightfrag.glsl");
-	combineShader = new OGLShader("combinevert.glsl", "combinefrag.glsl");
+	sceneShader = (OGLShader*) resourceManager->LoadShader("GameTechVert.vert", "bufferFragment.frag");
+	pointLightShader = new OGLShader("pointlightvertex.vert", "pointlightfrag.frag");
+	combineShader = new OGLShader("combinevert.vert", "combinefrag.frag");
 
 	glGenFramebuffers(1, &bufferFBO);
 	glGenFramebuffers(1, &pointLightFBO);
@@ -234,11 +234,11 @@ void GameTechRenderer::InitForwardPlus() {
 
 	GenPrePassFBO();
 
-	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusFrag.glsl");
-	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("forwardplusGrid.glsl");
-	forwardPlusCullShader = usingPrepass ? (OGLShader*)resourceManager->LoadShader("forwardplusCullAABB.comp") : (OGLShader*)resourceManager->LoadShader("forwardplusCull.glsl");
-	depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
-	debugShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "forwardPlusDebugFrag.glsl");
+	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.vert", "forwardPlusFrag.frag");
+	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("forwardplusGrid.comp");
+	forwardPlusCullShader = usingPrepass ? (OGLShader*)resourceManager->LoadShader("forwardplusCullAABB.comp") : (OGLShader*)resourceManager->LoadShader("forwardplusCull.comp");
+	depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.vert", "DepthPassFrag.frag");
+	debugShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.vert", "forwardPlusDebugFrag.frag");
 
 	tilesX = (currentWidth + (currentWidth % TILE_SIZE)) / TILE_SIZE;
 	tilesY = (currentHeight + (currentHeight % TILE_SIZE)) / TILE_SIZE;
@@ -296,7 +296,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 
 	if (withPrepass) {
 		GenPrePassFBO();
-		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.glsl", "DepthPassFrag.glsl");
+		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.vert", "DepthPassFrag.frag");
 		glGenBuffers(1, &activeClusterSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, activeClusterSSBO);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(unsigned int), NULL, GL_STATIC_COPY);
@@ -308,14 +308,14 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_TEST6, activeCountSSBO);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterActiveCull.glsl");
+		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterActiveCull.comp");
 	}
 	else {
-		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.glsl");
+		forwardPlusCullShader = (OGLShader*)resourceManager->LoadShader("clusterCull.comp");
 	}
 
-	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.glsl", "clusterFrag.glsl");
-	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("clusterGrid.glsl");
+	forwardPlusShader = (OGLShader*)resourceManager->LoadShader("GameTechVert.vert", "clusterFrag.frag");
+	forwardPlusGridShader = (OGLShader*)resourceManager->LoadShader("clusterGrid.comp");
 
 	glGenBuffers(1, &lightGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightGridSSBO);
@@ -633,8 +633,8 @@ void GameTechRenderer::ClusteredCullLights() {
 }
 
 void GameTechRenderer::LoadPrinter() {
-	printShader = new OGLShader("PrinterVertex.glsl", "PrinterFragment.glsl");
-	split_shader = new OGLShader("SplitVertex.glsl", "PrinterFragment.glsl");
+	printShader = new OGLShader("PrinterVertex.vert", "PrinterFragment.frag");
+	split_shader = new OGLShader("SplitVertex.vert", "PrinterFragment.frag");
 	printer = OGLMesh::GenerateQuad();
 
 	glGenFramebuffers(1, &printFBO);
@@ -1546,7 +1546,7 @@ Matrix4 GameTechRenderer::SetupDebugStringMatrix()	const {
 }
 
 void GameTechRenderer::LoadStartImage() {
-	loading_shader = new OGLShader("LoadingVertex.glsl", "LoadingFragment.glsl");
+	loading_shader = new OGLShader("LoadingVertex.vert", "LoadingFragment.frag");
 	glGenTextures(1, &background_tex);
 	glBindTexture(GL_TEXTURE_2D, background_tex);
 
