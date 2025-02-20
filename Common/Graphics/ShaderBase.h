@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <array>
 
 using std::string;
 namespace NCL {
@@ -34,7 +35,7 @@ namespace NCL {
 				return *this;
 			};
 
-			string shaderFiles[(int)ShaderStages::SHADER_MAX];
+			std::array<string, (int)ShaderStages::SHADER_MAX> shaderFiles;
 		};
 	}
 }

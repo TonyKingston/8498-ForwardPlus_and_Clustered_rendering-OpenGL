@@ -1,6 +1,7 @@
 #pragma once
 #include "Common/Graphics/ShaderBase.h"
 #include "Common/Math/Maths.h"
+#include "Common/Build.h"
 #include "glad\glad.h"
 #include <unordered_map>
 #include <string>
@@ -8,6 +9,7 @@
 #include <utility>
 #include <type_traits>
 #include <optional>
+#include <array>
 
 namespace NCL {
 	namespace Rendering {
@@ -171,11 +173,28 @@ namespace NCL {
 			~OGLShaderBuilder() = default;
 
 			OGLShaderBuilder& With(ShaderStages stage, const std::string& shaderPath);
+			OGLShaderBuilder& WithVertex(const string& name);
+			OGLShaderBuilder& WithFragment(const string& name);
+			OGLShaderBuilder& WithGeometry(const string& name);
+			OGLShaderBuilder& WithTessControl(const string& name);
+			OGLShaderBuilder& WithTessEval(const string& name);
+			OGLShaderBuilder& WithCompute(const string& name);
+
+			/* Usage example: .With({SHADER_VERTEX, "shader.vert"}, {SHADER_FRAGMENT, "shader.frag"} */
+			OGLShaderBuilder& With(std::initializer_list<std::pair<ShaderStages, std::string>> shaders) {
+				NCL_ASSERT(shaders.size() <= (int)ShaderStages::SHADER_MAX);
+				for (const auto& [stage, path] : shaders) {
+					With(stage, path);
+				}
+				return *this;
+			}
+
 			OGLShaderBuilder& WithDebugName(const string& name);
 
 			std::optional<OGLShader*> Build();
 
 		private:
+			// TODO: CompileStage is Not implemented
 			int CompileStage(const uint32_t id, const std::string& shaderCode);
 			void Compile(const uint32_t id, const char* shaderCode);
 
@@ -183,7 +202,7 @@ namespace NCL {
 			int Validate(const uint32_t id);
 
 		private:
-			string shaderFiles[(int)ShaderStages::SHADER_MAX];
+			std::array<string, (int)ShaderStages::SHADER_MAX> shaderFiles;
 			string debugName;
 
 		};
