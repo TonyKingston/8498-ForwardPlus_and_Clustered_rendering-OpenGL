@@ -13,6 +13,7 @@ https://research.ncl.ac.uk/game/
 #include <string>
 #include <type_traits>
 #include <memory>
+#include <set>
 
 #define STB_INCLUDE_IMPLEMENTATION
 #define STB_INCLUDE_LINE_GLSL
@@ -22,7 +23,7 @@ using namespace NCL;
 using namespace NCL::Rendering;
 using namespace NCL::Maths;
 
-GLuint shaderTypes[(int)ShaderStages::SHADER_MAX] = {
+constexpr GLuint shaderTypes[(int)ShaderStages::SHADER_MAX] = {
 			GL_VERTEX_SHADER,
 			GL_FRAGMENT_SHADER,
 			GL_GEOMETRY_SHADER,
@@ -36,7 +37,8 @@ string ShaderNames[(int)ShaderStages::SHADER_MAX] = {
 	"Fragment",
 	"Geometry",
 	"Tess. Control",
-	"Tess. Eval"
+	"Tess. Eval",
+	"Compute"
 };
 
 OGLShader::OGLShader(const string& vertex, const string& fragment, const string& geometry, const string& domain, const string& hull) :
@@ -70,9 +72,9 @@ void OGLShader::ReloadShader() {
 	ClearCache();
 	programID = glCreateProgram();
 	string fileContents = "";
-	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
-		if (!shaderFiles[i].empty()) {
-			if (Assets::ReadTextFile(Assets::SHADERDIR + shaderFiles[i], fileContents)) {
+	for (int i = 0;  string& shader : shaderFiles) {
+		if (!shader.empty()) {
+			if (Assets::ReadTextFile(Assets::SHADERDIR + shader, fileContents)) {
 
 				char error[256]{};
 
@@ -86,7 +88,7 @@ void OGLShader::ReloadShader() {
 				std::string_view processedContents(processed_ptr.get());
 				shaderIDs[i] = glCreateShader(shaderTypes[i]);
 
-				std::cout << "Reading " << ShaderNames[i] << " shader " << shaderFiles[i] << std::endl;
+				std::cout << "Reading " << ShaderNames[i] << " shader " << shader << std::endl;
 
 				const char* stringData	 = processedContents.data();
 				int			stringLength = (int)processedContents.length();
@@ -104,7 +106,9 @@ void OGLShader::ReloadShader() {
 				PrintCompileLog(shaderIDs[i]);
 			}
 		}
+		++i;
 	}	
+
 	glLinkProgram(programID);
 	glGetProgramiv(programID, GL_LINK_STATUS, &programValid);
 
@@ -119,12 +123,11 @@ void OGLShader::ReloadShader() {
 	}
 }
 
-OGLShader::OGLShader() {
+OGLShader::OGLShader() : programID(0), programValid(0) {
 	for (int i = 0; i < (int)ShaderStages::SHADER_MAX; ++i) {
 		shaderIDs[i] = 0;
 		shaderValid[i] = 0;
 	}
-	programID = 0;
 }
 
 void OGLShader::AddBinaryShaderModule(const string& fromFile, ShaderStages stage) {
@@ -223,13 +226,44 @@ void OGLShader::CacheUniforms() {
 	}
 }
 
-OGLShaderBuilder& NCL::Rendering::OGLShaderBuilder::With(ShaderStages stage, const std::string& shaderPath) {
+OGLShaderBuilder& OGLShaderBuilder::With(ShaderStages stage, const std::string& shaderPath) {
 	shaderFiles[(int)stage] = shaderPath;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithVertex(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_VERTEX] = name;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithFragment(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_FRAGMENT] = name;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithGeometry(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_GEOMETRY] = name;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithTessControl(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_DOMAIN] = name;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithTessEval(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_HULL] = name;
+	return *this;
+}
+
+OGLShaderBuilder& OGLShaderBuilder::WithCompute(const string& name) {
+	shaderFiles[(int)ShaderStages::SHADER_COMPUTE] = name;
 	return *this;
 }
 
 OGLShaderBuilder& OGLShaderBuilder::WithDebugName(const string& name) {
 	debugName = name;
+	return *this;
 }
 
 std::optional<OGLShader*> OGLShaderBuilder::Build() {
@@ -272,7 +306,7 @@ int OGLShaderBuilder::Link(const uint32_t id) {
 	return success;
 }
 
-int NCL::Rendering::OGLShaderBuilder::Validate(const uint32_t id) {
+int OGLShaderBuilder::Validate(const uint32_t id) {
 	int success = 0;
 	char infoLog[512];
 
