@@ -24,6 +24,12 @@ namespace NCL {
 					float z;
 					float w;
 				};
+				struct {
+					float r;
+					float g;
+					float b;
+					float a;
+				};
 				float array[4];
 			};
 
@@ -36,6 +42,14 @@ namespace NCL {
 			Vector4(const Vector2& v2, float z = 0.0f, float w = 0.0f);
 
 			~Vector4(void) {}
+
+			// Decimal colour value to RGB
+			inline static Vector4 ConvertDecimalColour(int colour) {
+				int r = colour >> 16 & 0xff;
+				int g = colour >> 8 & 0xff;
+				int b = colour & 0xff;
+				return Vector4(r, g, b, 1.0f);
+			}
 
 			Vector4 Normalised() const {
 				Vector4 temp(x, y, z, w);

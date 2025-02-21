@@ -20,6 +20,10 @@ namespace NCL {
 					float x;
 					float y;
 				};
+				struct {
+					float r;
+					float g;
+				};
 				float array[2];
 			};
 

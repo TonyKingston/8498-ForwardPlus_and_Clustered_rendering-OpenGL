@@ -53,10 +53,12 @@ namespace NCL {
 		};
 
 		//It's pi(ish)...
-		static const float		PI = 3.14159265358979323846f;
+		static constexpr float		PI = 3.14159265358979323846f;
 
 		//It's pi...divided by 360.0f!
-		static const float		PI_OVER_360 = PI / 360.0f;
+		static constexpr float		PI_OVER_360 = PI / 360.0f;
+		static constexpr float RAD_TO_DEG = 180.0f / PI;
+		static constexpr float DEG_TO_RAD = PI / 180.0f;
 
 		//Radians to degrees
 		inline float RadiansToDegrees(float rads) {

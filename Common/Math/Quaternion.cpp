@@ -193,6 +193,11 @@ Quaternion Quaternion::AxisAngleToQuaterion(const Vector3& vector, float degrees
 	return Quaternion((float)(vector.x * result), (float)(vector.y * result), (float)(vector.z * result), (float)cos(theta / 2.0f));
 }
 
+Quaternion NCL::Maths::Quaternion::RotationBetween(const Vector3& aFrom, const Vector3& aTo) {
+	const Vector3 axis = Vector3::Cross(aFrom, aTo);
+	const float angle = Vector3::AngleBetweenDegrees(aFrom, aTo);
+	return Quaternion::AxisAngleToQuaterion(axis.Normalised(), angle);
+}
 
 Vector3		Quaternion::operator *(const Vector3 &a)	const {
 	Quaternion newVec = *this * Quaternion(a.x, a.y, a.z, 0.0f) * Conjugate();

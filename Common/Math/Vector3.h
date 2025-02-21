@@ -24,6 +24,11 @@ namespace NCL {
 					float y;
 					float z;
 				};
+				struct {
+					float r;
+					float g;
+					float b;
+				};
 				float array[3];
 			};
 		public:
@@ -42,7 +47,7 @@ namespace NCL {
 				return temp;
 			}
 
-			void			Normalise() {
+			void Normalise() {
 				float length = Length();
 
 				if (length != 0.0f) {
@@ -90,6 +95,14 @@ namespace NCL {
 			static Vector3	Cross(const Vector3 &a, const Vector3 &b) {
 				return Vector3((a.y*b.z) - (a.z*b.y), (a.z*b.x) - (a.x*b.z), (a.x*b.y) - (a.y*b.x));
 			}
+
+			static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
+				return (a * t) + (b * (1.0f - t));
+			}
+
+			static float AngleBetweenRadians(const Vector3& from, const Vector3& to);
+
+			static float AngleBetweenDegrees(const Vector3& from, const Vector3& to);
 
 			inline Vector3  operator+(const Vector3  &a) const {
 				return Vector3(x + a.x, y + a.y, z + a.z);

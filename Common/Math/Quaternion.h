@@ -49,6 +49,7 @@ namespace NCL {
 
 			static Quaternion EulerAnglesToQuaternion(float pitch, float yaw, float roll);
 			static Quaternion AxisAngleToQuaterion(const Vector3& vector, float degrees);
+			static Quaternion RotationBetween(const Vector3& aFrom, const Vector3& aTo);
 
 			inline bool  operator ==(const Quaternion &from)	const {
 				if (x != from.x || y != from.y || z != from.z || w != from.w) {
