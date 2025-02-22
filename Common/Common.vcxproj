@@ -110,6 +110,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)$(Platform)\$(Configuration)\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)$(Platform)\$(Configuration)\;$(ProjectDir);$(ProjectDir);$(IncludePath)</IncludePath>
@@ -144,6 +145,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>
@@ -190,9 +193,10 @@
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(ProjectDir)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -201,6 +205,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameTimer.cpp" />
+    <ClCompile Include="Core\Jobs\JobManager.cpp" />
+    <ClCompile Include="Core\Log\Logging.cpp" />
+    <ClCompile Include="Core\Signal.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\MeshAnimation.cpp" />
     <ClCompile Include="Graphics\MeshGeometry.cpp" />
@@ -259,7 +266,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Build.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="Core\GameTimer.h" />
+    <ClInclude Include="Core\Jobs\Job.h" />
+    <ClInclude Include="Core\Jobs\JobManager.h" />
+    <ClInclude Include="Core\Log\Logging.h" />
+    <ClInclude Include="Core\Misc\FunctionUtils.h" />
+    <ClInclude Include="Core\Signal.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
     <ClInclude Include="Graphics\MeshGeometry.h" />

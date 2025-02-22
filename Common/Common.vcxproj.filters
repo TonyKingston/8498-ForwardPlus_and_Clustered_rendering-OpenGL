@@ -31,6 +31,15 @@
     <Filter Include="Core">
       <UniqueIdentifier>{0d94427e-e387-4642-969f-1ac25be27fa4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Jobs">
+      <UniqueIdentifier>{c96460b7-ca75-4def-b414-f724c7770a81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Misc">
+      <UniqueIdentifier>{f7d4627d-d7fd-4e8f-9432-9da26f68fcc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Log">
+      <UniqueIdentifier>{a968826b-0a92-428a-93ab-51935a1dbf2f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Resources\Assets.cpp">
@@ -119,6 +128,15 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Signal.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Jobs\JobManager.cpp">
+      <Filter>Core\Jobs</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Log\Logging.cpp">
+      <Filter>Core\Log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +234,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Signal.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Jobs\Job.h">
+      <Filter>Core\Jobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Jobs\JobManager.h">
+      <Filter>Core\Jobs</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Misc\FunctionUtils.h">
+      <Filter>Core\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Log\Logging.h">
+      <Filter>Core\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

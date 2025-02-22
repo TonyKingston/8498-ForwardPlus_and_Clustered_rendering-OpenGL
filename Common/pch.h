@@ -40,16 +40,20 @@
 #include <cstdlib>
 #include <cstring>
 
-//#include <assimp/Importer.hpp>
-//#include <assimp/postprocess.h>
-//#include <assimp/scene.h>	
-//
+#include <spdlog/spdlog.h>	
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
-#include "Math/Maths.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>	
 
-#if !defined(NDEBUG) && !defined(_DEBUG)
-#define _DEBUG
-#endif
+#include <Common.h>
+
+//#if !defined(NDEBUG) && !defined(_DEBUG)
+//#define _DEBUG
+//#endif
 
 namespace NCL {
 
