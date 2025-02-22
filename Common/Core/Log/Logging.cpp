@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Logging.h"
-#include "Build.h"
 #include "Resources/Assets.h"
+#include "spdlog/sinks/daily_file_sink.h"
 
 namespace NCL {
     std::shared_ptr<spdlog::logger> g_logger;
@@ -37,9 +37,9 @@ namespace NCL {
 
             try {
                 const auto logFile = Assets::CONFIGDIR / std::filesystem::path{ NCL_NAME ".log" };
-                std::filesystem::remove(logFile);
-
-                const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFile.string());
+                //std::filesystem::remove(logFile);
+                auto now = spdlog::log_clock::now();
+                const auto fileSink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(logFile.string(), 12, 0);
                 g_logger->sinks().push_back(fileSink);
             }
             catch (const std::filesystem::filesystem_error& e) {

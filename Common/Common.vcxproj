@@ -290,6 +290,7 @@
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Input\Win32Keyboard.h" />
     <ClInclude Include="Input\Win32Mouse.h" />
+    <ClInclude Include="Macros.h" />
     <ClInclude Include="Math\Frustum.h" />
     <ClInclude Include="Math\Maths.h" />
     <ClInclude Include="Math\Matrix2.h" />
