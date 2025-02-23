@@ -302,6 +302,7 @@
     <ClInclude Include="Math\Vector3.h" />
     <ClInclude Include="Math\Vector4.h" />
     <ClInclude Include="Misc.h" />
+    <ClInclude Include="NCLAliases.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resources\Assets.h" />
   </ItemGroup>

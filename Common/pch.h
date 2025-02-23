@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <source_location>
 
 #include <spdlog/spdlog.h>	
 #include <spdlog/async.h>

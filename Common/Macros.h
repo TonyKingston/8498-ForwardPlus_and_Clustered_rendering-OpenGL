@@ -36,3 +36,5 @@
 #else
 #define NCL_DEBUG_BREAK() ::std::abort()
 #endif // _MSC_VER
+
+#define NCL_ARRAY_COUNT(x) (sizeof(x) / sizeof((x)[0]))
