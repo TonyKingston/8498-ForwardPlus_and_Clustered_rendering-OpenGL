@@ -88,7 +88,7 @@ void OGLShader::ReloadShader() {
 				std::string_view processedContents(processed_ptr.get());
 				shaderIDs[i] = glCreateShader(shaderTypes[i]);
 
-				std::cout << "Reading " << ShaderNames[i] << " shader " << shader << std::endl;
+				LOG_INFO("Reading {} shader {}", ShaderNames[i], shader);
 
 				const char* stringData	 = processedContents.data();
 				int			stringLength = (int)processedContents.length();
@@ -98,7 +98,7 @@ void OGLShader::ReloadShader() {
 				glGetShaderiv(shaderIDs[i], GL_COMPILE_STATUS, &shaderValid[i]);
 		
 				if (shaderValid[i] != GL_TRUE) {
-					std::cout << ShaderNames[i] << " shader " << " has failed!" << std::endl;
+					LOG_INFO("{} shader {} has failed", ShaderNames[i], shader);
 				}
 				else {
 					glAttachShader(programID, shaderIDs[i]);
@@ -115,11 +115,11 @@ void OGLShader::ReloadShader() {
 	PrintLinkLog(programID);
 
 	if (programValid != GL_TRUE) {
-		std::cout << "This shader has failed!" << std::endl;
+		LOG_ERROR("This shader has failed");
 	}
 	else {
 		CacheUniforms();
-		std::cout << "Shader loaded!" << std::endl;
+		LOG_INFO("This shader has loaded");
 	}
 }
 
@@ -154,7 +154,7 @@ void	OGLShader::PrintCompileLog(GLuint object) {
 	if (logLength) {
 		char* tempData = new char[logLength];
 		glGetShaderInfoLog(object, logLength, NULL, tempData);
-		std::cout << "Compile Log:\n" << tempData << std::endl;
+		LOG_INFO("Compile Log:\n {}", tempData);
 		delete[] tempData;
 	}
 }
@@ -166,17 +166,17 @@ void OGLShader::PrintLinkLog(GLuint program) {
 	if (logLength) {
 		char* tempData = new char[logLength];
 		glGetProgramInfoLog(program, logLength, NULL, tempData);
-		std::cout << "Link Log:\n" << tempData << std::endl;
+		LOG_INFO("Link Log:\n{}", tempData);
 		delete[] tempData;
 	}
 }
 
 void OGLShader::PrintUniformCache() {
-	std::cout << "Uniform Log:\n" << std::endl;
+	LOG_INFO("Uniform Log:\n{}");
 	for (auto& [name, entry] : uniformCache) {
-		std::cout << "Name: " << name << std::endl;
-		std::cout << "\tLocation: " << entry.location << std::endl;
-		std::cout << "\tCount: " << entry.count << std::endl;
+		LOG_INFO("Name: {}", name);
+		LOG_INFO("\tLocation: {}", entry.location);
+		LOG_INFO("\tCount: {}", entry.count);
 	}
 }
 

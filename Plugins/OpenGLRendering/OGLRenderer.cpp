@@ -137,7 +137,7 @@ void OGLRenderer::BindShader(ShaderBase*s) {
 		oglShader->ClearCache();
 	}
 	else {
-		std::cout << __FUNCTION__ << " has received invalid shader?!" << std::endl;
+		LOG_ERROR("{} has recieved invalid shader!?", __FUNCTION__);
 		boundShader = nullptr;
 	}
 }
@@ -149,24 +149,24 @@ void OGLRenderer::BindMesh(MeshGeometry*m) {
 	}
 	else if (OGLMesh* oglMesh = dynamic_cast<OGLMesh*>(m)) {
 		if (oglMesh->GetVAO() == 0) {
-			std::cout << __FUNCTION__ << " has received invalid mesh?!" << std::endl;
+			LOG_ERROR("{} has recieved invalid mesh!?", __FUNCTION__);
 		}
 		glBindVertexArray(oglMesh->GetVAO());
 		boundMesh = oglMesh;
 	}
 	else {
-		std::cout << __FUNCTION__ << " has received invalid mesh?!" << std::endl;
+		LOG_ERROR("{} has recieved invalid mesh!?", __FUNCTION__);
 		boundMesh = nullptr;
 	}
 }
 
 void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 	if (!boundMesh) {
-		std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
+		LOG_ERROR("{} has been called without a bound mesh!?", __FUNCTION__);
 		return;
 	}
 	if (!boundShader) {
-		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
+		LOG_ERROR("{} has been called without a bound shader!?", __FUNCTION__);
 		return;
 	}
 	GLuint	mode	= 0;
@@ -209,7 +209,7 @@ void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& un
 	GLint texID = 0;
 
 	if (!boundShader) {
-		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
+		LOG_WARN("{} has been called without a bound shader!", __FUNCTION__);
 		return;//Debug message time!
 	}
 	
@@ -340,7 +340,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	Win32Code::Win32Window* realWindow = (Win32Code::Win32Window*)&w;
 
 	if (!(deviceContext = GetDC(realWindow->GetHandle()))) {
-		std::cout << __FUNCTION__ << " Failed to create window!" << std::endl;
+		LOG_ERROR("{} failed to create window!", __FUNCTION__);
 		return;
 	}
 
@@ -359,29 +359,29 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	GLuint		PixelFormat;
 	if (!(PixelFormat = ChoosePixelFormat(deviceContext, &pfd))) {	// Did Windows Find A Matching Pixel Format for our PFD?
-		std::cout << __FUNCTION__ << " Failed to choose a pixel format!" << std::endl;
+		LOG_ERROR("{} failed to choose pixel format", __FUNCTION__);
 		return;
 	}
 
 	if (!SetPixelFormat(deviceContext, PixelFormat, &pfd)) {		// Are We Able To Set The Pixel Format?
-		std::cout << __FUNCTION__ << " Failed to set a pixel format!" << std::endl;
+		LOG_ERROR("{} failed to set a pixel format", __FUNCTION__);
 		return;
 	}
 
 	HGLRC		tempContext;		//We need a temporary OpenGL context to check for OpenGL 3.2 compatibility...stupid!!!
 	if (!(tempContext = wglCreateContext(deviceContext))) {	// Are We Able To get the temporary context?
-		std::cout << __FUNCTION__ <<"  Cannot create a temporary context!" << std::endl;
+		LOG_ERROR("{} cannot create a temporary context.", __FUNCTION__);
 		wglDeleteContext(tempContext);
 		return;
 	}
 
 	if (!wglMakeCurrent(deviceContext, tempContext)) {	// Try To Activate The Rendering Context
-		std::cout << __FUNCTION__ << " Cannot set temporary context!" << std::endl;
+		LOG_ERROR("{} cannot see the temporary context.", __FUNCTION__);
 		wglDeleteContext(tempContext);
 		return;
 	}
 	if (!gladLoadGL()) {
-		std::cout << __FUNCTION__ << " Cannot initialise GLAD!" << std::endl;	//It's all gone wrong!
+		LOG_ERROR("{} cannot instantiate GLAD.", __FUNCTION__);
 		return;
 	}
 	//Now we have a temporary context, we can find out if we support OGL 4.x
@@ -390,13 +390,13 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	int minor = ver[2] - '0';		//casts the 'correct' minor version integer from our version string
 
 	if (major < 3) {					//Graphics hardware does not support OGL 4! Erk...
-		std::cout << __FUNCTION__ << " Device does not support OpenGL 4.x!" << std::endl;
+		LOG_ERROR("{} device does not support OpenGL 4.x!", __FUNCTION__);
 		wglDeleteContext(tempContext);
 		return;
 	}
 
 	if (major == 4 && minor < 1) {	//Graphics hardware does not support ENOUGH of OGL 4! Erk...
-		std::cout << __FUNCTION__ << " Device does not support OpenGL 4.1!" << std::endl;
+		LOG_ERROR("{} device does not support OpenGL 4.1!", __FUNCTION__);
 		wglDeleteContext(tempContext);
 		return;
 	}
@@ -420,7 +420,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	// Check for the context, and try to make it the current rendering context
 	if (!renderContext || !wglMakeCurrent(deviceContext, renderContext)) {
-		std::cout << __FUNCTION__ <<" Cannot set OpenGL 3 context!" << std::endl;	//It's all gone wrong!
+		LOG_ERROR("{} Cannot set OpenGL 3 context!", __FUNCTION__);
 		wglDeleteContext(renderContext);
 		wglDeleteContext(tempContext);
 		return;
@@ -428,7 +428,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	wglDeleteContext(tempContext);	//We don't need the temporary context any more!
 
-	std::cout << __FUNCTION__ << " Initialised OpenGL " << major << "." << minor << " rendering context" << std::endl;	//It's all gone wrong!
+	LOG_INFO("{} Initialised OpenGL {}.{} rendering context", __FUNCTION__, major, minor);
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 
@@ -496,6 +496,6 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 	case GL_DEBUG_SEVERITY_LOW_ARB: severityName = "Priority(Low)"; break;
 	}
 
-	std::cout << "OpenGL Debug Output: " + sourceName + ", " + typeName + ", " + severityName + ", " + string(message) << std::endl;
+	LOG_DEBUG("OpenGL Debug Output: {}, {}, {}, {}", sourceName, typeName, severityName, string(message));
 }
 #endif

@@ -68,14 +68,14 @@ std::string TextureLoader::GetFileExtension(const std::string& fileExtension) {
 
 void TextureLoader::RegisterAPILoadFunction(APILoadFunction f) {
 	if (apiFunction) {
-		std::cout << __FUNCTION__ << " replacing previously defined API function." << std::endl;
+		LOG_INFO("{} replacing previously defined API function", __FUNCTION__);
 	}
 	apiFunction = f;
 }
 
 TextureBase* TextureLoader::LoadAPITexture(const std::string&filename) {
 	if (apiFunction == nullptr) {
-		std::cout << __FUNCTION__ << " no API Function has been defined!" << std::endl;
+		LOG_ERROR("{} no API function has been defined", __FUNCTION__);
 		return nullptr;
 	}
 	return apiFunction(filename);
