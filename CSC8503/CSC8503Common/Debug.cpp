@@ -1,6 +1,8 @@
 #include "Debug.h"
-#include "Common/Math/Matrix4.h"
+#include "Math/Maths.h"
+
 using namespace NCL;
+using namespace NCL::Maths;
 
 OGLRenderer* Debug::renderer = nullptr;
 

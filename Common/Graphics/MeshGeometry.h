@@ -1,15 +1,10 @@
 #pragma once
 #include <vector>
 #include "Math/Maths.h"
+#include "Math/MathsFwd.h"
 using std::vector;
 
 namespace NCL {
-	namespace Maths {
-		class Vector2;
-		class Vector3;
-		class Vector4;
-		class Matrix4;
-	}
 	namespace Rendering {
 		class RendererBase;
 		class Model;

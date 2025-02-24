@@ -2,6 +2,7 @@
 #include "../../Plugins/OpenGLRendering/OGLRenderer.h"
 #include <vector>
 #include <string>
+#include "Math/MathsFwd.h"
 
 namespace NCL {
 	class Debug
