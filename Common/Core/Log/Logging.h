@@ -24,6 +24,13 @@
     #define LOG_CRITICAL (void)0
 #endif
 
+// Only log if the condition is met.
+#define CLOG_DEBUG(cond, ...) if (cond) LOG_DEBUG(__VA_ARGS__)
+#define CLOG_TRACE(cond, ...) if (cond) LOG_TRACE(__VA_ARGS__)
+#define CLOG_INFO(cond, ...) if (cond) LOG_INFO(__VA_ARGS__)
+#define CLOG_WARN(cond, ...) if (cond) LOG_WARN(__VA_ARGS__)
+#define CLOG_ERROR(cond, ...) if (cond) LOG_ERROR(__VA_ARGS__)
+
 #define NCL_FATAL(...) \
     do { \
         LOG_CRITICAL(__VA_ARGS__); \
@@ -32,7 +39,8 @@
     } while(0)
 
 namespace NCL {
-    
+    //TODO: Should we have macros to declare/define categories like in Unreal
+    // Each category would need their own logger.
     extern std::shared_ptr<spdlog::logger> g_logger;
-    
+
 } // namespace NCL

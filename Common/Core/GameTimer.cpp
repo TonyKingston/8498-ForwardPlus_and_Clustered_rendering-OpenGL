@@ -42,3 +42,11 @@ void	GameTimer::Tick() {
 
 	timeDelta = diff.count();
 }
+
+NCL::ScopedTimer::~ScopedTimer() {
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - start);
+	const std::chrono::duration<double, std::milli> fp_ms = Clock::now() - start;
+	const auto count = duration.count();
+	float c = 2000;
+	LOG_INFO("{} took {}ms", label, fp_ms.count());
+}

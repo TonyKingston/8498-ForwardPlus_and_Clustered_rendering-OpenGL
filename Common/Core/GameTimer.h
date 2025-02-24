@@ -12,6 +12,7 @@ https://research.ncl.ac.uk/game/
 
 namespace NCL {
 	typedef  std::chrono::time_point<std::chrono::high_resolution_clock>  Timepoint;
+	using Clock = std::chrono::high_resolution_clock;
 
 	class GameTimer {
 	public:
@@ -29,6 +30,19 @@ namespace NCL {
 		float		timeDelta;
 		Timepoint	firstPoint;
 		Timepoint	nowPoint;
+	};
+
+#define NCL_SCOPED_TIMER(name) const ScopedTimer _nclScopedTimer(XSTR(name) ":" __FUNCTION__ ":" XSTR(__LINE__));
+
+	class ScopedTimer {
+	public:
+		ScopedTimer(std::string_view inLabel = "Timer") : label(inLabel), start(Clock::now()) {}
+
+		~ScopedTimer();
+
+	private:
+		std::string label;
+		Timepoint start;
 	};
 }
 

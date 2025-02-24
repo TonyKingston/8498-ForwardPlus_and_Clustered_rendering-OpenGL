@@ -1,7 +1,7 @@
 #pragma once
 #include "Common/Graphics/ShaderBase.h"
 #include "Common/Math/Maths.h"
-#include "Common/Build.h"
+#include "Common/Macros.h"
 #include "glad\glad.h"
 #include <unordered_map>
 #include <string>
@@ -108,7 +108,7 @@ namespace NCL {
 			std::enable_if_t<(std::is_arithmetic_v<Args> && ...), void> SetVectorUniform(const std::string& name, Args... args) const {
 				static_assert(sizeof...(args) >= 1 && sizeof...(args) <= 4, "SetUniform requires 1 to 4 arguments");
 
-				std::cout << "Not implemented just yet" << std::endl;
+				LOG_INFO("{} Not implemented just yet", __FUNCTION__);
 			}
 
 			/* Apply multiple uniforms without having to repeatedly call SetUniform.
