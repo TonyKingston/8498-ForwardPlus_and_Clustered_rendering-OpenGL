@@ -9,12 +9,12 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include <algorithm>
 #include <type_traits>
+#include "MathsFwd.h"
+#include "Vector4.h"
 #include "Vector2.h"
 #include "Vector3.h"
-#include "Vector4.h"
 #include "Quaternion.h"
 #include "Matrix4.h"
-
 
 namespace NCL {
 	namespace Maths {
@@ -30,6 +30,7 @@ namespace NCL {
 		//Vector##N \
 
 		template<typename T> struct IsVector : std::false_type {};
+		template <typename T> struct IsVector<TVector3<T>> : std::true_type {};
 
 		#define DECLARE_VECTOR_TYPE_TRAIT(TYPE) \
 	    template <> struct IsVector<Vector##TYPE> : std::true_type {};
@@ -61,12 +62,12 @@ namespace NCL {
 		static constexpr float DEG_TO_RAD = PI / 180.0f;
 
 		//Radians to degrees
-		inline float RadiansToDegrees(float rads) {
+		inline constexpr float RadiansToDegrees(float rads) {
 			return rads * 180.0f / PI;
 		};
 
 		//Degrees to radians
-		inline float DegreesToRadians(float degs) {
+		inline constexpr float DegreesToRadians(float degs) {
 			//MAKE_VECTOR(1.0f, 2.0f);
 
 			return degs * PI / 180.0f;
@@ -88,6 +89,15 @@ namespace NCL {
 		template<class T>
 		inline T Lerp(const T& a, const T&b, float by) {
 			return (a * (1.0f - by) + b*by);
+		}
+		
+		static constexpr auto AngleBetweenRadians(const	auto& from, const auto& to) {
+			using T = std::decay_t<decltype(from.x)>;
+			return std::acos(std::clamp(TVector3<T>::Dot(from.Normalised(), to.Normalised()), T(-1.0f), T(1.0f)));
+		}
+
+		static constexpr auto AngleBetweenDegrees(const auto& from, const auto& to) {
+			return RadiansToDegrees(AngleBetweenRadians(from, to));
 		}
 
 		void ScreenBoxOfTri(const Vector3& v0, const Vector3& v1, const Vector3& v2, Vector2& topLeft, Vector2& bottomRight);

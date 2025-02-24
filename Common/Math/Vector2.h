@@ -8,11 +8,10 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include <iostream>
+#include "MathsFwd.h"
 
 namespace NCL {
 	namespace Maths {
-		class Vector3;
-		class Vector4;
 		class Vector2 {
 		public:
 			union {

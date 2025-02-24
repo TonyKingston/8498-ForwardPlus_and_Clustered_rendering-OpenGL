@@ -293,6 +293,7 @@
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Math\Frustum.h" />
     <ClInclude Include="Math\Maths.h" />
+    <ClInclude Include="Math\MathsFwd.h" />
     <ClInclude Include="Math\Matrix2.h" />
     <ClInclude Include="Math\Matrix3.h" />
     <ClInclude Include="Math\Matrix4.h" />

@@ -8,12 +8,10 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include <iostream>
+#include "MathsFwd.h"
 
 namespace NCL {
 	namespace Maths {
-		class Matrix3;
-		class Matrix4;
-		class Vector3;
 
 		class Quaternion {
 		public:

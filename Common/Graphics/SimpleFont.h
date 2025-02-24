@@ -9,14 +9,10 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include <string>
 #include <vector>
+#include "Math/MathsFwd.h"
 #include "TextureBase.h"
 
 namespace NCL {
-	namespace Maths {
-		class Vector2;
-		class Vector3;
-		class Vector4;
-	}
 	namespace Rendering {
 		class SimpleFont
 		{
