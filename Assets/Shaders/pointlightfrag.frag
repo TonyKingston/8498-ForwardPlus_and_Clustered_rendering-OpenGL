@@ -1,8 +1,8 @@
 #version 430 core
 
-uniform sampler2D depthTex;
-uniform sampler2D normTex;
-uniform sampler2D specTex;
+layout(binding = 0) uniform sampler2D depthTex;
+layout(binding = 1) uniform sampler2D normTex;
+layout(binding = 2) uniform sampler2D specTex;
 //uniform sampler2D shadowTex;
 
 uniform vec3 cameraPos;

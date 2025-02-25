@@ -1,5 +1,5 @@
-#version 330 core
-uniform  sampler2D  diffuseTex;
+#version 430 core
+layout(binding = 0) uniform  sampler2D  diffuseTex;
 
 in  Vertex{
 	vec2  texCoord;

@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <optional>
 #include <array>
+#include <span>
 
 namespace NCL {
 	namespace Rendering {
@@ -82,15 +83,18 @@ namespace NCL {
 			template< typename VecType>
 			std::enable_if_t<NCL::Maths::IsVector<VecType>::value, void> SetUniform(const std::string& name, const VecType& value) const {
 				constexpr int VecSize = sizeof(VecType) / sizeof(float);
+				static_assert(VecSize >= 2 && VecSize <= 4, "Unsupported vector size");
+
+				std::span<const float> vecSpan(reinterpret_cast<const float*>(&value), VecSize);
 
 				if constexpr (VecSize == 2) {
-					glUniform2fv(GetUniformLocation(name), 1, (float*)&value);
+					glUniform2fv(GetUniformLocation(name), 1, vecSpan.data());
 				}
 				else if constexpr (VecSize == 3) {
-					glUniform3fv(GetUniformLocation(name), 1, (float*)&value);
+					glUniform3fv(GetUniformLocation(name), 1, vecSpan.data());
 				}
 				else if constexpr (VecSize == 4) {
-					glUniform4fv(GetUniformLocation(name), 1, (float*)&value);
+					glUniform4fv(GetUniformLocation(name), 1, vecSpan.data());
 				}
 			}
 
@@ -153,6 +157,10 @@ namespace NCL {
 
 			// @return If found, a uniform entry struct containing the location and size of the uniform.
 			std::optional<UniformEntry> GetUniformEntry(const std::string& name) const;
+
+			// Returns true, if a uniform with name exists in the shader
+			// Call GetUniformEntry is you actually want to retrieve info about the uniform.
+			bool HasUniformEntry(const std::string& name) const;
 			
 			void CacheUniforms();
 
@@ -161,6 +169,7 @@ namespace NCL {
 			// Helper function to apply the uniforms since (pre C++ 20 i.e. no templated lambdas)
 			// Not used anymore.
 			template <typename Tuple, std::size_t... I>
+			[[deprecated("This shouldn't be needed for C++20 onwards")]]
 			static void SetUniformsImpl(OGLShader* shader, const Tuple& uniformPairs, std::index_sequence<I...>) {
 				(shader->SetUniform(std::get<I * 2>(uniformPairs), std::get<I * 2 + 1>(uniformPairs)), ...);
 			}

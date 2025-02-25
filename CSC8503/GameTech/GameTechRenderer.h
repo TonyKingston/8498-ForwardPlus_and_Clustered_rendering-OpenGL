@@ -5,6 +5,7 @@
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "Common/Math/Frustum.h"
+#include "Common/Math/MathsFwd.h"
 
 #include "../CSC8503Common/GameWorld.h"
 #include "../CSC8503Common/NavigationMesh.h"
@@ -13,8 +14,6 @@
 #include <random>
 
 namespace NCL {
-	class Maths::Vector3;
-	class Maths::Vector4;
 	namespace CSC8503 {
 		class RenderObject;
 		//typedef OGLShaderStorageBuffer SSBO;
@@ -154,6 +153,9 @@ namespace NCL {
 			void GenerateShadowBuffer(GLuint& into);
 
 			void BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump);
+
+			// Updates the currently bound shader with projMat and viewMat;
+			void UpdateShaderMatrices();
 
 			vector<RenderObject*> activeObjects;
 			RenderObject* root;
