@@ -8,11 +8,10 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include <iostream>
+#include "MathsFwd.h"
 
 namespace NCL {
 	namespace Maths {
-		class Vector3;
-		class Vector2;
 
 		class Vector4 {
 
@@ -57,7 +56,7 @@ namespace NCL {
 				return temp;
 			}
 
-			void			Normalise() {
+			void Normalise() {
 				float length = Length();
 
 				if (length != 0.0f) {

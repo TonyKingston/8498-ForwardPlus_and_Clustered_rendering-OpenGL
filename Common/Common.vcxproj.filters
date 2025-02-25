@@ -260,5 +260,8 @@
     <ClInclude Include="NCLAliases.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Math\MathsFwd.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

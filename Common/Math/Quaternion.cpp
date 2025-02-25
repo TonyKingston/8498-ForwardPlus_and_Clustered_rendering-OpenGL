@@ -195,7 +195,7 @@ Quaternion Quaternion::AxisAngleToQuaterion(const Vector3& vector, float degrees
 
 Quaternion NCL::Maths::Quaternion::RotationBetween(const Vector3& aFrom, const Vector3& aTo) {
 	const Vector3 axis = Vector3::Cross(aFrom, aTo);
-	const float angle = Vector3::AngleBetweenDegrees(aFrom, aTo);
+	const float angle = Maths::AngleBetweenDegrees(aFrom, aTo);
 	return Quaternion::AxisAngleToQuaterion(axis.Normalised(), angle);
 }
 

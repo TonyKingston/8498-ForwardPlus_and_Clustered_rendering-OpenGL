@@ -75,11 +75,16 @@ namespace NCL {
                 auto now = spdlog::log_clock::now();
                 auto calc = spdlog::sinks::daily_filename_calculator{};
                 auto filename = calc.calc_filename(logFile.string(), now_tm(spdlog::log_clock::now()));
-                auto newFilename = generate_unique_log_name(filename);
-                if (newFilename) {
-                    std::filesystem::copy(filename, newFilename.value());
+
+                // If we have a log file already for the day from a previous run, 
+                // copy it with a new name and delete the original.
+                if (std::filesystem::exists(filename)) {
+                    auto newFilename = generate_unique_log_name(filename);
+                    if (newFilename) {
+                       std::filesystem::copy(filename, newFilename.value());
+                    }
+                    std::filesystem::remove(filename);
                 }
-                std::filesystem::remove(filename);
 
                 const auto fileSink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(logFile.string(), 12, 0);
                 g_logger->sinks().push_back(fileSink);

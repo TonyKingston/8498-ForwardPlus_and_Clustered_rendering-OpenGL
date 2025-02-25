@@ -7,48 +7,49 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #pragma once
+#include "Vector2.h"
+#include "Vector4.h"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
 
 namespace NCL {
 	namespace Maths {
-		class Vector2;
-		class Vector4;
 
-		class Vector3 {
+		template <typename T>
+		class TVector3 {
 		public:
 			union {
 				struct {
-					float x;
-					float y;
-					float z;
+					T x;
+					T y;
+					T z;
 				};
 				struct {
-					float r;
-					float g;
-					float b;
+					T r;
+					T g;
+					T b;
 				};
-				float array[3];
+				T array[3];
 			};
 		public:
-			constexpr Vector3(void) : x(0.0f), y(0.0f), z(0.0f) {}
+			constexpr TVector3(void) : x(0.0f), y(0.0f), z(0.0f) {}
 
-			constexpr Vector3(float xVal, float yVal, float zVal) : x(xVal), y(yVal), z(zVal) {}
+			constexpr TVector3(float xVal, float yVal, float zVal) : x(xVal), y(yVal), z(zVal) {}
 
-			Vector3(const Vector2& v2, float z = 0.0f);
-			Vector3(const Vector4& v4);
+			TVector3(const Vector2& v2, T newZ = 0.0f) : x(v2.x), y(v2.y), z(newZ) {};
+			TVector3(const Vector4& v4) : x(v4.x), y(v4.y), z(v4.z) {};
 
-			~Vector3(void) = default;
+			~TVector3(void) = default;
 
-			Vector3 Normalised() const {
-				Vector3 temp(x, y, z);
+			TVector3 Normalised() const {
+				TVector3 temp(x, y, z);
 				temp.Normalise();
 				return temp;
 			}
 
 			void Normalise() {
-				float length = Length();
+				T length = Length();
 
 				if (length != 0.0f) {
 					length = 1.0f / length;
@@ -58,15 +59,15 @@ namespace NCL {
 				}
 			}
 
-			float	Length() const {
+			T Length() const {
 				return sqrt((x*x) + (y*y) + (z*z));
 			}
 
-			constexpr float	LengthSquared() const {
+			constexpr T	LengthSquared() const {
 				return ((x*x) + (y*y) + (z*z));
 			}
 
-			constexpr float		GetMaxElement() const {
+			constexpr T	GetMaxElement() const {
 				float v = x;
 				if (y > v) {
 					v = y;
@@ -77,8 +78,8 @@ namespace NCL {
 				return v;
 			}
 
-			float		GetAbsMaxElement() const {
-				float v = abs(x);
+			T GetAbsMaxElement() const {
+				T v = abs(x);
 				if (abs(y) > v) {
 					v = abs(y);
 				}
@@ -88,70 +89,65 @@ namespace NCL {
 				return v;
 			}
 
-			static constexpr float	Dot(const Vector3 &a, const Vector3 &b) {
+			static constexpr T	Dot(const TVector3 &a, const TVector3 &b) {
 				return (a.x*b.x) + (a.y*b.y) + (a.z*b.z);
 			}
 
-			static Vector3	Cross(const Vector3 &a, const Vector3 &b) {
-				return Vector3((a.y*b.z) - (a.z*b.y), (a.z*b.x) - (a.x*b.z), (a.x*b.y) - (a.y*b.x));
+			static TVector3	Cross(const TVector3 &a, const TVector3 &b) {
+				return TVector3((a.y*b.z) - (a.z*b.y), (a.z*b.x) - (a.x*b.z), (a.x*b.y) - (a.y*b.x));
 			}
 
-			static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
+			static TVector3 Lerp(const TVector3& a, const TVector3& b, float t) {
 				return (a * t) + (b * (1.0f - t));
 			}
 
-			static float AngleBetweenRadians(const Vector3& from, const Vector3& to);
-
-			static float AngleBetweenDegrees(const Vector3& from, const Vector3& to);
-
-			inline Vector3  operator+(const Vector3  &a) const {
-				return Vector3(x + a.x, y + a.y, z + a.z);
+			inline TVector3  operator+(const TVector3  &a) const {
+				return TVector3(x + a.x, y + a.y, z + a.z);
 			}
 
-			inline Vector3  operator-(const Vector3  &a) const {
-				return Vector3(x - a.x, y - a.y, z - a.z);
+			inline TVector3  operator-(const TVector3  &a) const {
+				return TVector3(x - a.x, y - a.y, z - a.z);
 			}
 
-			inline Vector3  operator-() const {
-				return Vector3(-x, -y, -z);
+			inline TVector3  operator-() const {
+				return TVector3(-x, -y, -z);
 			}
 
-			inline Vector3  operator*(float a)	const {
-				return Vector3(x * a, y * a, z * a);
+			inline TVector3  operator*(float a)	const {
+				return TVector3(x * a, y * a, z * a);
 			}
 
-			inline Vector3  operator*(const Vector3  &a) const {
-				return Vector3(x * a.x, y * a.y, z * a.z);
+			inline TVector3  operator*(const TVector3  &a) const {
+				return TVector3(x * a.x, y * a.y, z * a.z);
 			}
 
-			inline Vector3  operator/(const Vector3  &a) const {
-				return Vector3(x / a.x, y / a.y, z / a.z);
+			inline TVector3  operator/(const TVector3  &a) const {
+				return TVector3(x / a.x, y / a.y, z / a.z);
 			};
 
-			inline constexpr Vector3  operator/(float v) const {
-				return Vector3(x / v, y / v, z / v);
+			inline constexpr TVector3  operator/(float v) const {
+				return TVector3(x / v, y / v, z / v);
 			};
 
-			inline constexpr void operator+=(const Vector3  &a) {
+			inline constexpr void operator+=(const TVector3  &a) {
 				x += a.x;
 				y += a.y;
 				z += a.z;
 			}
 
-			inline void operator-=(const Vector3  &a) {
+			inline void operator-=(const TVector3  &a) {
 				x -= a.x;
 				y -= a.y;
 				z -= a.z;
 			}
 
-
-			inline void operator*=(const Vector3  &a) {
+			inline void operator*=(const TVector3  &a) {
 				x *= a.x;
 				y *= a.y;
 				z *= a.z;
 			}
 
-			inline void operator/=(const Vector3  &a) {
+			inline void operator/=(const TVector3  &a) {
 				x /= a.x;
 				y /= a.y;
 				z /= a.z;
@@ -169,19 +165,19 @@ namespace NCL {
 				z /= f;
 			}
 
-			inline float operator[](int i) const {
+			inline T operator[](int i) const {
 				return array[i];
 			}
 
-			inline float& operator[](int i) {
+			inline T& operator[](int i) {
 				return array[i];
 			}
 
-			inline bool	operator==(const Vector3 &A)const { return (A.x == x && A.y == y && A.z == z) ? true : false; };
-			inline bool	operator!=(const Vector3 &A)const { return (A.x == x && A.y == y && A.z == z) ? false : true; };
+			inline bool	operator==(const TVector3 &A)const { return (A.x == x && A.y == y && A.z == z) ? true : false; };
+			inline bool	operator!=(const TVector3 &A)const { return (A.x == x && A.y == y && A.z == z) ? false : true; };
 
-			inline friend std::ostream& operator<<(std::ostream& o, const Vector3& v) {
-				o << "Vector3(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
+			inline friend std::ostream& operator<<(std::ostream& o, const TVector3& v) {
+				o << "TVector3(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
 				return o;
 			}
 		};

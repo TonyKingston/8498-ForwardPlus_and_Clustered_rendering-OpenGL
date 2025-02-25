@@ -7,7 +7,9 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #pragma once
+#include "MathsFwd.h"
 #include "Vector2.h"
+#include <iostream>
 #include <assert.h>
 namespace NCL {
 	namespace Maths {
