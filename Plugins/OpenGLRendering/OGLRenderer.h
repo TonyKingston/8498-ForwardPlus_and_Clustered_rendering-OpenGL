@@ -9,7 +9,11 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include "Common/Graphics/RendererBase.h"
 #include "Common/Math/Maths.h"
-
+#include "Common/NCLAliases.h"
+#include <string>
+#include <vector>
+#include <span>
+#include <functional>
 
 #ifdef _WIN32
 #include "windows.h"
@@ -18,10 +22,6 @@ https://research.ncl.ac.uk/game/
 #ifdef _DEBUG
 #define OPENGL_DEBUGGING
 #endif
-
-
-#include <string>
-#include <vector>
 
 namespace NCL {
 	class MeshGeometry;
@@ -36,9 +36,25 @@ namespace NCL {
 
 		class OGLMesh;
 		class OGLShader;
+		class OGLTexture;
 
 		class SimpleFont;
 
+		// TODO: Sort out what we're doing with these.
+		struct RenderColourAttachment {
+			std::reference_wrapper<const OGLTexture> texture;
+		};
+
+		struct RenderDepthStencilAttachment {
+			std::reference_wrapper<const OGLTexture> texture;
+		};
+
+		struct RenderInfo {
+			std::string_view name;
+			std::span<const RenderColourAttachment> colorAttachments;
+			std::optional<RenderDepthStencilAttachment> depthAttachment = {};
+			std::optional<RenderDepthStencilAttachment> stencilAttachment = {};
+		};
 
 		class OGLRenderer : public RendererBase
 		{
@@ -67,14 +83,6 @@ namespace NCL {
 			virtual Matrix4 SetupDebugLineMatrix()	const;
 			virtual Matrix4 SetupDebugStringMatrix()const;
 
-			#ifdef GL_VERSION_4_5
-			#define BIND_TEXTURE(unit, texture) glBindTextureUnit(unit, texture)
-			#else
-			#define BIND_TEXTURE(unit, texture) \
-				glActiveTexture(GL_TEXTURE0 + unit); \
-				glBindTexture(GL_TEXTURE_2D, texture)
-			#endif
-
 		protected:			
 			void BeginFrame()	override;
 			void RenderFrame()	override;
@@ -95,6 +103,9 @@ namespace NCL {
 			HDC		deviceContext;		//...Device context?
 			HGLRC	renderContext;		//Permanent Rendering Context		
 #endif
+		protected:
+			OGLMesh* boundMesh;
+			OGLShader* boundShader;
 		private:
 			struct DebugString {
 				Maths::Vector4 colour;
@@ -112,9 +123,6 @@ namespace NCL {
 			OGLMesh* debugLinesMesh;
 			OGLMesh* debugTextMesh;
 
-			OGLMesh*	boundMesh;
-			OGLShader*	boundShader;
-
 			OGLShader*  debugShader;
 			SimpleFont* font;
 			std::vector<DebugString>	debugStrings;
@@ -123,5 +131,18 @@ namespace NCL {
 			bool initState;
 			bool forceValidDebugState;
 		};
+
+		namespace Cmds {
+			void BindTexture(uint unit, uint texture);
+			// True = repeating, false = clamp
+			void SetTextureRepeating(uint target, bool state);
+			// True = linear filtering, False = nearest filtering,
+			void SetTextureFiltering(uint target, bool state);
+
+			// Utils
+			bool IsShaderBound(int programID);
+			bool IsTextureBound(int texID);
+			int GetBoundShader();	
+		}
 	}
 }

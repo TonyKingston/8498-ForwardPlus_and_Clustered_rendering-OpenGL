@@ -64,10 +64,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 
 		if (t) {
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, t->GetObjectID());
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			Cmds::SetTextureFiltering(t->GetObjectID(), false);
 		}
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		debugShader = new OGLShader("debugVert.vert", "debugFrag.frag");
@@ -223,10 +220,11 @@ void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& un
 		texID = oglTexture->GetObjectID();
 	}
 
-	glActiveTexture(GL_TEXTURE0 + texUnit);
-	glBindTexture(GL_TEXTURE_2D, texID);
+	Cmds::BindTexture(texUnit, texID);
 
+#ifndef GL_VERSION_4_5
 	glUniform1i(slot, texUnit);
+#endif
 }
 
 void OGLRenderer::DrawString(const std::string& text, const Vector2&pos, const Vector4& colour, float size) {
@@ -499,3 +497,48 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 	LOG_DEBUG("OpenGL Debug Output: {}, {}, {}, {}", sourceName, typeName, severityName, string(message));
 }
 #endif
+
+void Cmds::BindTexture(uint unit, uint texture) {
+#ifdef GL_VERSION_4_5
+	glBindTextureUnit(unit, texture);
+#else
+	glActiveTexture(GL_TEXTURE0 + unit); \
+	glBindTexture(GL_TEXTURE_2D, texture)
+#endif
+}
+
+void Cmds::SetTextureRepeating(uint target, bool state) {
+	glBindTexture(GL_TEXTURE_2D, target);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, state ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, state ? GL_REPEAT : GL_CLAMP);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Cmds::SetTextureFiltering(uint target, bool state) {
+	glBindTexture(GL_TEXTURE_2D, target);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+		state ? GL_LINEAR : GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+		state ? GL_LINEAR : GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+bool Cmds::IsShaderBound(int programID) {
+	GLint id;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+
+	return id == programID;
+}
+
+bool Cmds::IsTextureBound(int texID) {
+	GLint id;
+	glGetIntegerv(GL_TEXTURE_BINDING_2D, &id);
+	return id == texID;
+}
+
+int Cmds::GetBoundShader() {
+	GLint id;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+
+	return id;
+}

@@ -11,5 +11,5 @@ namespace NCL::Maths {
 	class Quaternion;
 
 	using Vector3 = TVector3<float>;
-	using IntVector3 = NCL::Maths::TVector3<int>;
+	using IntVector3 = TVector3<int>;
 }

@@ -1,7 +1,7 @@
-#version 330 core
-uniform sampler2D diffuseTex;
-uniform sampler2D diffuseLight;
-uniform sampler2D specularLight;
+#version 430 core
+layout(binding = 0) uniform sampler2D diffuseTex;
+layout(binding = 1) uniform sampler2D diffuseLight;
+layout(binding = 2) uniform sampler2D specularLight;
 
 //uniform sampler2D skyboxTex;
 //uniform sampler2D scene_depth;

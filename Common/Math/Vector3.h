@@ -35,7 +35,7 @@ namespace NCL {
 		public:
 			constexpr TVector3(void) : x(0.0f), y(0.0f), z(0.0f) {}
 
-			constexpr TVector3(float xVal, float yVal, float zVal) : x(xVal), y(yVal), z(zVal) {}
+			constexpr TVector3(T xVal, T yVal, T zVal) : x(xVal), y(yVal), z(zVal) {}
 
 			TVector3(const Vector2& v2, T newZ = 0.0f) : x(v2.x), y(v2.y), z(newZ) {};
 			TVector3(const Vector4& v4) : x(v4.x), y(v4.y), z(v4.z) {};
@@ -68,7 +68,7 @@ namespace NCL {
 			}
 
 			constexpr T	GetMaxElement() const {
-				float v = x;
+				T v = x;
 				if (y > v) {
 					v = y;
 				}
@@ -113,7 +113,7 @@ namespace NCL {
 				return TVector3(-x, -y, -z);
 			}
 
-			inline TVector3  operator*(float a)	const {
+			inline TVector3  operator*(T a)	const {
 				return TVector3(x * a, y * a, z * a);
 			}
 
@@ -125,7 +125,7 @@ namespace NCL {
 				return TVector3(x / a.x, y / a.y, z / a.z);
 			};
 
-			inline constexpr TVector3  operator/(float v) const {
+			inline constexpr TVector3  operator/(T v) const {
 				return TVector3(x / v, y / v, z / v);
 			};
 
@@ -153,13 +153,13 @@ namespace NCL {
 				z /= a.z;
 			}
 
-			inline void operator*=(float f) {
+			inline void operator*=(T f) {
 				x *= f;
 				y *= f;
 				z *= f;
 			}
 
-			inline void operator/=(float f) {
+			inline void operator/=(T f) {
 				x /= f;
 				y /= f;
 				z /= f;

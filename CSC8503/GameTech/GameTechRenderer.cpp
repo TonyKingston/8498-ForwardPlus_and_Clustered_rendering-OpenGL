@@ -395,10 +395,11 @@ void GameTechRenderer::UpdateLightsGPU(float dt) {
 
 	OGLShader* shader = lightUpdateShader;
 
-	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "noOfLights"), numLights);
-	glUniform3fv(glGetUniformLocation(shader->GetProgramID(), "minBounds"), 1, (float*)&LIGHT_MIN_BOUNDS);
-	glUniform3fv(glGetUniformLocation(shader->GetProgramID(), "maxBounds"), 1, (float*)&LIGHT_MAX_BOUNDS);
-	glUniform1f(glGetUniformLocation(shader->GetProgramID(), "dt"), dt);
+	OGLShader::SetUniforms(shader,
+		"noOfLights", numLights,
+		"minBounds", LIGHT_MIN_BOUNDS,
+		"maxBounds", LIGHT_MAX_BOUNDS,
+		"dt", dt);
 
 	glDispatchCompute(1, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -502,18 +503,19 @@ void GameTechRenderer::ComputeActiveClusters() {
 	BindShader(activeShader);
 
 	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "depthTex"), 0);
-	BIND_TEXTURE(0, bufferDepthTex);
+	Cmds::BindTexture(0, bufferDepthTex);
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
-	glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMat);
-
+	// TODO: Support 2f etc in SetUniforms...
 	glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
 
-	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxX"), clusterX);
-	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tilePxY"), clusterY);
-	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "scale"), clusterParams.scaleFactor);
-	glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "bias"), clusterParams.biasFactor);
+	OGLShader::SetUniforms(activeShader,
+		"projMatrix", projMat,
+		"tilePxX", clusterX,
+		"tilePxY", clusterY,
+		"scale", clusterParams.scaleFactor,
+		"bias", clusterParams.biasFactor);
 
 	glDispatchCompute(currentWidth, currentHeight, 1);
 	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -582,7 +584,7 @@ void GameTechRenderer::ForwardPlusCullLights() {
 	BindShader(forwardPlusCullShader);
 
 	glUniform1i(glGetUniformLocation(forwardPlusCullShader->GetProgramID(), "depthTex"), 0);
-	BIND_TEXTURE(0, bufferDepthTex);
+	Cmds::BindTexture(0, bufferDepthTex);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -794,6 +796,20 @@ void GameTechRenderer::BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump
 	}
 }
 
+void GameTechRenderer::UpdateShaderMatrices() {
+	if (boundShader) {
+		OGLShader::SetUniforms(boundShader,
+			"projMatrix", projMat,
+			"viewMatrix", viewMat);
+		return;
+		// Might need these at some point
+		/*glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, modelMatrix.values);
+		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, textureMatrix.values);
+		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "shadowMatrix"), 1, false, shadowMatrix.values);*/
+	}
+	LOG_WARN("{} no shader was bound when calling", __FUNCTION__);
+}
+
 void GameTechRenderer::ResizeSceneTextures(float width, float height) {
 	glBindTexture(GL_TEXTURE_2D, print_depth_Tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, currentWidth, currentHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
@@ -873,8 +889,7 @@ void GameTechRenderer::RenderForward(bool withPrepass) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		BindShader(printShader);
-		BIND_TEXTURE(0, bufferColourTex);
-		glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+		Cmds::BindTexture(0, bufferColourTex);
 		quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
 		BindMesh(quad);
@@ -932,8 +947,8 @@ void GameTechRenderer::RenderForwardPlus() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	BindShader(printShader);
-	BIND_TEXTURE(0, bufferColourTex);
-	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+	const uint diffuseBinding = 0;
+	Cmds::BindTexture(diffuseBinding, bufferColourTex);
 	quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
 	BindMesh(quad);
@@ -1034,9 +1049,8 @@ void GameTechRenderer::RenderClustered(bool withPrepass) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		BindShader(printShader);
-		BIND_TEXTURE(0, bufferColourTex);
-
-		glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+		const uint diffuseBinding = 0;
+		Cmds::BindTexture(diffuseBinding, bufferColourTex);
 		quad->SetPrimitiveType(GeometryPrimitive::TriangleStrip);
 
 		BindMesh(quad);
@@ -1171,11 +1185,10 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 	glDepthFunc(GL_ALWAYS);
 	glDepthMask(GL_FALSE);
 
-	glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "depthTex"), 0);
-	BIND_TEXTURE(0, bufferDepthTex);
-
-	glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "normTex"), 1);
-	BIND_TEXTURE(1, bufferNormalTex);
+	const uint depthBinding = 0, normBinding = 1;
+	// TODO: Shouldn't we have a specular texture here, what did we do with it?
+	Cmds::BindTexture(depthBinding, bufferDepthTex);
+	Cmds::BindTexture(normBinding, bufferNormalTex);
 
 	//glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "shadowTex"), 2);
 	//glActiveTexture(GL_TEXTURE2);
@@ -1224,20 +1237,15 @@ void GameTechRenderer::CombineBuffers(Camera* current) {
 	viewMatrix.ToIdentity();
 	projMatrix.ToIdentity();
 	Matrix4 identity = Matrix4();
-	int projLocation = glGetUniformLocation(combineShader->GetProgramID(), "projMatrix");
-	int viewLocation = glGetUniformLocation(combineShader->GetProgramID(), "viewMatrix");
-	int modelLocation = glGetUniformLocation(combineShader->GetProgramID(), "modelMatrix");
-	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
-	glUniformMatrix4fv(modelLocation, 1, false, (float*)&identity);
-	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "diffuseTex"), 0);
-	BIND_TEXTURE(0, bufferColourTex);
 
-	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "diffuseLight"), 1);
-	BIND_TEXTURE(1, lightDiffuseTex);
+	OGLShader::SetUniforms(combineShader,
+		"projMatrix", projMatrix,
+		"viewMatrix", viewMatrix,
+		"modelMatrix", identity);
 
-	glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "specularLight"), 2);
-	BIND_TEXTURE(2, lightSpecularTex);
+	Cmds::BindTexture(0, bufferColourTex);
+	Cmds::BindTexture(1, lightDiffuseTex);
+	Cmds::BindTexture(2, lightSpecularTex);
 
 	//glUniform1i(glGetUniformLocation(combineShader->GetProgramID(), "skyboxTex"), 3);
 	//glActiveTexture(GL_TEXTURE3);
@@ -1259,8 +1267,7 @@ void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
 	OGLShader* activeShader = nullptr;
 	if (split) {
 		BindShader(split_shader);
-		int offsetLocation = glGetUniformLocation(split_shader->GetProgramID(), "offset");
-		glUniform1fv(offsetLocation, 1, (float*)&offset);
+		split_shader->SetUniform("offset", offset);
 		activeShader = split_shader;
 	}
 	else {
@@ -1268,8 +1275,7 @@ void GameTechRenderer::PresentScene(bool split, GLfloat offset) {
 		activeShader = printShader;
 	}
 
-	BIND_TEXTURE(0, bufferFinalTex);
-	glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "diffuseTex"), 0);
+	Cmds::BindTexture(0, bufferFinalTex);
 
 	BindMesh(quad);
 	DrawBoundMesh();
@@ -1605,8 +1611,7 @@ void GameTechRenderer::RenderStartView() {
 	///////////
 	BindShader(printShader);
 
-	BIND_TEXTURE(0, background_tex);
-	glUniform1i(glGetUniformLocation(printShader->GetProgramID(), "diffuseTex"), 0);
+	Cmds::BindTexture(0, background_tex);
 	BindMesh(printer);
 	DrawBoundMesh();
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1614,7 +1619,7 @@ void GameTechRenderer::RenderStartView() {
 	if (loading) {
 		BindShader(loading_shader);
 
-		BIND_TEXTURE(0, loading_tex);
+		Cmds::BindTexture(0, loading_tex);
 		glUniform1i(glGetUniformLocation(loading_shader->GetProgramID(), "nyan"), 0);
 		glUniform1f(glGetUniformLocation(loading_shader->GetProgramID(), "movement"), movement);
 		BindMesh(printer);

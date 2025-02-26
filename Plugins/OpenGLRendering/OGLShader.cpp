@@ -199,6 +199,9 @@ std::optional<UniformEntry> OGLShader::GetUniformEntry(const std::string& name) 
 	return {};
 }
 
+bool OGLShader::HasUniformEntry(const std::string& name) const {
+	return uniformCache.contains(name);
+}
 // From Guide to Modern OpenGL
 void OGLShader::CacheUniforms() {
 	GLint uniform_count = 0;
