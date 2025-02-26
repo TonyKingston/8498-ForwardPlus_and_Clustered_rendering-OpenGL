@@ -138,6 +138,11 @@ namespace NCL {
 			void SetTextureRepeating(uint target, bool state);
 			// True = linear filtering, False = nearest filtering,
 			void SetTextureFiltering(uint target, bool state);
+
+			// Utils
+			bool IsShaderBound(int programID);
+			bool IsTextureBound(int texID);
+			int GetBoundShader();	
 		}
 	}
 }

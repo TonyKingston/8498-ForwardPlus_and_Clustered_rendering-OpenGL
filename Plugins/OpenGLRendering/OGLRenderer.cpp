@@ -523,3 +523,22 @@ void Cmds::SetTextureFiltering(uint target, bool state) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+bool Cmds::IsShaderBound(int programID) {
+	GLint id;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+
+	return id == programID;
+}
+
+bool Cmds::IsTextureBound(int texID) {
+	GLint id;
+	glGetIntegerv(GL_TEXTURE_BINDING_2D, &id);
+	return id == texID;
+}
+
+int Cmds::GetBoundShader() {
+	GLint id;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+
+	return id;
+}
