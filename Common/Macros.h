@@ -38,3 +38,5 @@
 #endif // _MSC_VER
 
 #define NCL_ARRAY_COUNT(x) (sizeof(x) / sizeof((x)[0]))
+
+#define NCL_SAFE_FREE(x) if(x != nullptr) free(x); x = nullptr;

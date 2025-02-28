@@ -15,6 +15,8 @@ https://research.ncl.ac.uk/game/
 using namespace NCL::Maths;
 
 namespace NCL {
+
+	class Image;
 	namespace Rendering {
 
 		// I've adpated some of https://github.com/JuanDiegoMontoya/Fwog/
@@ -47,7 +49,7 @@ namespace NCL {
 
 			~OGLTexture();
 
-			static TextureBase* RGBATextureFromData(char* data, int width, int height, int channels);
+			static TextureBase* RGBATextureFromData(const Image& Image);
 
 			static TextureBase* RGBATextureFromFilename(const std::string&name);
 

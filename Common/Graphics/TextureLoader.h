@@ -16,18 +16,39 @@ using std::map;
 
 namespace NCL {
 
-	typedef std::function<bool(const std::string& filename, char*& outData, int& width, int &height, int &channels, int&flags)> TextureLoadFunction;
+	class Image;
+	// TODO: Might just replace with optional<Image> instead of returning bool
+	typedef std::function<bool(const std::string& filename, Image& outImage, int& flags)> TextureLoadFunction;
 
 	typedef std::function<Rendering::TextureBase*(const std::string& filename)> APILoadFunction;
 
 	class TextureLoader	{
 	public:
-		static bool LoadTexture(const std::string& filename, char*& outData, int& width, int &height, int &channels, int&flags);
+		/// <summary>
+		/// Loads a texture from the texture directory with a given name
+		/// </summary>
+		/// <param name="filename">Name of texture to load</param>
+		/// <param name="outImage">Output image. If the passed in Image already has data, said data will be freed</param>
+		/// <param name="flags">Currently unused flags</param>
+		/// <returns>True if the image could be loaded, false otherwise.</returns>
+		static bool LoadTexture(const std::string& filename, Image& outImage, int&flags);
 
+
+		/// <summary>
+		/// Register a specialised function to handle textures will particular file extensions.
+		/// This function will be used in LoadTexture instead of the default behaviour.
+		/// </summary>
+		/// <param name="f">Custom texture load functor</param>
+		/// <param name="fileExtension">Extension to apply the function on e.g. "png"</param>
 		static void RegisterTextureLoadFunction(TextureLoadFunction f, const std::string&fileExtension);
 
 		static void RegisterAPILoadFunction(APILoadFunction f);
 
+		/// <summary>
+		/// Calls the registered API texture loading function (if it exists)
+		/// </summary>
+		/// <param name="filename"></param>
+		/// <returns>Pointer to loaded texture</returns>
 		static Rendering::TextureBase* LoadAPITexture(const std::string&filename);
 	protected:
 
