@@ -45,6 +45,7 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/fmt/ranges.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

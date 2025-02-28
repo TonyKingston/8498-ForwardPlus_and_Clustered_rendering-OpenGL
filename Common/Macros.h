@@ -12,7 +12,7 @@
 #define NCL_ASSERT(x) \
         do { \
             if(!(x)) { \
-                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(_cond), __FILE__, __LINE__); \
+                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(x), __FILE__, __LINE__); \
             } \
         } while(0)
 #else
