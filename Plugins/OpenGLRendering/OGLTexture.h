@@ -53,6 +53,8 @@ namespace NCL {
 
 			static TextureBase* RGBATextureFromFilename(const std::string&name);
 
+			virtual Image GetRawTextureData() const override final;
+
 			static int CalculateMipCount(int width, int height);
 			void GenMipMaps();
 

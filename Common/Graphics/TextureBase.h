@@ -2,16 +2,20 @@
 #include "NCLAliases.h"
 
 namespace NCL {
+    class Image;
 	namespace Rendering {
         class TextureBase
         {
         public:
             virtual ~TextureBase();
+
+            virtual Image GetRawTextureData() const;
         protected:
             TextureBase();
 
         };
 
+        // Analogous to TextureType in OGL
 		enum class ImageType : uint32 {
 			TEX_1D,
 			TEX_2D,
@@ -22,8 +26,11 @@ namespace NCL {
 			TEX_CUBEMAP_ARRAY,
 			TEX_2D_MULTISAMPLE,
 			TEX_2D_MULTISAMPLE_ARRAY,
+
+            UNDEFINED
 		};
 
+        // Analogous to internalFormat in OGL
 		enum class ImageFormat : uint32 {
             R8,
             R8_SNORM,
@@ -113,6 +120,37 @@ namespace NCL {
 
             UNDEFINED,
 		};
+
+        // Analogous to format in OGL
+        enum class PixelFormat : uint8_t
+        {
+           R,
+           RG,
+           RGB,
+           RGBA,
+           BGR,
+           BGRA,
+           RI,
+           RGI,
+           RGBI,
+           RGBAI,
+           BGRI,
+           BGRAI,
+           STENCIL_INDEX,
+           DEPTH_COMPONENT,
+           DEPTH_STENCIL,
+           
+           UNDEFINED
+        };
+
+        enum class TextureWrap : uint8
+        {
+            CLAMP_TO_EDGE,
+            CLAMP_TO_BORDER,
+            MIRRORED_REPEAT,
+            REPEAT,
+        };
+
 	}
 }
 
