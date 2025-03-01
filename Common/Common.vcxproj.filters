@@ -129,12 +129,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Signal.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Jobs\JobManager.cpp">
-      <Filter>Core\Jobs</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Log\Logging.cpp">
       <Filter>Core\Log</Filter>
     </ClCompile>
@@ -235,15 +229,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Signal.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Jobs\Job.h">
-      <Filter>Core\Jobs</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Jobs\JobManager.h">
-      <Filter>Core\Jobs</Filter>
     </ClInclude>
     <ClInclude Include="Core\Misc\FunctionUtils.h">
       <Filter>Core\Misc</Filter>
