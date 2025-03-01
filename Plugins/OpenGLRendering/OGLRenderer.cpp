@@ -131,7 +131,8 @@ void OGLRenderer::BindShader(ShaderBase*s) {
 	else if (OGLShader* oglShader = dynamic_cast<OGLShader*>(s)) {
 		glUseProgram(oglShader->programID);
 		boundShader = oglShader;
-		oglShader->ClearCache();
+		// TODO: Should we ever need to do this?
+		//oglShader->ClearCache();
 	}
 	else {
 		LOG_ERROR("{} has recieved invalid shader!?", __FUNCTION__);

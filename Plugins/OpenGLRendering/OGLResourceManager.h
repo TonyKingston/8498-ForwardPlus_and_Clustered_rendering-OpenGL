@@ -4,7 +4,7 @@
 namespace NCL {
 	namespace Rendering {
 
-		using std::map;
+		using std::unordered_map;
 		using std::string;
 
 		class OGLResourceManager : public Singleton<OGLResourceManager>, public ResourceManager {

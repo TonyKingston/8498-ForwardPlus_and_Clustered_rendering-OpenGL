@@ -5,6 +5,7 @@
 #include "Common/Graphics/Camera.h"
 #include "Common/Graphics/TextureLoader.h"
 #include "Common/Resources/Assets.h"
+#include "Core/Misc/Image.h"
 #include <cstddef>
 
 #include "Common/stb/stb_image.h"
@@ -679,16 +680,12 @@ void GameTechRenderer::LoadSkybox() {
 		"/Cubemap/skyrender0005.png"
 	};
 
-	int width[6] = { 0 };
-	int height[6] = { 0 };
-	int channels[6] = { 0 };
+	std::array<Image, 6> images{};
 	int flags[6] = { 0 };
 
-	vector<char*> texData(6, nullptr);
-
-	for (int i = 0; i < 6; ++i) {
-		TextureLoader::LoadTexture(filenames[i], texData[i], width[i], height[i], channels[i], flags[i]);
-		if (i > 0 && (width[i] != width[0] || height[0] != height[0])) {
+	for (int i = 0; i < images.size(); ++i) {
+		TextureLoader::LoadTexture(filenames[i].data(), images[i], flags[i]);
+		if (i > 0 && (images[i].width != images[i].width || images[i].height != images[i].height)) {
 			LOG_ERROR("{} cubemap input textures don't match in size?");
 			return;
 		}
@@ -696,10 +693,10 @@ void GameTechRenderer::LoadSkybox() {
 	glGenTextures(1, &skyboxTex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
-	GLenum type = channels[0] == 4 ? GL_RGBA : GL_RGB;
+	GLenum type = images[0].channels == 4 ? GL_RGBA : GL_RGB;
 
-	for (int i = 0; i < 6; ++i) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width[i], height[i], 0, type, GL_UNSIGNED_BYTE, texData[i]);
+	for (int i = 0; i < images.size(); ++i) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, images[i].width, images[i].height, 0, type, GL_UNSIGNED_BYTE, images[i].data);
 	}
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1556,20 +1553,17 @@ void GameTechRenderer::LoadStartImage() {
 	glGenTextures(1, &background_tex);
 	glBindTexture(GL_TEXTURE_2D, background_tex);
 
-	char* texData;
-	int width = 0;
-	int height = 0;
-	int channel = 0;
+	Image image;
 	int flag = 0;
 
 	stbi_set_flip_vertically_on_load(true);
-	TextureLoader::LoadTexture("SpitoonBackground.png", texData, width, height, channel, flag);
+	TextureLoader::LoadTexture("SpitoonBackground.png", image, flag);
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	sceneTextures.push_back(background_tex);
@@ -1579,14 +1573,14 @@ void GameTechRenderer::LoadStartImage() {
 	glBindTexture(GL_TEXTURE_2D, loading_tex);
 
 	stbi_set_flip_vertically_on_load(true);
-	TextureLoader::LoadTexture("nyan.png", texData, width, height, channel, flag);
+	TextureLoader::LoadTexture("nyan.png", image, flag);
 	stbi_set_flip_vertically_on_load(false);
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	sceneTextures.push_back(loading_tex);

@@ -12,7 +12,7 @@
 #define NCL_ASSERT(x) \
         do { \
             if(!(x)) { \
-                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(_cond), __FILE__, __LINE__); \
+                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(x), __FILE__, __LINE__); \
             } \
         } while(0)
 #else
@@ -38,3 +38,5 @@
 #endif // _MSC_VER
 
 #define NCL_ARRAY_COUNT(x) (sizeof(x) / sizeof((x)[0]))
+
+#define NCL_SAFE_FREE(x) if(x != nullptr) free(x); x = nullptr;
