@@ -36,6 +36,16 @@ def get_git_version() -> str:
 def get_build_timestamp() -> str:
     return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
 
+# Create a new git tag and push it
+def create_git_tag(version: str) -> None:
+    tag_name = f"v{version}"
+    if run_command(["git", "tag", "-l", tag_name]):
+        print(f"Tag {tag_name} already exists. Skipping tag creation.")
+        return
+    run_command(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"])
+    run_command(["git", "push", "origin", tag_name])
+    print(f"Created and pushed Git tag: {tag_name}")
+    
 # Generate build header
 def generate_build_header() -> None:
     commit_hash = get_git_commit()

@@ -5,9 +5,26 @@ on:
     branches:
       - main
       - master
-      - test
+      - test  
+    paths:
+      - '**.h'
+      - '**.cpp'
+      - '**.sln'
   pull_request:
+    types:
+      [closed]
+    branches:
+      - main
+      - master
+    paths:
+      - '**.h'
+      - '**.cpp'
+      - '**.sln'
   workflow_dispatch:
+
+concurrency:
+  group: "build"
+  cancel-in-progress: true
 
 permissions:
   contents: write
