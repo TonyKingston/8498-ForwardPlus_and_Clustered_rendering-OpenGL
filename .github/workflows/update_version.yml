@@ -3,8 +3,15 @@ name: Build & Version
 on:
   push:
     branches:
+      - main
       - master
+      - test
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
   build:
@@ -12,10 +19,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
@@ -23,7 +32,7 @@ jobs:
         run: python Scripts/generate_build_info.py
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build Project
         run: msbuild CSC8503.sln /p:Configuration=Release
