@@ -11,16 +11,26 @@ https://research.ncl.ac.uk/game/
 #include <Common.h>
 #include "Common/Graphics/TextureLoader.h"
 #include "Common/Math/Vector3.h"
+#include "Core/Misc/Image.h"
 #include <array>
 
 using namespace NCL;
 using namespace NCL::Rendering;
 
-constexpr std::array<GLint, 9> glImageTypes = {
+// Keep in sync with ImageType
+constexpr std::array<GLint, static_cast<size_t>(ImageType::UNDEFINED)> glImageTypes = {
 		GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D,
 		GL_TEXTURE_1D_ARRAY, GL_TEXTURE_2D_ARRAY,
 		GL_TEXTURE_CUBE_MAP, GL_TEXTURE_CUBE_MAP_ARRAY,
 		GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE_ARRAY
+};
+
+// Keep in sync with PixelFormat
+constexpr std::array<GLint, static_cast<size_t>(PixelFormat::UNDEFINED)> glUploadFormats = {
+	GL_RED,		GL_RG,		GL_RGB,			GL_RGBA,
+	GL_BGR,		GL_BGRA,	GL_RED_INTEGER,	GL_RG_INTEGER,
+	GL_RGB_INTEGER,	GL_RGBA_INTEGER, GL_BGR_INTEGER, GL_BGRA_INTEGER,
+	GL_STENCIL_INDEX, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL
 };
 
 constexpr auto textureStorageFunctions = std::array<void(*)(GLuint, const TextureConfig&), 9>{
@@ -35,6 +45,7 @@ constexpr auto textureStorageFunctions = std::array<void(*)(GLuint, const Textur
 	[](GLuint id, const TextureConfig& ci) { glTextureStorage3DMultisample(id, ci.sampleCount, FormatToOGL(ci.format), ci.extent.x, ci.extent.y, ci.arrayLayers, GL_TRUE); } // TEX_2D_MULTISAMPLE_ARRAY
 };
 
+// Keep in sync with ImageFormat
 constexpr std::array<GLuint, static_cast<size_t>(ImageFormat::UNDEFINED)> glImageFormats = {
 	GL_R8,             GL_R8_SNORM,         GL_R16,            GL_R16_SNORM,
 	GL_RG8,            GL_RG8_SNORM,        GL_RG16,           GL_RG16_SNORM,
@@ -106,20 +117,22 @@ OGLTexture::~OGLTexture()
 	LOG_DEBUG("Destroyed texture with handle: {}", texID);
 }
 
-TextureBase* OGLTexture::RGBATextureFromData(char* data, int width, int height, int channels) {
+TextureBase* OGLTexture::RGBATextureFromData(const Image& image) {
 	//OGLTexture* tex = new OGLTexture();
 
-	int dataSize = width * height * channels; //This always assumes data is 1 byte per channel
+	int dataSize = image.GetPixelSize(); //This always assumes data is 1 byte per channel
 
 	int sourceType = GL_RGB;
 
-	switch (channels) {
+	switch (image.channels) {
 		case 1: sourceType = GL_RED	; break;
 
 		case 2: sourceType = GL_RG	; break;
 		case 3: sourceType = GL_RGB	; break;
 		case 4: sourceType = GL_RGBA; break;
-		//default:
+		default:
+			LOG_WARN("Could not determine source type for image");
+		break;
 	}
 
 // OLD METHOD OF CREATING TEXTURES
@@ -141,7 +154,7 @@ TextureBase* OGLTexture::RGBATextureFromData(char* data, int width, int height, 
 	TextureConfig config{
 		.imageType = ImageType::TEX_2D,
 		.format = ImageFormat::RGB32F,
-		.extent = {width, height, 1},
+		.extent = {(int)image.width, (int)image.height, 1},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.sampleCount = 1,
@@ -156,7 +169,7 @@ TextureBase* OGLTexture::RGBATextureFromData(char* data, int width, int height, 
 	glTextureParameteri(tex->texID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTextureParameteri(tex->texID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTextureParameteri(tex->texID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureSubImage2D(tex->texID, 0, 0, 0, width, height, sourceType, GL_UNSIGNED_BYTE, data);
+	glTextureSubImage2D(tex->texID, 0, 0, 0, image.width, image.height, sourceType, GL_UNSIGNED_BYTE, image.data);
 
 	tex->GenMipMaps();
 
@@ -164,18 +177,24 @@ TextureBase* OGLTexture::RGBATextureFromData(char* data, int width, int height, 
 }
 
 TextureBase* OGLTexture::RGBATextureFromFilename(const std::string&name) {
-	char* texData	= nullptr;
-	int width		= 0;
-	int height		= 0;
-	int channels	= 0;
+	Image image;
 	int flags		= 0;
-	TextureLoader::LoadTexture(name, texData, width, height, channels, flags);  
+	TextureLoader::LoadTexture(name, image, flags);  
 
-	TextureBase* glTex = RGBATextureFromData(texData, width, height, channels);
-
-	free(texData);
+	TextureBase* glTex = RGBATextureFromData(image);
 
 	return glTex;
+}
+
+Image NCL::Rendering::OGLTexture::GetRawTextureData() const {
+	auto [width, height, z] = config.extent.array;
+	size_t bufferSize = width * height * z * 4;
+	// The returned Image will take ownership of the memory.
+	uint8* buffer = (uint8*)std::malloc(bufferSize);
+	// TODO Assuming 4 channels, need to refactor at some point and store sourceType somewhere;
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glGetTextureImage(texID, 0, GL_RGBA, GL_UNSIGNED_BYTE, bufferSize, (void*)buffer);
+	return Image(buffer, width, height, 4);
 }
 
 int OGLTexture::CalculateMipCount(int width, int height) {

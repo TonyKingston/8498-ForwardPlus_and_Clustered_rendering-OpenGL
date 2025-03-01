@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClCompile Include="Core\GameTimer.cpp" />
     <ClCompile Include="Core\Log\Logging.cpp" />
+    <ClCompile Include="Core\Misc\Image.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\MeshAnimation.cpp" />
     <ClCompile Include="Graphics\MeshGeometry.cpp" />
@@ -268,11 +269,14 @@
     <ClInclude Include="Core\GameTimer.h" />
     <ClInclude Include="Core\Log\Logging.h" />
     <ClInclude Include="Core\Misc\FunctionUtils.h" />
+    <ClInclude Include="Core\Misc\Image.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
     <ClInclude Include="Graphics\MeshGeometry.h" />
     <ClInclude Include="Graphics\MeshMaterial.h" />
     <ClInclude Include="Graphics\RendererBase.h" />
+    <ClInclude Include="Graphics\RenderPassBase.h" />
+    <ClInclude Include="Graphics\RenderPipelineBase.h" />
     <ClInclude Include="Graphics\ResourceManager.h" />
     <ClInclude Include="Graphics\ShaderBase.h" />
     <ClInclude Include="Graphics\SimpleFont.h" />

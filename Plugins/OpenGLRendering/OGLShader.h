@@ -24,6 +24,9 @@ namespace NCL {
 			GLint count;
 		};
 
+#define GL_INVALID_UNIFORM_LOCATION -1
+#define	NCL_INVALID_UNIFORM_LOCATION -1 // Set to lower than GL (-1) if you want invalid location errors to be raised when setting uniforms
+
 		class OGLShader : public ShaderBase
 		{
 		public:

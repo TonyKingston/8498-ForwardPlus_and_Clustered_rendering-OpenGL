@@ -14,6 +14,7 @@ https://research.ncl.ac.uk/game/
 #include "./stb/stb_image.h"
 
 #include "Resources/Assets.h"
+#include "Core/Misc/Image.h"
 
 #ifdef WIN32
 using namespace std::filesystem;
@@ -25,8 +26,9 @@ using namespace Rendering;
 std::map<std::string, TextureLoadFunction> TextureLoader::fileHandlers;
 APILoadFunction TextureLoader::apiFunction = nullptr;
 
-bool TextureLoader::LoadTexture(const std::string& filename, char*& outData, int& width, int &height, int &channels, int&flags) {
+bool TextureLoader::LoadTexture(const std::string& filename, Image& outImage, int& flags) {
 	if (filename.empty()) {
+		LOG_ERROR("Trying to load texture with empty filename");
 		return false;
 	}
 	std::string extension = GetFileExtension(filename);
@@ -35,15 +37,17 @@ bool TextureLoader::LoadTexture(const std::string& filename, char*& outData, int
 
 	std::string realPath = Assets::TEXTUREDIR + filename;
 
+	auto [width, height, channels] = std::tuple{ 0, 0, 0 };
 	if (it != fileHandlers.end()) {
 		//There's a custom handler function for this, just use that
-		return it->second(realPath, outData, width, height, channels, flags);
+		return it->second(realPath, outImage, flags);
 	}
 	//By default, attempt to use stb image to get this texture
 	stbi_uc *texData = stbi_load(realPath.c_str(), &width, &height, &channels, 4); //4 forces this to always be rgba!
 
 	if (texData) {
-		outData = (char*)texData;
+		// Will call move assignment which frees memory.
+		outImage = Image(texData, width, height, channels);
 		return true;
 	}
 

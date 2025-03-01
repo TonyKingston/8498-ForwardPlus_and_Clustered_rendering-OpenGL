@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include "Misc.h"
 #include "../CSC8503/CSC8503Common/SystemDefines.h"
@@ -13,7 +13,7 @@ namespace NCL {
 
 	using std::vector;
 	using std::string;
-	using std::map;
+	using std::unordered_map;
 
 	namespace Rendering {
 
@@ -23,7 +23,15 @@ namespace NCL {
 		class ResourceManager {
 		public:
 
-			~ResourceManager() = default;
+			virtual ~ResourceManager() {
+				DeleteMap(meshes);
+				DeleteMap(materials);
+#ifdef _WIN64
+				DeleteMap(animations);
+#endif
+				DeleteMap(textures);
+				DeleteMap(shaders);
+			}
 
 			virtual MeshGeometry* LoadMesh(string fileName) = 0;
 			virtual ShaderBase* LoadShader(string shaderVert, string shaderFrag, string shaderGeom = "") = 0;
@@ -38,14 +46,14 @@ namespace NCL {
 
 #ifdef _WIN64
 
-			map<string, MeshAnimation*> animations;
+			unordered_map<string, MeshAnimation*> animations;
 #endif
-			map<string, MeshMaterial*> materials;
-			map<string, MeshGeometry*> meshes;
-			map<string, TextureBase*> textures;
-			map<string, ShaderBase*> shaders;\
+			unordered_map<string, MeshMaterial*> materials;
+			unordered_map<string, MeshGeometry*> meshes;
+			unordered_map<string, TextureBase*> textures;
+			unordered_map<string, ShaderBase*> shaders;
 		};
-
+			
 		template <typename Derived>
 		class SingletonResourceManager : public ResourceManager, public Singleton<Derived> {
 		protected:

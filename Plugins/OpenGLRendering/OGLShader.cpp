@@ -186,7 +186,16 @@ GLint OGLShader::GetUniformLocation(const std::string& name) const {
 		return it->second.location;
 	}
 
+	// Fallback, if the requested uniform is not in the cache.
 	GLint location = glGetUniformLocation(programID, name.c_str());
+
+	// Changing value of location because if glUniformXX is called with -1, the uniform is silently ignored.
+	// I'd rather know that an invalid uniform is trying to be used.
+	if (location == GL_INVALID_UNIFORM_LOCATION) {	
+		location = NCL_INVALID_UNIFORM_LOCATION;
+		LOG_ERROR("Uniform {} does not exist on shader {}:{}", name, programID, shaderFiles);
+	}
+
 	uniformCache[name].location = location;
 	return location;
 }
@@ -276,9 +285,9 @@ std::optional<OGLShader*> OGLShaderBuilder::Build() {
 		if (!shaderFiles[i].empty()) {
 			newShader->AddBinaryShaderModule(shaderFiles[i], (ShaderStages)i);
 
-			//if (!debugName.empty()) {
-			//	renderer.SetDebugName(vk::ObjectType::eShaderModule, (uint64_t)newShader->shaderModules[i].operator VkShaderModule(), debugName);
-			//}
+			if (!debugName.empty()) {
+				glObjectLabel(GL_SHADER, newShader->GetProgramID(), static_cast<GLsizei>(debugName.length()), debugName.data());
+			}
 		}
 	};
 	newShader->ReloadShader();
