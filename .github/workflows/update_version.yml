@@ -1,0 +1,49 @@
+name: Build & Version
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Generate Build Info
+        run: python Scripts/generate_build_info.py
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build Project
+        run: msbuild CSC8503.sln /p:Configuration=Release
+
+      - name: Configure Git User
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build
+          path: |
+            build.h
+            build.json
+
+      - name: Create Git Tag
+        run: |
+          git tag v1.0.${{ github.run_number }}
+          git push origin --tags
+
