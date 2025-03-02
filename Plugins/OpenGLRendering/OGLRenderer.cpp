@@ -500,7 +500,7 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 #endif
 
 void Cmds::BindTexture(uint unit, uint texture) {
-#ifdef GL_VERSION_4_5
+#if USE_DSA
 	glBindTextureUnit(unit, texture);
 #else
 	glActiveTexture(GL_TEXTURE0 + unit); \

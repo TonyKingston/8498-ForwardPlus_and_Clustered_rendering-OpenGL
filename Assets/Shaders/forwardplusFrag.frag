@@ -4,10 +4,11 @@
 #define MAX_LIGHTS_PER_TILE 2048
 
 #include "Shared/Debug.h"
+#include "Shared/TextureBindings.h"
 
-uniform sampler2D 	mainTex;
-uniform sampler2D   bumpTex;
-uniform sampler2D   specTex;
+layout(binding = TEXTURE_BINDING_DIFFUSE) uniform sampler2D 	mainTex;
+layout(binding = TEXTURE_BINDING_NORMAL) uniform sampler2D   bumpTex;
+layout(binding = TEXTURE_BINDING_SPECULAR) uniform sampler2D   specTex;
 //uniform sampler2DShadow shadowTex;
 
  struct PointLight {
