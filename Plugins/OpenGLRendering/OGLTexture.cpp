@@ -78,13 +78,30 @@ constexpr GLint NCL::Rendering::FormatToOGL(ImageFormat format) {
     return glImageFormats[static_cast<size_t>(format)];
 }
 
+constexpr GLint NCL::Rendering::PixelFormatToOGL(PixelFormat format) {
+	return glUploadFormats[static_cast<size_t>(format)];
+}
+
 constexpr void CreateTextureStorage(GLuint id, const TextureConfig& ci) {
 	return textureStorageFunctions[static_cast<size_t>(ci.imageType)](id, ci);
 }
 
-OGLTexture::OGLTexture()
-{
+OGLTexture::OGLTexture() {
 	glGenTextures(1, &texID);
+}
+
+int OGLTexture::DetermineSourceType(int channels) {
+	int sourceType = GL_RGB;
+	switch (channels) {
+	case 1: sourceType = GL_RED; break;
+	case 2: sourceType = GL_RG; break;
+	case 3: sourceType = GL_RGB; break;
+	case 4: sourceType = GL_RGBA; break;
+	default:
+		LOG_WARN("Could not determine source type for image");
+		break;
+	}
+	return sourceType;
 }
 
 OGLTexture::OGLTexture(GLuint texToOwn) {
@@ -118,60 +135,59 @@ OGLTexture::~OGLTexture()
 }
 
 TextureBase* OGLTexture::RGBATextureFromData(const Image& image) {
-	//OGLTexture* tex = new OGLTexture();
-
 	int dataSize = image.GetPixelSize(); //This always assumes data is 1 byte per channel
 
-	int sourceType = GL_RGB;
+	int sourceType = DetermineSourceType(image.channels);
 
-	switch (image.channels) {
-		case 1: sourceType = GL_RED	; break;
-
-		case 2: sourceType = GL_RG	; break;
-		case 3: sourceType = GL_RGB	; break;
-		case 4: sourceType = GL_RGBA; break;
-		default:
-			LOG_WARN("Could not determine source type for image");
-		break;
-	}
-
+	const int width = (int)image.width;
+	const int height = (int)image.height;
+#if !USE_DSA
 // OLD METHOD OF CREATING TEXTURES
-//		glBindTexture(GL_TEXTURE_2D, tex->texID);
-//
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, x, y, 0, sourceType, GL_UNSIGNED_BYTE, data);
-//
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-////	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-////	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//
-//	glGenerateMipmap(GL_TEXTURE_2D);
-//
-//	glBindTexture(GL_TEXTURE_2D, 0);
+	OGLTexture* tex = new OGLTexture();
+	glBindTexture(GL_TEXTURE_2D, tex->texID);
 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, sourceType, GL_UNSIGNED_BYTE, image.data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+#else
 	TextureConfig config{
 		.imageType = ImageType::TEX_2D,
-		.format = ImageFormat::RGB32F,
-		.extent = {(int)image.width, (int)image.height, 1},
-		.mipLevels = 1,
+		.format = ImageFormat::RGBA8,
+		.extent = {width, height, 1},
+		.mipLevels = CalculateMipCount(width, height),
 		.arrayLayers = 1,
 		.sampleCount = 1,
 	};
 
 	OGLTexture* tex = new OGLTexture(config, "testTexture");
 //	glTextureSubImage2D(tex->texID, 0, 0, 0, x, y, GL_UNSIGNED_BYTE, GL_RGBA, data);
+	glTextureSubImage2D(tex->texID, 0, 0, 0, width, height, sourceType, GL_UNSIGNED_BYTE, image.data);
 
-	//glBindTexture(GL_TEXTURE_2D, tex->texID);
+	// TODO: Query platform limits somewhere else. Using IIFE to avoid repeated GL queries.
+	static GLfloat maxAniso = []{
+		GLfloat temp = 0;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &temp);
+		return temp;
+	}();
+
 	// TODO: Decouple texture creation from sampler state
+	glTextureParameterf(tex->texID, GL_TEXTURE_MAX_ANISOTROPY, maxAniso);
 	glTextureParameteri(tex->texID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(tex->texID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTextureParameteri(tex->texID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTextureParameteri(tex->texID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureSubImage2D(tex->texID, 0, 0, 0, image.width, image.height, sourceType, GL_UNSIGNED_BYTE, image.data);
 
 	tex->GenMipMaps();
+#endif
 
 	return tex;
 }
@@ -197,8 +213,8 @@ Image NCL::Rendering::OGLTexture::GetRawTextureData() const {
 	return Image(buffer, width, height, 4);
 }
 
-int OGLTexture::CalculateMipCount(int width, int height) {
-	return (int)floor(log2(float(std::min(width, height)))) + 1;
+uint32 OGLTexture::CalculateMipCount(int width, int height) {
+	return (uint32)floor(log2(float(std::min(width, height)))) + 1;
 }
 
 void OGLTexture::GenMipMaps() {

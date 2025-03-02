@@ -9,10 +9,18 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include "Common/Graphics/TextureBase.h"
 #include "Common/Math/Maths.h"
+#include "Common/NCLAliases.h"
 #include "glad\glad.h"
 #include <string>
 
 using namespace NCL::Maths;
+
+// Whether Direct Storage Access should be used for texture creation
+#ifdef GL_VERSION_4_5
+#define USE_DSA 1
+#else
+#define USE_DSA 0
+#endif
 
 namespace NCL {
 
@@ -33,6 +41,7 @@ namespace NCL {
 
 		constexpr GLint ImageTypeToOGL(ImageType imageType);
 		constexpr GLint FormatToOGL(ImageFormat format);
+		constexpr GLint PixelFormatToOGL(PixelFormat format);
 
 		class OGLTexture : public TextureBase
 		{
@@ -53,14 +62,21 @@ namespace NCL {
 
 			static TextureBase* RGBATextureFromFilename(const std::string&name);
 
+			// Begin TextureBase interface
 			virtual Image GetRawTextureData() const override final;
+			// End TextureBase interface
 
-			static int CalculateMipCount(int width, int height);
+			static uint32 CalculateMipCount(int width, int height);
 			void GenMipMaps();
 
 			GLuint GetObjectID() const	{
 				return texID;
 			}
+
+			// Return the source type (GL_RGB etc.) that should be used for the given number of channels
+			// Defaults to GL_RGB
+			static int DetermineSourceType(int channels);
+
 		protected:						
 			OGLTexture();
 
