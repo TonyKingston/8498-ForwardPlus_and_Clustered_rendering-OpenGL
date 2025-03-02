@@ -1,6 +1,6 @@
 #include "GameTechRenderer.h"
 
-#include "../CSC8503Common/GameObject.h"
+#include "CSC8503Common/GameObject.h"
 #include "Common/Math/Maths.h"
 #include "Common/Graphics/Camera.h"
 #include "Common/Graphics/TextureLoader.h"

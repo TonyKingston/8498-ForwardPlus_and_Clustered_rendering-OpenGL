@@ -1,8 +1,8 @@
 #include "GamePushdownState.h"
 #include "GameState.h"
-#include "../CSC8503Common/Debug.h"
+#include "CSC8503Common/Debug.h"
 #include "Common/Graphics/Window.h"
-#include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
+#include "Plugins/OpenGLRendering/OGLResourceManager.h"
 
 using namespace NCL::CSC8503;
 

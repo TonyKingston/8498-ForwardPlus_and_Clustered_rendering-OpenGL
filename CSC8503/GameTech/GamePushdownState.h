@@ -2,9 +2,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "../CSC8503Common/PushdownState.h"
-#include "../CSC8503Common/PushdownMachine.h"
-#include "../CSC8503Common/PushdownState.h"
+#include "CSC8503Common/PushdownState.h"
+#include "CSC8503Common/PushdownMachine.h"
+#include "CSC8503Common/PushdownState.h"
 #include "TutorialGame.h"
 
 namespace NCL {

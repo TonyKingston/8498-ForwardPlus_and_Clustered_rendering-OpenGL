@@ -1,15 +1,15 @@
 #pragma once
 #include "GameTechRenderer.h"
-#include "../CSC8503Common/PhysicsSystem.h"
-#include "../CSC8503Common/StateGameObject.h"
-#include "../CSC8503Common/PlayerObject.h"
-#include "../CSC8503Common/EnemyObject.h"
-#include "../CSC8503Common/BonusObject.h"
-#include "../CSC8503Common/NavigationGrid.h"
-#include "../CSC8503Common/PendulumObject.h"
-#include "../CSC8503Common/JumpPadObject.h"
-#include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
-#include "../../Plugins/OpenGLRendering/Model.h"
+#include "CSC8503Common/PhysicsSystem.h"
+#include "CSC8503Common/StateGameObject.h"
+#include "CSC8503Common/PlayerObject.h"
+#include "CSC8503Common/EnemyObject.h"
+#include "CSC8503Common/BonusObject.h"
+#include "CSC8503Common/NavigationGrid.h"
+#include "CSC8503Common/PendulumObject.h"
+#include "CSC8503Common/JumpPadObject.h"
+#include "Plugins/OpenGLRendering/OGLResourceManager.h"
+#include "Plugins/OpenGLRendering/Model.h"
 
 namespace NCL {
 	namespace CSC8503 {

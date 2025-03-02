@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../../Plugins/OpenGLRendering/OGLRenderer.h"
-#include "../../Plugins/OpenGLRendering/OGLShader.h"
-#include "../../Plugins/OpenGLRendering/OGLTexture.h"
-#include "../../Plugins/OpenGLRendering/OGLMesh.h"
+#include "Plugins/OpenGLRendering/OGLRenderer.h"
+#include "Plugins/OpenGLRendering/OGLShader.h"
+#include "Plugins/OpenGLRendering/OGLTexture.h"
+#include "Plugins/OpenGLRendering/OGLMesh.h"
 #include "Common/Math/Frustum.h"
 #include "Common/Math/MathsFwd.h"
 
-#include "../CSC8503Common/GameWorld.h"
-#include "../CSC8503Common/NavigationMesh.h"
-#include "../../Plugins/OpenGLRendering/OGLResourceManager.h"
+#include "CSC8503Common/GameWorld.h"
+#include "CSC8503Common/NavigationMesh.h"
+#include "Plugins/OpenGLRendering/OGLResourceManager.h"
 #include <fstream>
 #include <random>
 

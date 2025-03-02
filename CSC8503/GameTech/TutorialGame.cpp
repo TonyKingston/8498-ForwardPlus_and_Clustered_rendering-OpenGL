@@ -1,12 +1,12 @@
 #include "TutorialGame.h"
-#include "../CSC8503Common/GameWorld.h"
-#include "../../Plugins/OpenGLRendering/OGLMesh.h"
-#include "../../Plugins/OpenGLRendering/OGLShader.h"
-#include "../../Plugins/OpenGLRendering/OGLTexture.h"
+#include "CSC8503Common/GameWorld.h"
+#include "Plugins/OpenGLRendering/OGLMesh.h"
+#include "Plugins/OpenGLRendering/OGLShader.h"
+#include "Plugins/OpenGLRendering/OGLTexture.h"
 #include "Common/Graphics/TextureLoader.h"
 #include "Common/Resources/Assets.h"
-#include "..//CSC8503Common/PositionConstraint.h"
-#include "..//CSC8503Common/PositionOrientationConstraint.h"
+#include "CSC8503Common/PositionConstraint.h"
+#include "CSC8503Common/PositionOrientationConstraint.h"
 #include <fstream>
 #include <algorithm>
 

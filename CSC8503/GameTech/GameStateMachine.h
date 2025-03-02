@@ -1,5 +1,5 @@
 #pragma once
-#include "../CSC8503Common/PushdownMachine.h"
+#include "CSC8503Common/PushdownMachine.h"
 
 namespace NCL {
 	namespace CSC8503 {
