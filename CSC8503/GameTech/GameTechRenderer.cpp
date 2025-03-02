@@ -12,6 +12,7 @@
 #include <random>
 
 #include "../../Assets/Shaders/Shared/ComputeBindings.h"
+#include "../../Assets/Shaders/Shared/TextureBindings.h"
 
 using namespace NCL;
 using namespace Rendering;
@@ -778,15 +779,15 @@ void GameTechRenderer::BindAndDraw(RenderObject* obj, bool hasDiff, bool hasBump
 	int activeSpec = -1;
 	for (int i = 0; i < layerCount; ++i) {
 		if (hasDiff && ((OGLTexture*)textures[i])->GetObjectID() != activeDiffuse) {
-			BindTextureToShader((OGLTexture*)textures[i], "mainTex", 0);
+			BindTextureToShader((OGLTexture*)textures[i], "mainTex", TEXTURE_BINDING_DIFFUSE);
 			activeDiffuse = ((OGLTexture*)textures[i])->GetObjectID();
 		}
 		if (hasBump && ((OGLTexture*)textures[i + layerCount])->GetObjectID() != activeDiffuse) {
-			BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", 1);
+			BindTextureToShader((OGLTexture*)textures[i + layerCount], "bumpTex", TEXTURE_BINDING_NORMAL);
 			activeBump = ((OGLTexture*)textures[i + layerCount])->GetObjectID();
 		}
 		if (specTex.size() > 0 && ((OGLTexture*)specTex[i])->GetObjectID() != activeSpec) {
-			BindTextureToShader((OGLTexture*)specTex[i], "specTex", 2);
+			BindTextureToShader((OGLTexture*)specTex[i], "specTex", TEXTURE_BINDING_SPECULAR);
 			activeSpec = ((OGLTexture*)specTex[i])->GetObjectID();
 		}
 		DrawBoundMesh(i);
@@ -1440,13 +1441,11 @@ void GameTechRenderer::RenderCamera(Camera* current_camera) {
 
 		OGLShader::SetUniforms(activeShader,
 			"modelMatrix", modelMatrix,
-			"inDebug", inDebugMode,
 			"objectColour", i->GetColour(),
 			"hasVertexColours", !(*i).GetMesh()->GetColourData().empty(),
 			"hasTexture", (OGLTexture*)(*i).GetDefaultTexture() ? 1 : 0,
 			"hasBump", hasBump,
 			"hasSpec", hasSpec);
-
 
 		if (i->GetAnimation()) {
 			MeshGeometry* mesh = i->GetMesh();
