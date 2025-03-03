@@ -18,6 +18,8 @@ https://research.ncl.ac.uk/game/
 using namespace NCL;
 using namespace NCL::Maths;
 
+const Quaternion Quaternion::Identity = { 0, 0, 0, 1 };
+
 Quaternion::Quaternion(void)
 {
 	x = y = z = 0.0f;
@@ -194,9 +196,29 @@ Quaternion Quaternion::AxisAngleToQuaterion(const Vector3& vector, float degrees
 }
 
 Quaternion NCL::Maths::Quaternion::RotationBetween(const Vector3& aFrom, const Vector3& aTo) {
-	const Vector3 axis = Vector3::Cross(aFrom, aTo);
-	const float angle = Maths::AngleBetweenDegrees(aFrom, aTo);
-	return Quaternion::AxisAngleToQuaterion(axis.Normalised(), angle);
+	const Vector3 from = aFrom.Normalised();
+	const Vector3 to = aTo.Normalised();
+
+	const float dot = Vector3::Dot(from, to);
+
+	// If vectors are nearly identical, return identity quaternion
+	if (dot > 0.9999f) {
+		return Quaternion::Identity;
+	}
+
+	// If vectors are opposite, find an orthogonal vector for rotation
+	if (dot < -0.9999f) {
+		Vector3 orthogonal = (fabs(from.x) > fabs(from.z)) ? Vector3(-from.y, from.x, 0.0f)
+			: Vector3(0.0f, -from.z, from.y);
+		orthogonal = orthogonal.Normalised();
+		return Quaternion(orthogonal.x, orthogonal.y, orthogonal.z, 0.0f);
+	}
+
+	const Vector3 axis = Vector3::Cross(from, to);
+	const float si2 = 1.0f - dot * dot;  // Equivalent to sin^2(x), avoids sqrt
+	const float s = 1.0f / (2.0f * (1.0f + dot)); // 1 / (2 * cos^2(x/2)), avoids sqrt
+
+	return Quaternion(axis.x * s, axis.y * s, axis.z * s, 0.5f + 0.5f * dot);
 }
 
 Vector3		Quaternion::operator *(const Vector3 &a)	const {

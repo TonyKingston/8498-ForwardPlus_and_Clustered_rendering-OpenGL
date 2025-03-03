@@ -17,14 +17,13 @@ https://research.ncl.ac.uk/game/
 using namespace NCL;
 using namespace NCL::Maths;
 
-Matrix3::Matrix3(void)	{
-	for (int i = 0; i < 9; ++i) {
-		array[i] = 0.0f;
-	}
-	array[0] = 1.0f;
-	array[4] = 1.0f;
-	array[8] = 1.0f;
-}
+Matrix3::Matrix3() :
+	array{
+	  1, 0, 0,
+	  0, 1, 0,
+	  0, 0, 1 
+	} 
+{}
 
 Matrix3::Matrix3(float elements[9]) {
 	array[0] = elements[0];
@@ -92,6 +91,11 @@ Matrix3::Matrix3(const Quaternion &quat) {
 	array[8] = 1 - 2 * xx - 2 * yy;
 }
 
+NCL::Maths::Matrix3::Matrix3(const Vector3& i, const Vector3& j, const Vector3& k) : array {
+	i.x, i.y, i.z,
+		j.x, j.y, j.z,
+		k.x, k.y, k.z
+} {}
 
 Matrix3::~Matrix3(void)	{
 
@@ -120,6 +124,18 @@ Matrix3 Matrix3::Rotation(float degrees, const Vector3 &inaxis)	 {
 	m.array[8]  = (axis.z * axis.z) * (1.0f - c) + c;
 
 	return m;
+}
+
+Matrix3 Matrix3::Rotation(const Vector3& heading, const Vector3& axis) {
+	const Vector3  v = Vector3::Cross(heading, axis);
+	const float c = Vector3::Dot(axis, heading);
+	const float k = 1.0f / (1.0f + c);
+
+	float mArray[9] = { v.x * v.x * k + c, v.y * v.x * k - v.z, v.z * v.x * k + v.y,
+		v.x * v.y * k + v.z, v.y * v.y * k + c, v.z * v.y * k - v.x,
+		v.x * v.z * k - v.y, v.y * v.z * k + v.x, v.z * v.z * k + c };
+
+	return Matrix3(mArray);
 }
 
 Matrix3 Matrix3::Scale( const Vector3 &scale )	{

@@ -15,13 +15,14 @@ https://research.ncl.ac.uk/game/
 
 using namespace NCL;
 using namespace NCL::Maths;
-Matrix4::Matrix4(void)	{
-	ToZero();
-	array[0]  = 1.0f;
-	array[5]  = 1.0f;
-	array[10] = 1.0f;
-	array[15] = 1.0f;
-}
+Matrix4::Matrix4() :
+	array{
+	  1, 0, 0, 0,
+	  0, 1, 0, 0,
+	  0, 0, 1, 0,
+	  0, 0, 0, 1
+	} 
+{}
 
 Matrix4::Matrix4( float elements[16] )	{
 	memcpy(this->array,elements,16*sizeof(float));
@@ -68,6 +69,14 @@ Matrix4::Matrix4(const Quaternion& quat) : Matrix4() {
 	array[10] = 1 - 2 * xx - 2 * yy;
 }
 
+Matrix4::Matrix4(const Vector4& i, const Vector4& j, const Vector4& k, const Vector4& l) :
+	array{
+	  i.x, i.y, i.z, i.w,
+	  j.x, j.y, j.z, j.w,
+	  k.x, k.y, k.z, k.w,
+	  l.x, l.y, l.z, l.w,
+} {}
+
 Matrix4::~Matrix4(void)	{
 }
 
@@ -79,10 +88,9 @@ void Matrix4::ToZero()	{
 
 void Matrix4::ToIdentity() {
 	ToZero();
-	array[0] = 1.0f;
-	array[5] = 1.0f;
-	array[10] = 1.0f;
-	array[15] = 1.0f;
+	for (size_t i = 0; i < 4; i++) {
+		m[i][i] = 1;
+	}
 }
 
 Vector3 Matrix4::GetPositionVector() const{
@@ -187,6 +195,10 @@ Matrix4 Matrix4::Rotation(float degrees, const Vector3 &inaxis)	 {
 	m.array[10] = (axis.z * axis.z) * (1.0f - c) + c;
 
 	return m;
+}
+
+Matrix4 Matrix4::Rotation(const Vector3& heading, const Vector3& axis) {
+	return Matrix4(Matrix3::Rotation(heading, axis));
 }
 
 Matrix4 Matrix4::Scale( const Vector3 &scale )	{

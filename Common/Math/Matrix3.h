@@ -23,6 +23,7 @@ namespace NCL {
 			Matrix3(const Matrix2 &m4);
 			Matrix3(const Matrix4 &m4);
 			Matrix3(const Quaternion& quat);
+			Matrix3(const Vector3& i, const Vector3& j, const Vector3& k);
 
 			~Matrix3(void);
 
@@ -76,12 +77,11 @@ namespace NCL {
 
 			inline Matrix3 operator*(const Matrix3 &a) const {
 				Matrix3 out;
-				//Students! You should be able to think up a really easy way of speeding this up...
+				out.ToZero();
 				for (unsigned int r = 0; r < 3; ++r) {
-					for (unsigned int c = 0; c < 3; ++c) {
-						out.array[c + (r * 3)] = 0.0f;
-						for (unsigned int i = 0; i < 3; ++i) {
-							out.array[c + (r * 3)] += this->array[c + (i * 3)] * a.array[(r * 3) + i];
+					for (unsigned int k = 0; k < 3; k++) {
+						for (unsigned int c = 0; c < 3; c++) {
+							out.m[r][c] += this->m[k][c] * a.m[r][k];
 						}
 					}
 				}
@@ -92,13 +92,29 @@ namespace NCL {
 			//Analogous to glRotatef
 			static Matrix3 Rotation(float degrees, const Vector3 &axis);
 
+			// Creates a rotation matrix to align vector "heading" to the "axis" 
+			static Matrix3 Rotation(const Vector3& heading, const Vector3& axis);
+
 			//Creates a scaling matrix (puts the 'scale' vector down the diagonal)
 			//Analogous to glScalef
 			static Matrix3 Scale(const Vector3 &scale);
 
 			static Matrix3 FromEuler(const Vector3 &euler);
 		public:
-			float array[9];
+			union {
+				struct {
+					float array[9];
+				};
+				struct {
+					float m[3][3];
+				};
+				struct {
+					float
+						m00, m01, m02,
+						m10, m11, m12,
+						m20, m21, m22;
+				};
+			};
 		};
 
 		//Handy string output for the matrix. Can get a bit messy, but better than nothing!

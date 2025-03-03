@@ -16,13 +16,29 @@ namespace NCL {
 
 		class Matrix4 {
 		public:
-			Matrix4(void);
+			Matrix4();
 			Matrix4(float elements[16]);
 			Matrix4(const Matrix3& m3);
 			Matrix4(const Quaternion& quat);
+			Matrix4(const Vector4& i, const Vector4& j, const Vector4& k, const Vector4& l);
+
 			~Matrix4(void);
 
-			float	array[16];
+			union {
+				struct {
+					float array[16];
+				};
+				struct {
+					float m[4][4];
+				};
+				struct {
+					float
+						m00, m01, m02, m03,
+						m10, m11, m12, m13,
+						m20, m21, m22, m23,
+						m30, m31, m32, m33;
+				};
+			};
 
 			//Set all matrix values to zero
 			void	ToZero();
@@ -41,6 +57,8 @@ namespace NCL {
 			//Creates a rotation matrix that rotates by 'degrees' around the 'axis'
 			//Analogous to glRotatef
 			static Matrix4 Rotation(float degrees, const Vector3& axis);
+			// Creates a rotation matrix to align vector "heading" to the "axis" 
+			static Matrix4 Rotation(const Vector3& heading, const Vector3& axis);
 
 			//Creates a scaling matrix (puts the 'scale' vector down the diagonal)
 			//Analogous to glScalef
@@ -73,13 +91,13 @@ namespace NCL {
 
 			//Multiplies 'this' matrix by matrix 'a'. Performs the multiplication in 'OpenGL' order (ie, backwards)
 			inline Matrix4 operator*(const Matrix4& a) const {
+				// TODO: Default constructor should probably init everything to 0 instead of being identity matrix
 				Matrix4 out;
-				//Students! You should be able to think up a really easy way of speeding this up...
+				out.ToZero();
 				for (unsigned int r = 0; r < 4; ++r) {
-					for (unsigned int c = 0; c < 4; ++c) {
-						out.array[c + (r * 4)] = 0.0f;
-						for (unsigned int i = 0; i < 4; ++i) {
-							out.array[c + (r * 4)] += this->array[c + (i * 4)] * a.array[(r * 4) + i];
+					for (unsigned int k = 0; k < 4; k++) {
+						for (unsigned int c = 0; c < 4; c++) {
+							out.m[r][c] += this->m[k][c] * a.m[r][k];
 						}
 					}
 				}
