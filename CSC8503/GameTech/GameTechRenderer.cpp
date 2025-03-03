@@ -413,24 +413,23 @@ bool GameTechRenderer::AddLights(int n) {
 	}
 	if (n == 0) return false;
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
-	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	std::vector<Light> newLights(n);
 
 	Vector4 lightPos = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
-	for (int i = numLights; i < numLights + n; i++) {
-		Light& light = pointLights[i];
+	for (int i = 0; i < n; i++) {
+		Light& light = newLights[i];
 		for (int j = 0; j < 3; j++) {
 			float min = LIGHT_MIN_BOUNDS[j];
 			float max = LIGHT_MAX_BOUNDS[j];
 			lightPos[j] = lightDist(lightGen) * (max - min) + min;
 		}
 		light.colour = Vector4(1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0 - lightDist(lightGen), 1.0f);
-//		lightPos.y = 10.0f;
 		light.position = lightPos;
 		light.radius = Vector4(LIGHT_RADIUS, 0.0, 0.0, 0.0);
 	}
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER,0, lightSSBO);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, numLights * sizeof(Light), n * sizeof(Light), newLights.data());
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	numLights += n;
