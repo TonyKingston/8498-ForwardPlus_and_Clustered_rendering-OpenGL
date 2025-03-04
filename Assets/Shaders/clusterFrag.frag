@@ -4,6 +4,7 @@
 
 #include "Shared/Debug.h"
 #include "Shared/TextureBindings.h"
+#include "lighting.frag"
 
 layout(binding = TEXTURE_BINDING_DIFFUSE) uniform sampler2D 	mainTex;
 layout(binding = TEXTURE_BINDING_NORMAL) uniform sampler2D   bumpTex;
@@ -11,12 +12,6 @@ layout(binding = TEXTURE_BINDING_SPECULAR) uniform sampler2D   specTex;
 //uniform sampler2DShadow shadowTex;
 
 uniform mat4 projMatrix;
-
- struct PointLight {
-	 vec4 colour;
-	 vec4 pos;
-	 vec4 radius;
- };
 
 //struct PointLight {
 //  vec3 pos;
@@ -138,29 +133,7 @@ void main(void)
 	//	uint lightIndex = globalLightIndexList[lightIndexOffset + i];
 		uint lightIndex = lightIndices[lightIndexOffset + i];
 		PointLight light = pointLights[lightIndex];
-		vec3 lightVec = light.pos.xyz - IN.worldPos;
-		//vec3 lightVec = light.pos - IN.worldPos;
-		//float lambert = max(0.0, dot(incident, normal)) * 0.9;
-
-		float distance = length(lightVec);
-		float attenuation = 1.0f - clamp(distance / light.radius.x, 0.0, 1.0);
-		if (attenuation > 0.0f) {
-			vec3  incident = normalize(lightVec);
-			vec3 halfDir = normalize(incident + viewDir);
-
-			float lambert = clamp(dot(incident, normal), 0.0, 1.0);
-
-			//float rFactor = max(0.0, dot(halfDir, normal));
-			float rFactor = clamp(dot(halfDir, normal), 0.0, 1.0);
-			float sFactor = pow(rFactor, 60.0) * specSample;
-
-			vec3 attenuated = light.colour.rgb * attenuation;
-			//fragColor.rgb += albedo.rgb * attenuated * lambert; //diffuse light
-			//fragColor.rgb += albedo.rgb * attenuated * lambert;
-			//fragColor.rgb += light.colour.rgb * attenuated * sFactor * 0.33;
-			diffuseLight.rgb += attenuated * lambert; //diffuse light
-			specularLight.rgb += attenuated * sFactor * 0.33; //specular light
-		}
+		calculateLighting(light, IN.worldPos, viewDir, normal, specSample, diffuseLight, specularLight);
 	}
 	
 	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
