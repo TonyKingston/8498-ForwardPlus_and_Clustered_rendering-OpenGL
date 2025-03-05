@@ -119,7 +119,7 @@ int TutorialGame::AskRenderingMode() {
 		cout << "Invalid Input" << endl;
 		cin.clear();
 		cin.ignore(256, '\n');
-		AskRenderingMode();
+		return AskRenderingMode();
 	}
 
 	switch (input) {
@@ -138,7 +138,7 @@ int TutorialGame::AskRenderingMode() {
 	default:
 		cout << "Invalid input." << endl;
 		cin.ignore();
-		AskRenderingMode();
+		return AskRenderingMode();
 		break;
 	}
 
@@ -155,7 +155,7 @@ bool TutorialGame::AskPrepass() {
 		cout << "Invalid Input" << endl;
 		cin.clear();
 		cin.ignore(256, '\n');
-		AskRenderingMode();
+		return AskPrepass();
 	}
 	switch (input) {
 	case 0:
@@ -169,11 +169,11 @@ bool TutorialGame::AskPrepass() {
 	default:
 		cout << "Invalid input." << endl;
 		cin.ignore();
-		AskPrepass();
+		return AskPrepass();
 		break;
 	}
 
-	return 0;
+	return input;
 
 }
 
@@ -187,7 +187,7 @@ bool TutorialGame::AskForwardPlus() {
 		cout << "Invalid Input" << endl;
 		cin.clear();
 		cin.ignore(256, '\n');
-		AskForwardPlus();
+		return AskForwardPlus();
 	}
 	switch (input) {
 	case 0:
@@ -201,7 +201,7 @@ bool TutorialGame::AskForwardPlus() {
 	default:
 		cout << "Invalid input." << endl;
 		cin.ignore();
-		AskForwardPlus();
+		return AskForwardPlus();
 		break;
 	}
 
@@ -238,18 +238,18 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) {
 		Vector3 pos = world->GetMainCamera()->GetPosition();
-		cout << "Camera Position (x,y,z): " << pos.x << " " << pos.y << " " << pos.z << endl;
+		LOG_INFO("Camera Position (x,y,z): {}", pos);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM9)) {
 		renderer->ToggleDebugMode();
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::MINUS)) {
 		lightsToAdd = (std::max)(lightsToAdd / 2, 1u);
-		cout << "Decreased lights to " << lightsToAdd << endl;
+		LOG_INFO("Decreased lights to {}", lightsToAdd);
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PLUS)) {
 		lightsToAdd = lightsToAdd * 2;
-		cout << "Increased lights to " << lightsToAdd << endl;
+		LOG_INFO("Increased lights to {}", lightsToAdd);
 	}
 }
 

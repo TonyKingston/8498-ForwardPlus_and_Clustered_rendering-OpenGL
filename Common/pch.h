@@ -46,11 +46,14 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/fmt/ranges.h>
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/fmt/ostr.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>	
 
+#include <Math/MathsFwd.h>
 #include <Common.h>
 
 //#if !defined(NDEBUG) && !defined(_DEBUG)
