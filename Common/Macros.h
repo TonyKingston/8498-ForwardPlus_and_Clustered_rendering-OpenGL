@@ -1,24 +1,10 @@
 #pragma once
-#include "Core/Log/Logging.h"
 
 #ifndef _DEBUG
 #define NCL_DEBUG 0
 #else
 #define NCL_DEBUG 1
 #endif // NDEBUG
-
-#ifndef NCL_ASSERT
-#if NCL_DEBUG
-#define NCL_ASSERT(x) \
-        do { \
-            if(!(x)) { \
-                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(x), __FILE__, __LINE__); \
-            } \
-        } while(0)
-#else
-#define NCL_ASSERT(x) (void)(x)
-#endif
-#endif // NCL_ASSERT
 
 #ifdef _MSC_VER
 #define NCL_DEBUG_BREAK() \
@@ -40,3 +26,13 @@
 #define NCL_ARRAY_COUNT(x) (sizeof(x) / sizeof((x)[0]))
 
 #define NCL_SAFE_FREE(x) if(x != nullptr) free(x); x = nullptr;
+
+#ifdef NCL_NO_FORCE_INLINE // Forcing inlining is the default behaviour
+	#define NCL_INLINE inline
+#elif defined(_MSC_VER)
+#define NCL_INLINE __forceinline
+#elif defined(__clang__) || defined(__GNUC__)
+#define NCL_INLINE __inline__ __attribute__((always_inline))
+#else
+#define NCL_INLINE inline // Fallback to regular inline, might be best to notify with an error instead
+#endif

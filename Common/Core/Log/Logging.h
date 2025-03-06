@@ -40,6 +40,19 @@
         ::std::abort(); \
     } while(0)
 
+#ifndef NCL_ASSERT
+#if NCL_DEBUG
+#define NCL_ASSERT(x) \
+        do { \
+            if(!(x)) { \
+                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(x), __FILE__, __LINE__); \
+            } \
+        } while(0)
+#else
+#define NCL_ASSERT(x) (void)(x)
+#endif
+#endif // NCL_ASSERT
+
 namespace NCL {
     //TODO: Should we have macros to declare/define categories like in Unreal
     // Each category would need their own logger.
