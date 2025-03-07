@@ -1,7 +1,6 @@
 #pragma once
 #include "Common/Graphics/ShaderBase.h"
-#include "Common/Math/Maths.h"
-#include "Common/Macros.h"
+#include <Common.h>
 #include "glad\glad.h"
 #include <unordered_map>
 #include <string>

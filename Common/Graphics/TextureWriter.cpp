@@ -40,6 +40,7 @@ bool NCL::TextureWriter::SaveImage(const std::string& filename, const Image& ima
 	}
 	
 	LOG_ERROR("Could not find save function for file {} when trying to save image", filename);
+	return false;
 }
 
 bool NCL::TextureWriter::SaveTexture(const std::string& filename, const Rendering::TextureBase* texture, int quality /*100*/) {

@@ -102,8 +102,8 @@ PushdownState::PushdownResult Game::OnUpdate(float dt, PushdownState** newState)
 
 			return PushdownResult::Push;
 		}
-		return PushdownResult::NoChange;
 	}
+	return PushdownResult::NoChange;
 }
 void Game::OnAwake() {
 	//game = gameState->GetGame();

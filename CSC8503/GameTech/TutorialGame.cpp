@@ -296,8 +296,8 @@ void NCL::CSC8503::TutorialGame::InitPhysicsLevel() {
 	AddKillPlaneToWorld(Vector3(0, -200, 0));
 	AddVictoryTriggerToWorld(Vector3(165, -95, 420), Vector3(30, 1, 30));
 	GameObject* floor = AddCubeToWorld(Vector3(165, -15, 113), Vector3(20, 2, 50), Vector3(15, 0, 0), true, 0.0f, Debug::CYAN);
-	floor->GetPhysicsObject()->SetElasticity(0.9);
-	floor->GetPhysicsObject()->SetFriction(0.1);
+	floor->GetPhysicsObject()->SetElasticity(0.9f);
+	floor->GetPhysicsObject()->SetFriction(0.1f);
 	GameObject* block = AddCubeToWorld(Vector3(170, -30, 200), Vector3(4, 4, 4), true, 0.8f, Debug::GRAY);
 	GameObject* block2 = AddCubeToWorld(Vector3(160, -30, 200), Vector3(4, 4, 4), true, 0.8f, Debug::GRAY);
 	GameObject* target = AddCubeToWorld(Vector3(165, -35, 300), Vector3(20, 5, 10), false, 0.0f, Debug::GRAY);
@@ -532,7 +532,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia(hollow);
-	sphere->GetPhysicsObject()->SetElasticity(0.8);
+	sphere->GetPhysicsObject()->SetElasticity(0.8f);
 
 
 	world->AddGameObject(sphere);
@@ -582,8 +582,8 @@ PlayerObject* NCL::CSC8503::TutorialGame::AddPlayerToWorld(const Vector3& positi
 
 	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
 	sphere->GetPhysicsObject()->InitSphereInertia(false);
-	sphere->GetPhysicsObject()->SetElasticity(0.7);
-	sphere->GetPhysicsObject()->SetFriction(0.4);
+	sphere->GetPhysicsObject()->SetElasticity(0.7f);
+	sphere->GetPhysicsObject()->SetFriction(0.4f);
 
 
 	world->AddGameObject(sphere);
@@ -612,7 +612,7 @@ EnemyObject* NCL::CSC8503::TutorialGame::AddEnemyToWorld(const Vector3& position
 
 	sphere->GetPhysicsObject()->SetInverseMass(1.0f);
 	sphere->GetPhysicsObject()->InitSphereInertia(false);
-	sphere->GetPhysicsObject()->SetElasticity(0.7);
+	sphere->GetPhysicsObject()->SetElasticity(0.7f);
 
 	world->AddGameObject(sphere);
 
@@ -793,10 +793,10 @@ PendulumObject* NCL::CSC8503::TutorialGame::AddPendulumToWorld(const Vector3& po
 
 	sphere->GetPhysicsObject()->SetInverseMass(0.4f);
 	sphere->GetPhysicsObject()->InitSphereInertia(false);
-	sphere->GetPhysicsObject()->SetElasticity(0.7);
-	sphere->GetPhysicsObject()->SetFriction(0.4);
-	sphere->GetPhysicsObject()->SetLinearDamping(0.0); // Pendulum will always swing, no need for state machine
-//	sphere->GetPhysicsObject()->SetAngularDamping(0.0);
+	sphere->GetPhysicsObject()->SetElasticity(0.7f);
+	sphere->GetPhysicsObject()->SetFriction(0.4f);
+	sphere->GetPhysicsObject()->SetLinearDamping(0.0f); // Pendulum will always swing, no need for state machine
+//	sphere->GetPhysicsObject()->SetAngularDamping(0.0f);
 
 
 	world->AddGameObject(sphere);

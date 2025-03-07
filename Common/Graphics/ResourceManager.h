@@ -23,15 +23,7 @@ namespace NCL {
 		class ResourceManager {
 		public:
 
-			virtual ~ResourceManager() {
-				DeleteMap(meshes);
-				DeleteMap(materials);
-#ifdef _WIN64
-				DeleteMap(animations);
-#endif
-				DeleteMap(textures);
-				DeleteMap(shaders);
-			}
+			virtual ~ResourceManager();
 
 			virtual MeshGeometry* LoadMesh(string fileName) = 0;
 			virtual ShaderBase* LoadShader(string shaderVert, string shaderFrag, string shaderGeom = "") = 0;
