@@ -10,16 +10,16 @@ on:
       - '**.h'
       - '**.cpp'
       - '**.sln'
-  pull_request:
-    types:
-      [closed]
-    branches:
-      - main
-      - master
-    paths:
-      - '**.h'
-      - '**.cpp'
-      - '**.sln'
+#  pull_request:
+#    types:
+#      [closed]
+#    branches:
+#      - main
+#      - master
+#    paths:
+#      - '**.h'
+#      - '**.cpp'
+#      - '**.sln'
   workflow_dispatch:
 
 concurrency:
