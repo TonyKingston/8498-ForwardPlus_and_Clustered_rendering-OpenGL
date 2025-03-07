@@ -81,7 +81,7 @@ void OGLShader::ReloadShader() {
 				auto processed_ptr = std::unique_ptr<char, decltype([](char* p) {free(p); })>(
 					stb_include_string(fileContents.c_str(), nullptr, Assets::SHADERDIR.c_str(), nullptr, error));
 				if (!processed_ptr) {
-					std::cerr << "Failed to process includes." << std::endl;
+					LOG_ERROR("Failed to process includes.");
 					return;
 				}
 
@@ -312,7 +312,7 @@ int OGLShaderBuilder::Link(const uint32_t id) {
 	glGetProgramInfoLog(id, 512, NULL, infoLog);
 
 	if (!success) {
-		std::cerr << "Failed to link shader: " << infoLog << std::endl;
+		LOG_ERROR("Failed to link shader : {}", infoLog);
 	}
 
 	return success;
@@ -327,7 +327,7 @@ int OGLShaderBuilder::Validate(const uint32_t id) {
 	glGetProgramInfoLog(id, 512, NULL, infoLog);
 
 	if (!success) {
-		std::cerr << "Failed to validate shader: " << infoLog << std::endl;
+		LOG_ERROR("Failed to validate shader: {}", infoLog);
 	}
 
 	return success;

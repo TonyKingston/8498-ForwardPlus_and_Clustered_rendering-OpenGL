@@ -132,12 +132,6 @@
     <ClCompile Include="Core\Log\Logging.cpp">
       <Filter>Core\Log</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RenderPassBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RenderPipelineBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Misc\Image.cpp">
       <Filter>Core\Misc</Filter>
     </ClCompile>
@@ -265,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="Core\Misc\Image.h">
       <Filter>Core\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Log\FmtUtils.h">
+      <Filter>Core\Log</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

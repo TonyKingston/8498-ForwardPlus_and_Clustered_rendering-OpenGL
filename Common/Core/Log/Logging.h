@@ -2,6 +2,7 @@
 #include "Build.h"
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ranges.h>
+#include "FmtUtils.h"
 
 // TODO: Add option that uses SPDLOG macros so we can get source info in the log e.g. __FUNC__
 #define USE_ASYNC_LOGGER 1
@@ -38,6 +39,19 @@
         NCL_DEBUG_BREAK(); \
         ::std::abort(); \
     } while(0)
+
+#ifndef NCL_ASSERT
+#if NCL_DEBUG
+#define NCL_ASSERT(x) \
+        do { \
+            if(!(x)) { \
+                NCL_FATAL("Assertion: {}\n\t{}:{}", XSTR(x), __FILE__, __LINE__); \
+            } \
+        } while(0)
+#else
+#define NCL_ASSERT(x) (void)(x)
+#endif
+#endif // NCL_ASSERT
 
 namespace NCL {
     //TODO: Should we have macros to declare/define categories like in Unreal

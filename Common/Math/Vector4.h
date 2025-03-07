@@ -8,6 +8,7 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include <iostream>
+#include "Macros.h"
 #include "MathsFwd.h"
 
 namespace NCL {
@@ -33,117 +34,94 @@ namespace NCL {
 			};
 
 		public:
-			constexpr Vector4(void) : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+			Vector4() = default;
+			constexpr Vector4(const Vector4& other) = default;
+			Vector4&operator=(const Vector4& other) = default;
 
 			constexpr Vector4(float xVal, float yVal, float zVal, float wVal) : x(xVal), y(yVal), z(zVal), w(wVal) {}
 
 			Vector4(const Vector3& v3, float w = 0.0f);
 			Vector4(const Vector2& v2, float z = 0.0f, float w = 0.0f);
 
-			~Vector4(void) {}
+			~Vector4() = default;
 
 			// Decimal colour value to RGB
-			inline static Vector4 ConvertDecimalColour(int colour) {
+
+
+#pragma warning( push )
+#pragma warning( disable : 4244)
+			NCL_INLINE static Vector4 ConvertDecimalColour(int colour) {
 				int r = colour >> 16 & 0xff;
 				int g = colour >> 8 & 0xff;
 				int b = colour & 0xff;
 				return Vector4(r, g, b, 1.0f);
 			}
+#pragma warning( pop ) 
 
-			Vector4 Normalised() const {
-				Vector4 temp(x, y, z, w);
-				temp.Normalise();
-				return temp;
+			NCL_INLINE Vector4 Normalised() const {
+				return *this / Length();
 			}
 
-			void Normalise() {
-				float length = Length();
-
-				if (length != 0.0f) {
-					length = 1.0f / length;
-					x = x * length;
-					y = y * length;
-					z = z * length;
-					w = w * length;
-				}
+			NCL_INLINE Vector4& Normalise() {
+				return *this = Normalised();
 			}
 
-			float	Length() const {
-				return sqrt((x*x) + (y*y) + (z*z) + (w * w));
+			NCL_INLINE float Length() const {
+				return sqrt(LengthSquared());
 			}
 
-			constexpr float	LengthSquared() const {
+			NCL_INLINE constexpr float	LengthSquared() const {
 				return ((x*x) + (y*y) + (z*z) + (w * w));
 			}
 
-			constexpr float		GetMaxElement() const {
-				float v = x;
-				if (y > v) {
-					v = y;
-				}
-				if (z > v) {
-					v = z;
-				}
-				if (w > v) {
-					v = w;
-				}
-				return v;
+			NCL_INLINE constexpr float GetMaxElement() const {
+				return std::max(std::max(x, y), std::max(z, w));
 			}
 
-			float		GetAbsMaxElement() const {
-				float v = abs(x);
-				if (abs(y) > v) {
-					v = abs(y);
-				}
-				if (abs(z) > v) {
-					v = abs(z);
-				}
-				if (abs(w) > v) {
-					v = abs(w);
-				}
-				return v;
+			NCL_INLINE constexpr float GetAbsMaxElement() const {
+				return std::max(std::max(abs(x), abs(y)), std::max(abs(z), abs(w)));
 			}
 
-			static float	Dot(const Vector4 &a, const Vector4 &b) {
+			static float Dot(const Vector4 &a, const Vector4 &b) {
 				return (a.x*b.x) + (a.y*b.y) + (a.z*b.z) + (a.w*b.w);
 			}
 
-			inline Vector4  operator+(const Vector4  &a) const {
+			NCL_INLINE Vector4  operator+(const Vector4  &a) const {
 				return Vector4(x + a.x, y + a.y, z + a.z, w + a.w);
 			}
 
-			inline Vector4  operator-(const Vector4  &a) const {
+			NCL_INLINE Vector4  operator-(const Vector4  &a) const {
 				return Vector4(x - a.x, y - a.y, z - a.z, w - a.w);
 			}
 
-			inline Vector4  operator-() const {
+			NCL_INLINE Vector4  operator-() const {
 				return Vector4(-x, -y, -z, -w);
 			}
 
-			inline Vector4  operator*(float a)	const {
+			NCL_INLINE Vector4  operator*(float a)	const {
 				return Vector4(x * a, y * a, z * a, w * a);
 			}
 
-			inline Vector4  operator*(const Vector4  &a) const {
+			NCL_INLINE Vector4  operator*(const Vector4  &a) const {
 				return Vector4(x * a.x, y * a.y, z * a.z, w * a.w);
 			}
 
-			inline Vector4  operator/(const Vector4  &a) const {
+			NCL_INLINE Vector4  operator/(const Vector4  &a) const {
 				return Vector4(x / a.x, y / a.y, z / a.z, w / a.w);
 			};
 
-			inline Vector4  operator/(float v) const {
+			NCL_INLINE Vector4  operator/(float v) const {
 				return Vector4(x / v, y / v, z / v, w / v);
 			};
 
-			inline constexpr void operator+=(const Vector4  &a) {
+			NCL_INLINE constexpr void operator+=(const Vector4  &a) {
 				x += a.x;
 				y += a.y;
 				z += a.z;
 				w += a.w;
 			}
 
-			inline void operator-=(const Vector4  &a) {
+			NCL_INLINE void operator-=(const Vector4  &a) {
 				x -= a.x;
 				y -= a.y;
 				z -= a.z;
@@ -151,46 +129,46 @@ namespace NCL {
 			}
 
 
-			inline void operator*=(const Vector4  &a) {
+			NCL_INLINE void operator*=(const Vector4  &a) {
 				x *= a.x;
 				y *= a.y;
 				z *= a.z;
 				w *= a.w;
 			}
 
-			inline void operator/=(const Vector4  &a) {
+			NCL_INLINE void operator/=(const Vector4  &a) {
 				x /= a.x;
 				y /= a.y;
 				z /= a.z;
 				w /= a.w;
 			}
 
-			inline void operator*=(float f) {
+			NCL_INLINE void operator*=(float f) {
 				x *= f;
 				y *= f;
 				z *= f;
 				w *= f;
 			}
 
-			inline void operator/=(float f) {
+			NCL_INLINE void operator/=(float f) {
 				x /= f;
 				y /= f;
 				z /= f;
 				w /= f;
 			}
 
-			inline float operator[](int i) const {
+			NCL_INLINE float operator[](int i) const {
 				return array[i];
 			}
 
-			inline float& operator[](int i) {
+			NCL_INLINE float& operator[](int i) {
 				return array[i];
 			}
 
-			inline bool	operator==(const Vector4 &A)const { return (A.x == x && A.y == y && A.z == z && A.w == w) ? true : false; };
-			inline bool	operator!=(const Vector4 &A)const { return (A.x == x && A.y == y && A.z == z && A.w == w) ? false : true; };
+			NCL_INLINE bool	operator==(const Vector4 &A)const { return (A.x == x && A.y == y && A.z == z && A.w == w) ? true : false; };
+			NCL_INLINE bool	operator!=(const Vector4 &A)const { return (A.x == x && A.y == y && A.z == z && A.w == w) ? false : true; };
 
-			inline friend std::ostream& operator<<(std::ostream& o, const Vector4& v) {
+			NCL_INLINE friend std::ostream& operator<<(std::ostream& o, const Vector4& v) {
 				o << "Vector4(" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << std::endl;
 				return o;
 			}

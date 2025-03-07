@@ -1,5 +1,7 @@
 #version 430 core
 
+#include "lighting.frag"
+
 layout(binding = 0) uniform sampler2D depthTex;
 layout(binding = 1) uniform sampler2D normTex;
 layout(binding = 2) uniform sampler2D specTex;
@@ -7,12 +9,6 @@ layout(binding = 2) uniform sampler2D specTex;
 
 uniform vec3 cameraPos;
 uniform vec2 pixelSize; // reciprocal of resolution
-
-struct PointLight {
-	vec4 colour;
-	vec4 pos;
-	vec4 radius;
-};
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
@@ -38,27 +34,13 @@ void main (void) {
 	vec3 viewDir = normalize ( cameraPos - worldPos );
 
 	PointLight light = pointLights[lightIndex];
-	vec3 lightVec = light.pos.xyz - worldPos;
-	float dist = length ( lightVec );
-	float atten = 1.0 - clamp ( dist / light.radius.x , 0.0 , 1.0);
-
-	// if( atten == 0.0) {
-	    // discard;
-	// }
-
-		
-	vec3 incident = normalize ( lightVec);
-	vec3 halfDir = normalize ( incident + viewDir );
-	
-	float lambert = clamp ( dot ( incident , normal ) ,0.0 ,1.0);
-   	float rFactor = clamp ( dot ( halfDir , normal ) ,0.0 ,1.0);
-	float specFactor = clamp ( dot ( halfDir , normal ) ,0.0 ,1.0);
-	specFactor = pow ( specFactor , 60.0 );
-	vec3 attenuated = light.colour.xyz * atten;
+	vec3 diffuse = vec3(0);
+	vec3 specular = vec3(0);
+	calculateLighting(light, worldPos, viewDir, normal, specSample, diffuse, specular);
 	
 //	float shadow = texture(shadowTex, texCoord.xy).r * 2.0 - 1.0;
-	diffuseOutput = vec4 ( attenuated * lambert, 1.0);
-	specularOutput = vec4 ( attenuated * specFactor * 0.33 , 1.0);
+	diffuseOutput = vec4 ( diffuse, 1.0);
+	specularOutput = vec4 ( specular , 1.0);
 
 //	diffuseOutput = vec4 ( attenuated * lambert * shadow , 1.0);
 	//specularOutput = vec4 ( attenuated * specFactor * shadow * 0.33 , 1.0);

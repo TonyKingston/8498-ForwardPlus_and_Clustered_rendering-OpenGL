@@ -12,8 +12,8 @@ PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* 
 	elasticity	= 0.5f;
 	friction	= 0.8f;
 	stiffness   = 50.0f;
-	linearDamping = 0.4;
-	angularDamping = 0.4;
+	linearDamping = 0.4f;
+	angularDamping = 0.4f;
 	isStatic = false;
 }
 
@@ -72,7 +72,7 @@ void PhysicsObject::InitCubeInertia() {
 
 void PhysicsObject::InitSphereInertia(bool hollow) {
 	float radius	= transform->GetScale().GetMaxElement();
-	float constant = hollow ? 1.5 : 2.5f;
+	float constant = hollow ? 1.5f : 2.5f;
 	float i			= constant * inverseMass / (radius*radius);
 
 	inverseInertia	= Vector3(i, i, i);

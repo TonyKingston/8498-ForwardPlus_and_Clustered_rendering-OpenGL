@@ -224,8 +224,8 @@
     <ClCompile Include="Input\Win32Keyboard.cpp" />
     <ClCompile Include="Input\Win32Mouse.cpp" />
     <ClCompile Include="Math\Frustum.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Math\Maths.cpp" />
     <ClCompile Include="Math\Matrix2.cpp">
@@ -267,6 +267,7 @@
     <ClInclude Include="Build.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Core\GameTimer.h" />
+    <ClInclude Include="Core\Log\FmtUtils.h" />
     <ClInclude Include="Core\Log\Logging.h" />
     <ClInclude Include="Core\Misc\FunctionUtils.h" />
     <ClInclude Include="Core\Misc\Image.h" />
