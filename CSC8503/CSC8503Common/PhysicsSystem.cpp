@@ -309,7 +309,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	const float allowedPenetration = 0.1f;
 
 	const float biasFactor = 0.1f;
-	float bias = biasFactor * max(0.0f, p.penetration - allowedPenetration);
+	float bias = biasFactor * (std::max)(0.0f, p.penetration - allowedPenetration);
 
 	// Separate them out using projection
 	transformA.SetPosition(transformA.GetPosition() -
@@ -434,8 +434,8 @@ void PhysicsSystem::BroadPhase() {
 				for (auto j = std::next(i); j != data.end(); ++j) {
 					//is this pair of items already in the collision set -
 					//if the same pair is in another quadtree node together etc
-					info.a = min((*i).object, (*j).object);
-					info.b = max((*i).object, (*j).object);
+					info.a = (std::min)((*i).object, (*j).object);
+					info.b = (std::max)((*i).object, (*j).object);
 					int layerMask = (*i).object->GetLayerMask() & (*j).object->GetLayerMask();
 					if (layerMask == 0) {
 						continue;
