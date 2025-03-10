@@ -135,6 +135,9 @@
     <ClCompile Include="Core\Misc\Image.cpp">
       <Filter>Core\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resources\Assets.h">
@@ -263,5 +266,14 @@
     <ClInclude Include="Core\Log\FmtUtils.h">
       <Filter>Core\Log</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Misc\EnumUtils.h">
+      <Filter>Core\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Misc\InstanceCounter.h">
+      <Filter>Core\Misc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>
