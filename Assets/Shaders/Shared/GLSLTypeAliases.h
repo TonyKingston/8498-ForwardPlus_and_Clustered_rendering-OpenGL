@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common/Maths.h"
+#include "../../Common/Math/Maths.h"
 
 namespace NCL::GLSL {
 	using vec3 = Maths::Vector3;

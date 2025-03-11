@@ -29,18 +29,11 @@ namespace NCL {
 
 		constexpr unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
-		struct Light {
+		/*struct PointLight {
 			Vector4 colour;
 			Vector4 position;
 			Vector4 radius;
-		};
-
-		/*struct Light {
-			Vector3 position;
-			float radius;
-			Vector4 colour;
 		};*/
-
 
 		struct TileAABB {
 			Vector4 min;

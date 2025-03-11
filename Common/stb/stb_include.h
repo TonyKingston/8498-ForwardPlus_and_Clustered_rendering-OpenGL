@@ -56,6 +56,7 @@ char *stb_include_file(const char *filename, const char *inject, const char *pat
 #include <stdlib.h>
 #include <string.h>
 #include <filesystem>
+#include <stdbool.h>
 
 // glibc users like to live dangerously
 #ifndef _WIN32
@@ -191,6 +192,49 @@ static char *stb_include_load_file(const char *filename, size_t *plen)
    return text;
 }
 
+#define MAX_MACROS 100
+
+typedef struct {
+    char* name;
+    bool defined;
+} Macro;
+
+// Store macro definitions
+static Macro macros[MAX_MACROS];
+static int macro_count = 0;
+
+// Check if a macro is defined
+static bool is_macro_defined(const char* macro) {
+    for (int i = 0; i < macro_count; i++) {
+        if (strcmp(macros[i].name, macro) == 0) {
+            return macros[i].defined;
+        }
+    }
+    return false;  // If not found, assume undefined
+}
+
+// Add or update a macro definition
+static void add_macro(const char* macro, bool defined) {
+    for (int i = 0; i < macro_count; i++) {
+        if (strcmp(macros[i].name, macro) == 0) {
+            macros[i].defined = defined;
+            return;
+        }
+    }
+    if (macro_count < MAX_MACROS) {
+        macros[macro_count].name = _strdup(macro);
+        macros[macro_count].defined = defined;
+        macro_count++;
+    }
+}
+
+static void stb_include_free_macros() {
+    int i;
+    for (i = 0; i < macro_count; ++i)
+        free(macros[i].name);
+    macro_count = 0;
+}
+
 typedef struct
 {
    int offset;
@@ -229,6 +273,12 @@ static int stb_include_find_includes(const char *text, include_info **plist)
    int inc_count = 0;
    const char *s = text, *start;
    include_info *list = NULL;
+   // TK Change Begin
+   int ifdef_nesting = 0; // Track how many levels of ifdef statements we're in
+   bool only_skip_first_ifdef = true; // If true, we only skip past the first ifdef block in the file
+   bool skipping = false;
+   //char* macro_name = (char*)malloc(sizeof(char) * 256);
+   // TK Change End
    while (*s) {
       // parse is always at start of line when we reach here
       start = s;
@@ -238,7 +288,82 @@ static int stb_include_find_includes(const char *text, include_info **plist)
          ++s;
          while (*s == ' ' || *s == '\t')
             ++s;
-         if (0==strncmp(s, "include", 7) && stb_include_isspace(s[7])) {
+         /* TK Change Begin : Small modification to avoid processing includes intended for cpp files e.g.
+         #ifdef __cplusplus
+         #include "GLSLTypeAliases.h"
+         #endif
+         Note: This change does mean that includes shouldn't be defined within ifdef blocks*/
+         //if (0 == strncmp(s, "ifdef", 5) && stb_include_isspace(s[5])) {
+         //    ifdef_nesting++;
+         //    s += 5;
+         //    while (*s == ' ' || *s == '\t')
+         //        ++s;
+         //}
+         //else if (ifdef_nesting > 0) {
+         //    if (0 == strncmp(s, "endif", 5) && stb_include_isspace(s[5])) {
+         //        ifdef_nesting--; // Exit one level of #ifdef
+         //    }
+         //}
+        // Handle #define
+        if (0 == strncmp(s, "define", 6) && stb_include_isspace(s[6])) {
+            s += 6;
+            while (*s == ' ' || *s == '\t')
+                ++s;
+            char* macro_name = (char*)malloc(sizeof(char) * 256);
+            sscanf_s(s, "%255s", macro_name);
+            add_macro(macro_name, true);
+        }
+        // Handle #undef
+        else if (0 == strncmp(s, "undef", 5) && stb_include_isspace(s[5])) {
+            s += 5;
+            while (*s == ' ' || *s == '\t')
+                ++s;
+            char* macro_name = (char*)malloc(sizeof(char) * 256);
+            sscanf_s(s, "%255s", macro_name);
+            add_macro(macro_name, false);
+        }
+        // Handle #ifdef
+        else if (0 == strncmp(s, "ifdef", 5) && stb_include_isspace(s[5])) {
+            s += 5;
+            while (*s == ' ' || *s == '\t')
+                ++s;
+            char* macro_name = (char*)malloc(sizeof(char) * 256);
+            sscanf_s(s, "%255s", macro_name);
+
+            if (!is_macro_defined(macro_name)) {
+                skipping = true;  // Start skipping if the macro is undefined
+            }
+            ifdef_nesting++;
+        }
+        // Handle #ifndef
+        else if (0 == strncmp(s, "ifndef", 6) && stb_include_isspace(s[6])) {
+            s += 6;
+            while (*s == ' ' || *s == '\t')
+                ++s;
+            char* macro_name = (char*)malloc(sizeof(char) * 256);
+            sscanf_s(s, "%255s", macro_name);
+
+            if (is_macro_defined(macro_name)) {
+                skipping = true;  // Start skipping if the macro is defined
+            }
+            ifdef_nesting++;
+        }
+        // Handle #endif
+        else if (0 == strncmp(s, "endif", 5) && stb_include_isspace(s[5])) {
+            if (ifdef_nesting > 0) {
+                ifdef_nesting--;
+                if (ifdef_nesting == 0) {
+                    skipping = false;  // Stop skipping after the first matching #endif
+                }
+            }
+        }
+        if (skipping) {
+            // Skip this block entirely
+            while (*s != '\r' && *s != '\n' && *s != 0)
+                ++s;
+            continue;
+        }
+         else if (0==strncmp(s, "include", 7) && stb_include_isspace(s[7])) {
             s += 7;
             while (*s == ' ' || *s == '\t')
                ++s;
@@ -365,6 +490,7 @@ char *stb_include_string(const char *str, const char *inject, const char *path_t
    }
    text = stb_include_append(text, &textlen, str+last, source_len - last + 1); // append '\0'
    stb_include_free_includes(inc_list, num);
+   stb_include_free_macros();
    return text;
 }
 
