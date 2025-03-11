@@ -10,8 +10,10 @@
 #include "CSC8503Common/GameWorld.h"
 #include "CSC8503Common/NavigationMesh.h"
 #include "Plugins/OpenGLRendering/OGLResourceManager.h"
+#include "Assets/Shaders/Shared/SharedFwd.h"
 #include <fstream>
 #include <random>
+#include <span>
 
 namespace NCL {
 	namespace CSC8503 {
@@ -28,19 +30,6 @@ namespace NCL {
 #define LIGHT_RADIUS 40.0 / WORLD_SCALE
 
 		constexpr unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
-
-		struct Light {
-			Vector4 colour;
-			Vector4 position;
-			Vector4 radius;
-		};
-
-		/*struct Light {
-			Vector3 position;
-			float radius;
-			Vector4 colour;
-		};*/
-
 
 		struct TileAABB {
 			Vector4 min;
@@ -84,11 +73,28 @@ namespace NCL {
 			void RenderStartView();
 			void ResizeSceneTextures(float width, float height);
 
+			// Updates the positon of all lights in the SSBO on the CPU.
 			void UpdateLights(float dt);
-			void UpdateLightsGPU(float dt);
-			bool AddLights(int n);
 
-			int GetNumLight() const {
+			// Dispatches a compute shader to update the position of all lights in the SSBO.
+			void UpdateLightsGPU(float dt);
+
+			/// <summary>
+			/// Adds N lights to the scene with random positions and colours.
+			/// </summary>
+			/// <param name="n">True if any lights were added, false if none were</param>
+			/// <returns></returns>
+			bool AddLights(uint n);
+
+			/// <summary>
+			/// Use to add lights to the scene with manually specified attributes.
+			/// </summary>
+			/// <param name="newLights">Span of lights to be added to the scene. 
+			///	Will be truncated to not exceed MAX_LIGHTS.</param>
+			/// <returns>True if any lights were added, false if none were</returns>
+			bool AddLights(std::span<const PointLight> newLights);
+
+			uint GetNumLight() const {
 				return numLights;
 			}
 
@@ -96,7 +102,7 @@ namespace NCL {
 				return renderMode;
 			}
 
-			void InitLights();
+			void InitLights(bool addDebugLights = false);
 
 			void ToggleDebugMode() {
 				inDebugMode = !inDebugMode;
@@ -156,6 +162,9 @@ namespace NCL {
 
 			// Updates the currently bound shader with projMat and viewMat;
 			void UpdateShaderMatrices();
+
+			// Appends the span of lights to an SSBO on the GPU and increments numLights
+			void UploadLights(std::span<const PointLight> lights);
 
 			vector<RenderObject*> activeObjects;
 			RenderObject* root;
@@ -247,7 +256,7 @@ namespace NCL {
 
 			int renderMode;
 			bool usingPrepass = false;
-			int numLights = 0;
+			uint numLights = 0;
 			float lightDt = 0.2f;
 
 			Matrix4 viewMat;

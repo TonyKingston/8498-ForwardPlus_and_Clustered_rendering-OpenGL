@@ -36,3 +36,23 @@
 #else
 #define NCL_INLINE inline // Fallback to regular inline, might be best to notify with an error instead
 #endif
+
+#ifndef XSTR
+	#define XSTR(x) STR_IMPL(x)
+	#define STR_IMPL(x) #x
+#endif 
+
+#ifndef XCONCAT
+	#define XCONCAT(x, y) CONCAT_IMPL(x, y)
+	#define CONCAT_IMPL(x, y) x##y
+#endif
+
+#define ANON(Name) XCONCAT(Name, __COUNTER__)
+
+#ifndef NCL_NO_UNIQUE_ADDRESS
+#ifdef _MSC_VER
+	#define NCL_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#else
+	#define NCL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#endif // _MSC_VER
+#endif // NCL_NO_UNIQUE_ADDRESS
