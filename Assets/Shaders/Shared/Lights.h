@@ -13,5 +13,4 @@ struct PointLight {
 
 #ifdef __cplusplus
 } // namespace
-using PointLight = NCL::GLSL::PointLight;
 #endif

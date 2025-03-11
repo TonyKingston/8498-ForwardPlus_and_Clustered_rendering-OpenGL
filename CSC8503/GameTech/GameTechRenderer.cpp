@@ -59,7 +59,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, 
 	viewMat = gameWorld.GetMainCamera()->BuildViewMatrix();
 	projMat = gameWorld.GetMainCamera()->BuildProjectionMatrix(aspect);
 
-	InitLights();
+	InitLights(false);
 	//glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 
@@ -80,7 +80,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& w, ResourceManager* rm, int type, 
 
 }
 
-void NCL::CSC8503::GameTechRenderer::InitLights() {
+void NCL::CSC8503::GameTechRenderer::InitLights(const bool addDebugLights /*false*/) {
 
 	lightUpdateShader = (OGLShader*) resourceManager->LoadShader("updateLights.comp");
 	std::random_device rd;
@@ -90,42 +90,22 @@ void NCL::CSC8503::GameTechRenderer::InitLights() {
 	glGenBuffers(1, &lightSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_LIGHTS * sizeof(PointLight), 0, GL_DYNAMIC_DRAW);
-//
-//	Light* pointLights = (Light*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-//	Light& light = pointLights[0];
-//	//light.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-//	light.colour = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-//	light.position = Vector4(10.0f, 10.0f, 10.0f, 1.0f);
-//	//light.position = Vector3(10.0f, 10.0f, 10.0f);
-////	light.radius = 40.0f;
-//	light.radius = Vector4(40.0f, 0.0, 0.0, 0.0);
-////
-//	Light& light2 = pointLights[1];
-//	light2.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-//	light2.position = Vector4(80.0f, 10.0f, 10.0f, 1.0f);
-//	//light2.position = Vector3(80.0f, 10.0f, 10.0f);
-//	//light2.radius = 40.0f;
-//	light2.radius = Vector4(40.0, 0.0, 0.0, 0.0);
-//
-//
-//	Light& light3 = pointLights[2];
-//	light3.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f);
-//	light3.position = Vector4(-60.0f, 10.0f, 10.0f, 1.0f);
-//	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-//	//light3.radius = 40.0f;
-//	light3.radius = Vector4(40.0, 0.0, 0.0, 0.0);
 
-//	Light& light4 = pointLights[3];
-//	light4.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f);
-//	light4.position = Vector4(-200.0f, 10.0f, 120.0f, 1.0f);
-//	//light3.position = Vector3(-60.0f, 10.0f, 10.0f);
-//	//light3.radius = 40.0f;
-//	light4.radius = Vector4(40.0, 0.0, 0.0, 0.0);
+	if (addDebugLights) {
+		Vector4 debugRadius = Vector4(40.0f, 0.0f, 0.0f, 0.0f);
+		std::vector<PointLight> debugLights = {
+			{.colour = Vector4(0.8f, 0.8f, 0.5f, 1.0f), .pos = Vector4(10.0f, 10.0f, 10.0f, 1.0f), .radius = debugRadius},
+			{.colour = Vector4(0.0f, 1.0f, 0.0f, 1.0f), .pos = Vector4(80.0f, 10.0f, 10.0f, 1.0f), .radius = debugRadius },
+			{.colour = Vector4(0.0f, 0.5f, 1.0f, 1.0f), .pos = Vector4(60.0f, 10.0f, 10.0f, 1.0f), .radius = debugRadius },
+			{.colour = Vector4(0.2f, 0.8f, 1.0f, 1.0f), .pos = Vector4(-200.0f, 10.0f, 120.0f, 1.0f), .radius = debugRadius }
+		};
+
+		AddLights(debugLights);
+	}
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	sceneBuffers.push_back(lightSSBO);
- //   numLights += 3;
 }
 
 void GameTechRenderer::InitForward(bool withPrepass) {
@@ -408,10 +388,9 @@ void GameTechRenderer::UpdateLightsGPU(float dt) {
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-bool GameTechRenderer::AddLights(int n) {
-	if (numLights + n >= MAX_LIGHTS) {
-		n = MAX_LIGHTS - numLights;
-	}
+bool GameTechRenderer::AddLights(uint n) {
+	n = std::clamp(n, 0u, MAX_LIGHTS - numLights);
+
 	if (n == 0) return false;
 
 	std::vector<PointLight> newLights(n);
@@ -429,11 +408,17 @@ bool GameTechRenderer::AddLights(int n) {
 		light.radius = Vector4(LIGHT_RADIUS, 0.0, 0.0, 0.0);
 	}
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, numLights * sizeof(PointLight), n * sizeof(PointLight), newLights.data());
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	UploadLights(newLights);
+	return true;
+}
 
-	numLights += n;
+bool GameTechRenderer::AddLights(std::span<const PointLight> newLights) {
+	uint n = newLights.size();
+	// Don't exceed MAX_LIGHTS when adding lights from the span
+	n = std::clamp(n, 0u, MAX_LIGHTS - numLights);
+	std::span<const PointLight> subSpan = newLights.subspan(0, n);
+	if (subSpan.empty()) return false;
+	UploadLights(subSpan);
 	return true;
 }
 
@@ -806,6 +791,14 @@ void GameTechRenderer::UpdateShaderMatrices() {
 		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "shadowMatrix"), 1, false, shadowMatrix.values);*/
 	}
 	LOG_WARN("{} no shader was bound when calling", __FUNCTION__);
+}
+
+void GameTechRenderer::UploadLights(std::span<const PointLight> newLights) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, numLights * sizeof(PointLight), newLights.size() * sizeof(PointLight), newLights.data());
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	numLights += newLights.size();
 }
 
 void GameTechRenderer::ResizeSceneTextures(float width, float height) {
