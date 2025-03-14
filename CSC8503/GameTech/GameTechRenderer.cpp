@@ -13,7 +13,7 @@
 
 #include "Assets/Shaders/Shared/ComputeBindings.h"
 #include "Assets/Shaders/Shared/TextureBindings.h"
-#include "Assets/Shaders/Shared/Lights.h"
+#include "Assets/Shaders/Shared/LightDefinitions.h"
 
 using namespace NCL;
 using namespace Rendering;

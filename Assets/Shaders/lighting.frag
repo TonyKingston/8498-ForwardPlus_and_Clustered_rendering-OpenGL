@@ -1,4 +1,4 @@
-#include "Shared/Lights.h"
+#include "Shared/LightDefinitions.h"
 
 // TODO: Some materials specify their own specular exponent. Should use that instead of universal magic number
 float calculateSpecular(float rFactor) {
