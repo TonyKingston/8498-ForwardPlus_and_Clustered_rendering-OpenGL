@@ -2,18 +2,7 @@
 
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 16
-
- struct PointLight {
-	 vec4 colour;
-	 vec4 pos;
-	 vec4 radius;
- };
-
-//struct PointLight {
-//  vec3 pos;
-//  float radius;
-//  vec4 colour;
-//};
+#include "Shared/LightDefinitions.h"
 
  struct LightGrid {
 	 uint count;

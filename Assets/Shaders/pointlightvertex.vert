@@ -1,16 +1,11 @@
 #version 430 core
+#include "Shared/LightDefinitions.h"
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
 
 layout(location = 0) in vec3 position;
-
-struct PointLight {
-    vec4 colour;
-	vec4 pos;
-	vec4 radius;
-};
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
