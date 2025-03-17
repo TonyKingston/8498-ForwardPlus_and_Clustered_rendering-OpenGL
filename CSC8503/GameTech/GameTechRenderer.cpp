@@ -13,7 +13,8 @@
 
 #include "Assets/Shaders/Shared/ComputeBindings.h"
 #include "Assets/Shaders/Shared/TextureBindings.h"
-#include "Assets/Shaders/Shared/Lights.h"
+#include "Assets/Shaders/Shared/LightDefinitions.h"
+#include "Assets/Shaders/Shared/LightGridDefinitions.h"
 
 using namespace NCL;
 using namespace Rendering;
@@ -244,7 +245,7 @@ void GameTechRenderer::InitForwardPlus() {
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
 	//glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileAABB), NULL, GL_DYNAMIC_DRAW);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(struct TileFrustum), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numTiles * sizeof(TileFrustum), NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, aabbGridSSBO);
 //	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -311,7 +312,7 @@ void GameTechRenderer::InitClustered(bool withPrepass) {
 
 	glGenBuffers(1, &aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, aabbGridSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(struct ClusterFrustum), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numClusters * sizeof(ClusterFrustum), NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, COMPUTE_BINDING_GRID_BUFFER, aabbGridSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

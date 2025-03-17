@@ -81,7 +81,7 @@ void OGLShader::ReloadShader() {
 				auto processed_ptr = std::unique_ptr<char, decltype([](char* p) {free(p); })>(
 					stb_include_string(fileContents.c_str(), nullptr, Assets::SHADERDIR.c_str(), nullptr, error));
 				if (!processed_ptr) {
-					LOG_ERROR("Failed to process includes.");
+					LOG_ERROR("Failed to process includes for file {}", shader);
 					return;
 				}
 

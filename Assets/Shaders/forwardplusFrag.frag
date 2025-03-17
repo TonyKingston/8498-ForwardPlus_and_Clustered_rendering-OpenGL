@@ -5,6 +5,7 @@
 
 #include "Shared/Debug.h"
 #include "Shared/TextureBindings.h"
+#include "Shared/ComputeBindings.h"
 #include "lighting.frag"
 
 layout(binding = TEXTURE_BINDING_DIFFUSE) uniform sampler2D 	mainTex;
@@ -17,11 +18,11 @@ layout(binding = TEXTURE_BINDING_SPECULAR) uniform sampler2D   specTex;
 	 uint lightIndices[MAX_LIGHTS_PER_TILE];
  };
 
-layout(std430, binding = 0) readonly buffer lightSSBO {
+layout(std430, binding = COMPUTE_BINDING_LIGHT_BUFFER) readonly buffer lightSSBO {
 	PointLight pointLights[];
 };
 
-layout(std430, binding = 2) buffer lightGridSSBO {
+layout(std430, binding = COMPUTE_BINDING_LIGHT_INDEX_BUFFER) buffer lightGridSSBO {
 	int lightIndices[];
 };
 

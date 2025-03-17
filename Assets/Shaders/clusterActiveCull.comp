@@ -3,17 +3,12 @@
 #define THREADS 32
 #define MAX_LIGHTS_PER_TILE 2048
 #include "Shared/ComputeBindings.h"
+#include "Shared/LightDefinitions.h"
 
 layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
 
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
-
-struct PointLight {
-	vec4 colour;
-	vec4 pos;
-	vec4 radius;
-};
 
 struct Plane {
 	vec4 normal;

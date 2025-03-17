@@ -31,31 +31,6 @@ namespace NCL {
 
 		constexpr unsigned int numClusters = CLUSTER_GRID_X * CLUSTER_GRID_Y * CLUSTER_GRID_Z;
 
-		struct TileAABB {
-			Vector4 min;
-			Vector4 max;
-			Vector4 extent;
-		};
-
-		struct TilePlane {
-			Vector4 normal;
-			Vector4 distance;
-		};
-	
-		struct TileFrustum {
-			TilePlane plane[4];
-		};
-
-		struct ClusterFrustum {
-			TilePlane plane[4];
-			Vector4 nearFar;
-		};
-
-		struct LightGrid {
-			unsigned int count;
-			unsigned int lightIndices[MAX_LIGHTS_PER_TILE];
-		};
-
 		struct ClusterParams {
 			float scaleFactor = 1.0f;
 			float biasFactor = 1.0f;

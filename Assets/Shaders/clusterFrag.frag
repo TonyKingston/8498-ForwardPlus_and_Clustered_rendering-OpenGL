@@ -13,12 +13,6 @@ layout(binding = TEXTURE_BINDING_SPECULAR) uniform sampler2D   specTex;
 
 uniform mat4 projMatrix;
 
-//struct PointLight {
-//  vec3 pos;
-//  float radius;
-//  vec4 colour;
-//};
-
  struct LightGrid {
 	 uint count;
 	 uint lightIndices[MAX_LIGHTS_PER_TILE];

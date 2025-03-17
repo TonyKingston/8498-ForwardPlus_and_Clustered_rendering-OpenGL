@@ -7,18 +7,6 @@ layout(binding = TEXTURE_BINDING_DIFFUSE) uniform sampler2D 	mainTex;
 layout(binding = TEXTURE_BINDING_NORMAL) uniform sampler2D   bumpTex;
 layout(binding = TEXTURE_BINDING_SPECULAR) uniform sampler2D   specTex;
 //uniform sampler2DShadow shadowTex;
-//
-//struct PointLight {
-//	vec4 colour;
-//	vec4 pos;
-//	float radius;
-//};
-
-// struct PointLight {
-	// vec3 pos;
-	// float radius;
-	// vec4 colour;
-// };
 
 layout(std430, binding = 0) readonly buffer lightSSBO {
 	PointLight pointLights[];
