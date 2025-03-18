@@ -1,15 +1,7 @@
 #pragma once
 #pragma message("Compiling precompiled headers.\n")
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-//#define _CRT_SECURE_NO_WARNINGS
-#include <Windows.h>
-
-#undef FAR
-#undef NEAR
-#endif
+#include <Core/Platform/Windows/MinWindows.h>
 
 #include <algorithm>
 #include <array>
