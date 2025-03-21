@@ -247,9 +247,7 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 	}
 
 	for (int i = 0; i < 4 && result; i++) {
-		if (SphereInsidePlane(posVs, radius, frustum.planes[i])) {
-			result = false;
-		}
+		result = result && SphereInsidePlane(posVs, radius, frustum.planes[i]);`
 	}
 
 	return result;
