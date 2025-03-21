@@ -274,6 +274,8 @@
     <ClInclude Include="Core\Misc\FunctionUtils.h" />
     <ClInclude Include="Core\Misc\Image.h" />
     <ClInclude Include="Core\Misc\InstanceCounter.h" />
+    <ClInclude Include="Core\Platform\Windows\MinWindows.h" />
+    <ClInclude Include="Core\Platform\Windows\MinWindowsFwd.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
     <ClInclude Include="Graphics\MeshGeometry.h" />

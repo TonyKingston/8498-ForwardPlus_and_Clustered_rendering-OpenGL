@@ -7,6 +7,7 @@ Comments and queries to: richard-gordon.davison AT ncl.ac.uk
 https://research.ncl.ac.uk/game/
 */
 #pragma once
+#include "Core/Platform/Windows/MinWindowsFwd.h"
 #include "Common/Graphics/RendererBase.h"
 #include "Common/Math/Maths.h"
 #include "Common/NCLAliases.h"
@@ -14,10 +15,6 @@ https://research.ncl.ac.uk/game/
 #include <vector>
 #include <span>
 #include <functional>
-
-#ifdef _WIN32
-#include "windows.h"
-#endif
 
 #ifdef _DEBUG
 #define OPENGL_DEBUGGING
@@ -100,8 +97,8 @@ namespace NCL {
 #ifdef _WIN32
 			void InitWithWin32(Window& w);
 			void DestroyWithWin32();
-			HDC		deviceContext;		//...Device context?
-			HGLRC	renderContext;		//Permanent Rendering Context		
+			Windows::HDC		deviceContext;		//...Device context?
+			Windows::HGLRC	renderContext;		//Permanent Rendering Context		
 #endif
 		protected:
 			OGLMesh* boundMesh;

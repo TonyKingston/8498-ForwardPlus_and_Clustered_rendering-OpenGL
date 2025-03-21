@@ -192,7 +192,7 @@ static char *stb_include_load_file(const char *filename, size_t *plen)
    return text;
 }
 
-#define MAX_MACROS 100
+#define MAX_MACROS 128
 
 typedef struct {
     char* name;
@@ -203,35 +203,66 @@ typedef struct {
 static Macro macros[MAX_MACROS];
 static int macro_count = 0;
 
+// Hash function: DJB2 by Daniel J. Bernstein
+unsigned int hash(const char* str) {
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) ^ c; // hash(i - 1) * 33 ^ str[i]   
+    return hash % MAX_MACROS;
+}
+
 // Check if a macro is defined
-static bool is_macro_defined(const char* macro) {
-    for (int i = 0; i < macro_count; i++) {
-        if (strcmp(macros[i].name, macro) == 0) {
-            return macros[i].defined;
-        }
+static bool is_macro_defined(char* macro) {
+    unsigned int index = hash(macro);
+    for (int i = 0; i < MAX_MACROS; ++i) {
+        int probe_index = (index + i) % MAX_MACROS;
+
+        if (macros[probe_index].name == NULL)
+            free(macro);
+            return false;
+
+        if (strcmp(macros[probe_index].name, macro) == 0)
+            free(macro);
+            return macros[probe_index].defined;
     }
-    return false;  // If not found, assume undefined
+    free(macro);
+    return false;
 }
 
 // Add or update a macro definition
-static void add_macro(const char* macro, bool defined) {
-    for (int i = 0; i < macro_count; i++) {
-        if (strcmp(macros[i].name, macro) == 0) {
-            macros[i].defined = defined;
+static void add_macro(char* macro, bool defined) {
+    unsigned int index = hash(macro);
+
+    for (int i = 0; i < MAX_MACROS; ++i) {
+        int probe_index = (index + i) % MAX_MACROS;
+
+        // Empty slot found, insert macro
+        if (macros[probe_index].name == NULL) {
+            macros[probe_index].name = macro;
+            macros[probe_index].defined = defined;
+            macro_count++;
             return;
         }
-    }
-    if (macro_count < MAX_MACROS) {
-        macros[macro_count].name = _strdup(macro);
-        macros[macro_count].defined = defined;
-        macro_count++;
-    }
+
+        // Macro already exists, update if it's defined
+        if (strcmp(macros[probe_index].name, macro) == 0) {
+            macros[probe_index].defined = defined;
+            free(macro);
+            return;
+        }
+    } 
+    // Table is full
+    free(macro);
 }
 
 static void stb_include_free_macros() {
-    int i;
-    for (i = 0; i < macro_count; ++i)
-        free(macros[i].name);
+    for (int i = 0; i < MAX_MACROS; i++) {
+        if (macros[i].name) {
+            free(macros[i].name);
+            macros[i].name = NULL;
+        }
+    }
     macro_count = 0;
 }
 
@@ -310,7 +341,7 @@ static int stb_include_find_includes(const char *text, include_info **plist)
             while (*s == ' ' || *s == '\t')
                 ++s;
             char* macro_name = (char*)malloc(sizeof(char) * 256);
-            sscanf_s(s, "%255s", macro_name);
+            sscanf_s(s, "%255s", macro_name, sizeof(char) * 256);
             add_macro(macro_name, true);
         }
         // Handle #undef
@@ -319,7 +350,7 @@ static int stb_include_find_includes(const char *text, include_info **plist)
             while (*s == ' ' || *s == '\t')
                 ++s;
             char* macro_name = (char*)malloc(sizeof(char) * 256);
-            sscanf_s(s, "%255s", macro_name);
+            sscanf_s(s, "%255s", macro_name, sizeof(char) * 256);
             add_macro(macro_name, false);
         }
         // Handle #ifdef
@@ -328,7 +359,7 @@ static int stb_include_find_includes(const char *text, include_info **plist)
             while (*s == ' ' || *s == '\t')
                 ++s;
             char* macro_name = (char*)malloc(sizeof(char) * 256);
-            sscanf_s(s, "%255s", macro_name);
+            sscanf_s(s, "%255s", macro_name, sizeof(char) * 256);
 
             if (!is_macro_defined(macro_name)) {
                 skipping = true;  // Start skipping if the macro is undefined
@@ -341,7 +372,7 @@ static int stb_include_find_includes(const char *text, include_info **plist)
             while (*s == ' ' || *s == '\t')
                 ++s;
             char* macro_name = (char*)malloc(sizeof(char) * 256);
-            sscanf_s(s, "%255s", macro_name);
+            sscanf_s(s, "%255s", macro_name, sizeof(char) * 256);
 
             if (is_macro_defined(macro_name)) {
                 skipping = true;  // Start skipping if the macro is defined

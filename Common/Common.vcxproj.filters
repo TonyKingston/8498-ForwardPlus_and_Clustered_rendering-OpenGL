@@ -40,6 +40,9 @@
     <Filter Include="Core\Log">
       <UniqueIdentifier>{a968826b-0a92-428a-93ab-51935a1dbf2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Windows">
+      <UniqueIdentifier>{be7c73be-93fd-48d1-8c27-e16a2a90a02a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Resources\Assets.cpp">
@@ -271,6 +274,12 @@
     </ClInclude>
     <ClInclude Include="Core\Misc\InstanceCounter.h">
       <Filter>Core\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Platform\Windows\MinWindows.h">
+      <Filter>Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Platform\Windows\MinWindowsFwd.h">
+      <Filter>Core\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

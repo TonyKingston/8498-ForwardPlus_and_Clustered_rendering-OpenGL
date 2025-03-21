@@ -1,6 +1,9 @@
-#version 430 core
+#version 460 core
+#extension GL_KHR_shader_subgroup_basic : enable
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+#extension GL_KHR_shader_subgroup_ballot : enable
 
-#define THREADS 32
+#define THREADS 64
 #define MAX_LIGHTS_PER_TILE 2048
 #include "Shared/ComputeBindings.h"
 #include "Shared/LightDefinitions.h"
@@ -55,11 +58,11 @@ layout(std430, binding = COMPUTE_BINDING_LIGHT_BUFFER) readonly buffer lightSSBO
 //	TileAABB tiles[];
 //};
 
-layout(std430, binding = COMPUTE_BINDING_GRID_BUFFER) buffer tileGrid {
+layout(std430, binding = COMPUTE_BINDING_GRID_BUFFER) readonly buffer tileGrid {
 	Frustum tile[];
 };
 
-layout(std430, binding = COMPUTE_BINDING_LIGHT_INDEX_BUFFER) buffer lightGridSSBO {
+layout(std430, binding = COMPUTE_BINDING_LIGHT_INDEX_BUFFER) writeonly buffer lightGridSSBO {
 	int lightIndices[];
 };
 
@@ -86,6 +89,7 @@ uniform float far;
 shared uint visibleLightCount;
 shared int visibleLightIndices[MAX_LIGHTS_PER_TILE];
 shared Frustum tileFrustum;
+shared bool workDone;
 
 shared mat4 viewProjMatrix;
 //shared mat4 invViewProj;
@@ -102,7 +106,7 @@ bool SphereInsidePlane(vec3 posVs, float radius, Plane plane);
 
 
 float linearDepth(float depthSample) {
-	float depthRange = 2.0 * depthSample - 1.0;
+	float depthRange = fma(2.0, depthSample, -1.0);
 	float linear = 2.0 * near * far / (far + near - depthRange * (far - near));
 	return linear;
 }
@@ -131,6 +135,7 @@ void main() {
 		//invProj = inverse(projMatrix);
 		//invViewProj = inverse(viewProjMatrix);
 		tileFrustum = tile[tileIndex];
+		workDone = false;
 
 		//if (tileId.x < 78) {
 		//	tileFrustum.planes[1] = tile[tileIndex + 1].planes[0];
@@ -142,6 +147,8 @@ void main() {
 		//}
 	}
 
+	barrier();
+
 	float minDepthVS = tileFrustum.nearFar.x;
 	float maxDepthVS = tileFrustum.nearFar.y;
 	float nearClipVS = ClipToView(vec4(0.0, 0.0, 0.0, 1.0)).z;
@@ -150,43 +157,77 @@ void main() {
 
 	barrier();
 
-	uint threadCount = THREADS;
-	uint batchCount = (noOfLights + threadCount - 1) / threadCount;
+	uint threadCount = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
+	uint batchCount = (noOfLights + threadCount - 1u) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
-		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
-
-		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
+		// Need to do more profiling to see if this actually helps
+		if (workDone) {
 			break;
 		}
 
-		/*lightIndex = min(lightIndex, noOfLights);*/
-		PointLight light = pointLights[lightIndex];
-		vec4 position = light.pos;
-		position.w = 1.0;
-		float radius = light.radius.x;
-		vec4 vPos = viewMatrix * position;
+		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-		if (SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS)) {
-			if (!SphereInsidePlane(vPos.xyz, radius, minPlane)) {
-				if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
-					uint offset = atomicAdd(visibleLightCount, 1);
-					visibleLightIndices[offset] = int(lightIndex);
-			    }
-			}
+//		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
+//			break;
+//		}
+
+		bool isVisible = false;
+		// TODO: Test performance of removing the conditional and just testing again a light of negative radius instead (always culled)
+		if (lightIndex < noOfLights) {
+
+			/*lightIndex = min(lightIndex, noOfLights);*/
+			// TODO: Try loading a batch of lights into shared memory, and iterating over that.
+			PointLight light = pointLights[lightIndex];
+			vec4 position = light.pos;
+			position.w = 1.0;
+			float radius = light.radius.x;
+			vec4 vPos = viewMatrix * position;
+
+			bool inside = SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS) && !SphereInsidePlane(vPos.xyz, radius, minPlane);
+			isVisible = inside;
 		}
+
+		uint visMask = isVisible ? 1u : 0u;
+
+		uint subgroupOffset = subgroupExclusiveAdd(visMask);
+
+		uint subgroupCount = subgroupAdd(visMask);
+
+		// The "lead lane" in the subgroup does a single atomic
+		// Preferable to having each thread an atomic op
+        uint groupBase  = 0u;
+        if (subgroupElect()) {
+            groupBase = atomicAdd(visibleLightCount, subgroupCount);
+			if (groupBase >= MAX_LIGHTS_PER_TILE) {
+				workDone = true;
+			}
+        }
+        // Broadcast the result so all lanes see it
+        groupBase = subgroupBroadcastFirst(groupBase);
+
+		if (isVisible)
+        {
+            // We flatten the offset: groupBase + subgroupOffset
+			// And write our light indices buffer
+            // There's a chunk for each cluster, each chunk up to 2048 lights
+            uint writeIndex = tileIndex * MAX_LIGHTS_PER_TILE + groupBase + subgroupOffset;
+
+            // Always be sure we don’t exceed MAX_LIGHTS_PER_TILE
+			// Do we need this if we're checking earlier?
+            if (writeIndex < tileIndex * MAX_LIGHTS_PER_TILE + MAX_LIGHTS_PER_TILE) {
+                lightIndices[writeIndex] = int(lightIndex);
+            }
+        }
+
 	}
 
 	barrier();
 
+	// If there's space left, one thread places a sentinel at the end of the workgroups light range
 	if (gl_LocalInvocationIndex == 0) {
-		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
-
-		for (uint i = 0; i < visibleLightCount && i < MAX_LIGHTS_PER_TILE; i++) {
-			lightIndices[offset + i] = visibleLightIndices[i];
-		}
-
-		if (visibleLightCount < MAX_LIGHTS_PER_TILE) {
-			lightIndices[offset + visibleLightCount] = -1;
+		uint finalCount = visibleLightCount;
+		if (finalCount < MAX_LIGHTS_PER_TILE) {
+			lightIndices[tileIndex * MAX_LIGHTS_PER_TILE + finalCount] = -1;
 		}
 
 	}
@@ -206,9 +247,7 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 	}
 
 	for (int i = 0; i < 4 && result; i++) {
-		if (SphereInsidePlane(posVs, radius, frustum.planes[i])) {
-			result = false;
-		}
+		result = result && SphereInsidePlane(posVs, radius, frustum.planes[i]);`
 	}
 
 	return result;

@@ -14,24 +14,7 @@ _-_-_-_-_-_-_-""  ""
 #include "Window.h"
 
 #ifdef _WIN32
-#ifndef HID_USAGE_PAGE_GENERIC
-#define HID_USAGE_PAGE_GENERIC			((USHORT) 0x01)
-#endif
-
-#ifndef HID_USAGE_GENERIC_MOUSE
-#define HID_USAGE_GENERIC_MOUSE			((USHORT) 0x02)
-#endif
-
-#ifndef HID_USAGE_GENERIC_KEYBOARD
-#define HID_USAGE_GENERIC_KEYBOARD		((USHORT) 0x06)
-#endif
-
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+#include "Core/Platform/Windows/MinWindows.h"
 #include <io.h>
 #include <stdio.h>
 #include <fcntl.h>
