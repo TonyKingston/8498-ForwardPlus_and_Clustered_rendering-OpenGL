@@ -5,14 +5,19 @@
 
 #define THREADS 64
 #define MAX_LIGHTS_PER_TILE 2048
+
+// Provide a fallback using old method if extensions aren't available
+#if defined(GL_KHR_shader_subgroup_basic) && defined(GL_KHR_shader_subgroup_ballot) && defined(GL_KHR_shader_subgroup_arithmetic)
+	#define USE_SUBGROUPS 1
+#else
+	#define USE_SUBGROUPS 0
+#endif
+
 #include "Shared/ComputeBindings.h"
 #include "Shared/LightDefinitions.h"
 
 layout(local_size_x = THREADS, local_size_y = 1, local_size_z = 1) in;
-//layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-//layout(local_size x = 32) in;
 
-//uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
 
@@ -160,16 +165,20 @@ void main() {
 	uint threadCount = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
 	uint batchCount = (noOfLights + threadCount - 1u) / threadCount;
 	for (uint i = 0; i < batchCount; ++i) {
-		// Need to do more profiling to see if this actually helps
-		if (workDone) {
-			break;
-		}
 
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 
-//		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
-//			break;
-//		}
+#if !USE_SUBGROUPS
+		if (lightIndex >= noOfLights || visibleLightCount >= MAX_LIGHTS_PER_TILE) {
+			break;
+		}
+#else
+		// Need to do more profiling to see if this actually helps
+		bool isDone = workDone;
+		if (isDone) {
+			break;
+		}
+#endif
 
 		bool isVisible = false;
 		// TODO: Test performance of removing the conditional and just testing again a light of negative radius instead (always culled)
@@ -185,8 +194,15 @@ void main() {
 
 			bool inside = SphereInsideFrustum(vPos.xyz, radius, tileFrustum, nearClipVS, maxDepthVS) && !SphereInsidePlane(vPos.xyz, radius, minPlane);
 			isVisible = inside;
+			#if !USE_SUBGROUPS
+				if (isVisible && visibleLightCount < MAX_LIGHTS_PER_TILE) {
+					uint offset = atomicAdd(visibleLightCount, 1);
+					visibleLightIndices[offset] = int(lightIndex);
+				}
+			#endif
 		}
 
+#if USE_SUBGROUPS
 		uint visMask = isVisible ? 1u : 0u;
 
 		uint subgroupOffset = subgroupExclusiveAdd(visMask);
@@ -219,15 +235,22 @@ void main() {
             }
         }
 
+#endif
 	}
 
 	barrier();
 
 	// If there's space left, one thread places a sentinel at the end of the workgroups light range
 	if (gl_LocalInvocationIndex == 0) {
+		uint offset = tileIndex * MAX_LIGHTS_PER_TILE;
 		uint finalCount = visibleLightCount;
+#if !USE_SUBGROUPS
+		for (uint i = 0; i < finalCount && i < MAX_LIGHTS_PER_TILE; i++) {
+			lightIndices[offset + i] = visibleLightIndices[i];
+		}
+#endif
 		if (finalCount < MAX_LIGHTS_PER_TILE) {
-			lightIndices[tileIndex * MAX_LIGHTS_PER_TILE + finalCount] = -1;
+			lightIndices[offset + finalCount] = -1;
 		}
 
 	}
@@ -247,7 +270,10 @@ bool SphereInsideFrustum(vec3 posVs, float radius, Frustum frustum, float zNear,
 	}
 
 	for (int i = 0; i < 4 && result; i++) {
-		result = result && SphereInsidePlane(posVs, radius, frustum.planes[i]);`
+		if (SphereInsidePlane(posVs, radius, frustum.planes[i])) {
+			result = false;
+		}
+		//result = result && !SphereInsidePlane(posVs, radius, frustum.planes[i]);
 	}
 
 	return result;
