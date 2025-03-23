@@ -21,6 +21,8 @@ on:
 #      - '**.cpp'
 #      - '**.sln'
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1'
 
 concurrency:
   group: "build"
@@ -31,9 +33,45 @@ permissions:
   id-token: write
 
 jobs:
+  check-new-commits:
+    runs-on: ubuntu-latest
+    outputs:
+      has_new_commits: ${{ steps.check_commits.outputs.has_new_commits }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full history is available
+
+      - name: Check for new commits since last run
+        id: check_commits
+        run: |
+          LAST_RUN=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=2" \
+          | jq -r '.workflow_runs[1].created_at')
+
+          if [[ "$LAST_RUN" == "null" ]]; then
+            echo "No previous runs found. Running workflow."
+            echo "has_new_commits=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          # Get new commits since last run
+          NEW_COMMITS=$(git rev-list --count HEAD --since="$LAST_RUN")
+
+          if [[ "$NEW_COMMITS" -gt 0 ]]; then
+            echo "New commits found since last run."
+            echo "has_new_commits=true" >> $GITHUB_ENV
+          else
+            echo "No new commits found."
+            echo "has_new_commits=false" >> $GITHUB_ENV
+          fi
   build:
+    needs: check-new-commits
     runs-on: windows-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    #if : github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' 
+      && needs.check-new-commits.outputs.has_new_commits == 'true')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
