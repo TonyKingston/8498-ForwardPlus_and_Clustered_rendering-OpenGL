@@ -3,6 +3,7 @@
 #include <Build.h>
 #include <Math/Maths.h>
 #include <Core/Log/Logging.h>
+#include <Core/Log/FmtUtils.h>
 #include <Macros.h>
 #include <NCLAliases.h>
 #include <Resources/Assets.h>

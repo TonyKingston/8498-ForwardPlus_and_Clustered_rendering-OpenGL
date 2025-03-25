@@ -2,7 +2,6 @@
 #include "Build.h"
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ranges.h>
-#include "FmtUtils.h"
 
 // TODO: Add option that uses SPDLOG macros so we can get source info in the log e.g. __FUNC__
 #define USE_ASYNC_LOGGER 1

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Logging.h"
+#include "FmtUtils.h"
 #include "Resources/Assets.h"
 #include "spdlog/sinks/daily_file_sink.h"
 #include <source_location>
