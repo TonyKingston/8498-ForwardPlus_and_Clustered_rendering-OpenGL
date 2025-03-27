@@ -37,7 +37,7 @@ void NCL::CSC8503::EnemyObject::CreateBehaviourTree() {
 					return Success;
 				}
 			}
-			return state; // will be ’ongoing ’ until success
+			return state; // will be 'ongoing' until success
 		}
 	);
 
@@ -88,7 +88,7 @@ void NCL::CSC8503::EnemyObject::CreateBehaviourTree() {
 					return Success;
 				}
 			}
-			return state; // will be ’ongoing ’ until success
+			return state; // will be 'ongoing' until success
 		}
 	);
 

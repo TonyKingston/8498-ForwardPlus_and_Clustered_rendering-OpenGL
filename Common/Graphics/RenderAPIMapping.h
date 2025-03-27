@@ -35,8 +35,6 @@ struct ConstMap {
         if (it != data.end()) {
             return it->second;
         }
-
-        static_assert(AlwaysFalse<T>, "Key not in map");
     }
 
     // Backend API to our Enum
@@ -48,8 +46,6 @@ struct ConstMap {
         if (it != data.end()) {
             return it->first;
         }
-
-        static_assert(AlwaysFalse<T>, "Key not in map");
     }
 
     constexpr bool Contains(K key) const {
@@ -68,7 +64,7 @@ constexpr auto CreateConstMap(Entries &&...entry) {
 template <typename Backend, typename Enum>
 struct EnumMapping {
     static constexpr auto Map(Enum) {
-        static_assert(sizeof(Enum) == 0, "EnumMapping specialization missing for this backend and enum type.");
+        static_assert(AlwaysFalse<Enum>, "EnumMapping specialization missing for this backend and enum type.");
     }
 };
 
@@ -78,6 +74,8 @@ concept HasEnumMapping = requires(Enum e) {
 };
 
 // This will dispatch to the right API function.
+// Example usage: constexpr auto blendMode = EnumToAPI<OGLTag>(BlendMode::AlphaBlend);
+// An EnumMapping must be defined for this function  to work, see DEFINE_ENUM_MAPPING
 template <typename Backend, typename Enum>
 requires std::is_enum_v<Enum> && HasEnumMapping<Backend, Enum>
 constexpr auto EnumToAPI(Enum value) {
@@ -86,12 +84,22 @@ constexpr auto EnumToAPI(Enum value) {
 
 #define MAP(KEY, VALUE) std::pair{ KEY, VALUE }
 
-// Helper macro to slightly reduce verbosity.
+ /* Helper macro to slightly reduce verbosity.
+  For an API specified by API_TAG (OGLTag etc...), a compile time lookup table will be constructed
+  which will be an array of pairs<ENUM_TYPE, BACKEND_TYPE> 
+  Example usage:
+  DEFINE_ENUM_MAPPING(OGLTag, CullMode, GLenum,
+            MAP(CullMode::None, GL_NONE)
+    );
+ This is saying to create a mapping between our enum CullMode and the type GLenum.
+ The map has one entry std::pair{CullMode::None, GL_NONE}
+ We can then retrieve GL_NONE by calling EnumToAPI<OGLTag>(CullMode::None)
+  */
 #define DEFINE_ENUM_MAPPING(API_TAG, ENUM_TYPE, BACKEND_TYPE, ...)                   \
 template <>                                                                          \
 struct EnumMapping<API_TAG, ENUM_TYPE> {                                             \
     static constexpr ConstMap<ENUM_TYPE, BACKEND_TYPE,                          \
-        std::tuple_size_v<decltype(std::make_tuple(__VA_ARGS__))>> values {        \
+        NCL::CountArgs(__VA_ARGS__)> values {        \
         __VA_ARGS__                                                                  \
     };                                                                              \
                                                                                      \

@@ -113,39 +113,7 @@ void GameTechRenderer::InitForward(bool withPrepass) {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
 	if (withPrepass) {
-		glGenFramebuffers(1, &bufferFBO);
-		glGenFramebuffers(1, &forwardPlusFBO);
-		//
-		GLenum buffers[1] = {
-			GL_COLOR_ATTACHMENT0
-		};
-
-		GenerateScreenTexture(bufferDepthTex, true);
-		GenerateScreenTexture(depthColourTex);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthColourTex, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-		glDrawBuffers(1, buffers);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
-
-		sceneBuffers.push_back(bufferFBO);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		GenerateScreenTexture(bufferColourTex);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, forwardPlusFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-
-		glDrawBuffers(1, buffers);
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)  return;
-
-		sceneBuffers.push_back(forwardPlusFBO);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		GenPrePassFBO();
 		depthPrepassShader = (OGLShader*)resourceManager->LoadShader("DepthPassVert.vert", "DepthPassFrag.frag");
 	}
 }
@@ -360,7 +328,7 @@ void GameTechRenderer::UpdateLights(float dt) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
 	PointLight* pointLights = (PointLight*) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 
-	for (int i = 0; i < numLights; i++) {
+	for (uint i = 0; i < numLights; i++) {
 		PointLight& light = pointLights[i];
 		//light.position.x = fmod((light.position.y + (-4.5f * lightDt) - min + max), max) + min;
 		//light.position.x = light.position.x;
@@ -397,7 +365,7 @@ bool GameTechRenderer::AddLights(uint n) {
 	std::vector<PointLight> newLights(n);
 
 	Vector4 lightPos = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
-	for (int i = 0; i < n; i++) {
+	for (uint i = 0; i < n; i++) {
 		PointLight& light = newLights[i];
 		for (int j = 0; j < 3; j++) {
 			float min = LIGHT_MIN_BOUNDS[j];
@@ -1203,7 +1171,7 @@ void GameTechRenderer::DrawPointLights(Camera* current_camera) {
 
 	BindMesh(sphere);
 
-	for (int i = 0; i < numLights; i++) {
+	for (uint i = 0; i < numLights; i++) {
 		glUniform1i(glGetUniformLocation(pointLightShader->GetProgramID(), "lightIndex"), i);
 		DrawBoundMesh();
 	}
