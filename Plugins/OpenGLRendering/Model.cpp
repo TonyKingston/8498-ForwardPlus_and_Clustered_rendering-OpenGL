@@ -180,6 +180,7 @@ GameObject* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
 vector<OGLTexture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type) {
 	vector<OGLTexture*> textures;
+	textures.reserve(mat->GetTextureCount(type));
 
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;

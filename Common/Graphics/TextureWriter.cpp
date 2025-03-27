@@ -31,12 +31,13 @@ bool NCL::TextureWriter::SaveImage(const std::string& filename, const Image& ima
 			{".png", [](const char* filename, int w, int h, int c, const void* d) { return stbi_write_png(filename, w, h, c, d, w * c); }},
 			{".bmp", stbi_write_bmp},
 			{".tga", stbi_write_tga},
+			{".hdr", [](const char* filename, int w, int h, int c, const void* d) { return stbi_write_hdr(filename, w, h, c, (float*)d); }},
 			{".jpg", [quality](const char* filename, int w, int h, int c, const void* d) { return stbi_write_jpg(filename, w, h, c, d, quality); }}
 	};
 
 	auto it = writers.find(extension);
 	if (it != writers.end()) {
-		return it->second(filePath.string().c_str(), (int)image.width, (int)image.height, (int)image.channels, (void*)image.data);
+		return it->second(filePath.string().c_str(), (int)image.Width(), (int)image.Height(), (int)image.Channels(), (void*)image.Data());
 	}
 	
 	LOG_ERROR("Could not find save function for file {} when trying to save image", filename);

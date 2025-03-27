@@ -135,12 +135,10 @@ OGLTexture::~OGLTexture()
 }
 
 TextureBase* OGLTexture::RGBATextureFromData(const Image& image) {
-	int dataSize = image.GetPixelSize(); //This always assumes data is 1 byte per channel
+	int sourceType = DetermineSourceType(image.Channels());
 
-	int sourceType = DetermineSourceType(image.channels);
-
-	const int width = (int)image.width;
-	const int height = (int)image.height;
+	const int width = (int)image.Width();
+	const int height = (int)image.Height();
 #if !USE_DSA
 // OLD METHOD OF CREATING TEXTURES
 	OGLTexture* tex = new OGLTexture();
@@ -170,7 +168,7 @@ TextureBase* OGLTexture::RGBATextureFromData(const Image& image) {
 
 	OGLTexture* tex = new OGLTexture(config, "testTexture");
 //	glTextureSubImage2D(tex->texID, 0, 0, 0, x, y, GL_UNSIGNED_BYTE, GL_RGBA, data);
-	glTextureSubImage2D(tex->texID, 0, 0, 0, width, height, sourceType, GL_UNSIGNED_BYTE, image.data);
+	glTextureSubImage2D(tex->texID, 0, 0, 0, width, height, sourceType, GL_UNSIGNED_BYTE, image.Data());
 
 	// TODO: Query platform limits somewhere else. Using IIFE to avoid repeated GL queries.
 	static GLfloat maxAniso = []{

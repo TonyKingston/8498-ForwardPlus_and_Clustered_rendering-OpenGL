@@ -672,7 +672,7 @@ void GameTechRenderer::LoadSkybox() {
 
 	for (int i = 0; i < images.size(); ++i) {
 		TextureLoader::LoadTexture(filenames[i], images[i], flags[i]);
-		if (i > 0 && (images[i].width != images[i].width || images[i].height != images[i].height)) {
+		if (i > 0 && (images[i].Width() != images[i].Width() || images[i].Height() != images[i].Height())) {
 			LOG_ERROR("{} cubemap input textures don't match in size?");
 			return;
 		}
@@ -680,10 +680,10 @@ void GameTechRenderer::LoadSkybox() {
 	glGenTextures(1, &skyboxTex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
-	GLenum type = images[0].channels == 4 ? GL_RGBA : GL_RGB;
+	GLenum type = images[0].Channels() == 4 ? GL_RGBA : GL_RGB;
 
 	for (int i = 0; i < images.size(); ++i) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, images[i].width, images[i].height, 0, type, GL_UNSIGNED_BYTE, images[i].data);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, images[i].Width(), images[i].Height(), 0, type, GL_UNSIGNED_BYTE, images[i].Data());
 	}
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1556,7 +1556,7 @@ void GameTechRenderer::LoadStartImage() {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.Width(), image.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.Data());
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	sceneTextures.push_back(background_tex);
@@ -1573,7 +1573,7 @@ void GameTechRenderer::LoadStartImage() {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.Width(), image.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.Data());
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	sceneTextures.push_back(loading_tex);
