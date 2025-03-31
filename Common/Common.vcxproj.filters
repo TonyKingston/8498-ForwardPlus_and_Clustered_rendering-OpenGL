@@ -141,6 +141,12 @@
     <ClCompile Include="Graphics\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\RenderPassBase.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RenderPipelineBase.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resources\Assets.h">
@@ -257,12 +263,6 @@
     <ClInclude Include="Math\MathsFwd.h">
       <Filter>Maths</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RenderPassBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RenderPipelineBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Misc\Image.h">
       <Filter>Core\Misc</Filter>
     </ClInclude>
@@ -280,6 +280,18 @@
     </ClInclude>
     <ClInclude Include="Core\Platform\Windows\MinWindowsFwd.h">
       <Filter>Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderPipelineBase.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderPassBase.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderAPIMapping.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Misc\TypeUtils.h">
+      <Filter>Core\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

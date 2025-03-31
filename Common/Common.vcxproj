@@ -212,6 +212,8 @@
     <ClCompile Include="Graphics\MeshGeometry.cpp" />
     <ClCompile Include="Graphics\MeshMaterial.cpp" />
     <ClCompile Include="Graphics\RendererBase.cpp" />
+    <ClCompile Include="Graphics\RenderPassBase.cpp" />
+    <ClCompile Include="Graphics\RenderPipelineBase.cpp" />
     <ClCompile Include="Graphics\ResourceManager.cpp" />
     <ClCompile Include="Graphics\ShaderBase.cpp" />
     <ClCompile Include="Graphics\SimpleFont.cpp" />
@@ -274,12 +276,14 @@
     <ClInclude Include="Core\Misc\FunctionUtils.h" />
     <ClInclude Include="Core\Misc\Image.h" />
     <ClInclude Include="Core\Misc\InstanceCounter.h" />
+    <ClInclude Include="Core\Misc\TypeUtils.h" />
     <ClInclude Include="Core\Platform\Windows\MinWindows.h" />
     <ClInclude Include="Core\Platform\Windows\MinWindowsFwd.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\MeshAnimation.h" />
     <ClInclude Include="Graphics\MeshGeometry.h" />
     <ClInclude Include="Graphics\MeshMaterial.h" />
+    <ClInclude Include="Graphics\RenderAPIMapping.h" />
     <ClInclude Include="Graphics\RendererBase.h" />
     <ClInclude Include="Graphics\RenderPassBase.h" />
     <ClInclude Include="Graphics\RenderPipelineBase.h" />
