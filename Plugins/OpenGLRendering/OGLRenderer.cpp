@@ -543,3 +543,7 @@ int Cmds::GetBoundShader() {
 
 	return id;
 }
+
+void Cmds::ToggleFeature(uint state, bool value) {
+	(value ? glEnable : glDisable)(state);
+}

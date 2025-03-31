@@ -64,33 +64,30 @@ void* ReadVertexData(GeometryChunkData dataType, GeometryChunkTypes chunkType, i
 	return data;
 }
 
-void ReadTextFloats(std::ifstream& file, vector<Vector2>& element, int numVertices) {
-	for (int i = 0; i < numVertices; ++i) {
-		Vector2 temp;
-		file >> temp.x;
-		file >> temp.y;
-		element.emplace_back(temp);
+template <typename T, typename... Members>
+void ReadFields(std::ifstream& file, T& obj, Members... members) {
+	((file >> obj.*members), ...);
+}
+
+// Reads from file into N elements of a Vector
+template <typename T, size_t N>
+void ReadArray(std::ifstream& file, T& obj) {
+	for (size_t i = 0; i < N; ++i) {
+		file >> obj.array[i];
 	}
 }
 
-void ReadTextFloats(std::ifstream& file, vector<Vector3>& element, int numVertices) {
-	for (int i = 0; i < numVertices; ++i) {
-		Vector3 temp;
-		file >> temp.x;
-		file >> temp.y;
-		file >> temp.z;
-		element.emplace_back(temp);
-	}
-}
+template <typename T>
+void ReadTextFloats(std::ifstream& file, std::vector<T>& elements, int count) {
+	static_assert(std::is_class_v<T>, "T must be a class or struct type");
+	// Check how many elements the vector has.
+	constexpr size_t N = sizeof(T::array) / sizeof(T::x);
+	elements.reserve(elements.size() + count);
 
-void ReadTextFloats(std::ifstream& file, vector<Vector4>& element, int numVertices) {
-	for (int i = 0; i < numVertices; ++i) {
-		Vector4 temp;
-		file >> temp.x;
-		file >> temp.y;
-		file >> temp.z;
-		file >> temp.w;
-		element.emplace_back(temp);
+	for (int i = 0; i < count; ++i) {
+		T temp{};
+		ReadArray<T, N>(file, temp);
+		elements.emplace_back(temp);
 	}
 }
 

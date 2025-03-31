@@ -56,8 +56,9 @@ struct ConstMap {
     }
 };
 
+// Factory function that ensures compile-time creation of a Map
 template <typename K, typename V, typename... Entries>
-constexpr auto CreateConstMap(Entries &&...entry) {
+consteval auto CreateConstMap(Entries &&...entry) {
     return ConstMap<K, V, sizeof...(entry)>{entry...};
 }
 
