@@ -228,7 +228,7 @@ void main() {
             // There's a chunk for each cluster, each chunk up to 2048 lights
             uint writeIndex = tileIndex * MAX_LIGHTS_PER_TILE + groupBase + subgroupOffset;
 
-            // Always be sure we don’t exceed MAX_LIGHTS_PER_TILE
+            // Always be sure we don't exceed MAX_LIGHTS_PER_TILE
 			// Do we need this if we're checking earlier?
             if (writeIndex < tileIndex * MAX_LIGHTS_PER_TILE + MAX_LIGHTS_PER_TILE) {
                 lightIndices[writeIndex] = int(lightIndex);

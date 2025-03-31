@@ -541,7 +541,7 @@ void PhysicsSystem::IntegrateAccel(float dt, bool penalty) {
 		Vector3 accel = force * inverseMass;
 		
 		if (applyGravity && inverseMass > 0 && !(*i)->IsAsleep()) {
-			accel += gravity; // don ’t move infinitely heavy things
+			accel += gravity; // don't move infinitely heavy things
 			
 		}
 		

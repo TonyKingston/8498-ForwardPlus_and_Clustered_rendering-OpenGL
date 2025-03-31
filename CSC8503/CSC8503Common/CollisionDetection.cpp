@@ -89,7 +89,7 @@ bool CollisionDetection::RayBoxIntersection(const Ray&r, const Vector3& boxPos, 
 	for (int i = 0; i < 3; ++i) {
 		if (intersection[i] + epsilon < boxMin[i] ||
 			intersection[i] - epsilon > boxMax[i]) {
-		    return false; //best intersection doesn’t touch the box!
+		    return false; //best intersection doesn't touch the box!
 			
 		}
 	}
@@ -476,12 +476,12 @@ bool CollisionDetection::AABBIntersection(const AABBVolume& volumeA, const Trans
 		Vector3 minB = boxBPos - boxBSize;
 		
 		float distances[6] = {
-			(maxB.x - minA.x),// distance of box ’b’ to ’left ’ of ’a ’.
-				(maxA.x - minB.x),// distance of box ’b’ to ’right ’ of ’a ’.
-				(maxB.y - minA.y),// distance of box ’b’ to ’bottom ’ of ’a ’.
-				(maxA.y - minB.y),// distance of box ’b’ to ’top ’ of ’a ’.
-				(maxB.z - minA.z),// distance of box ’b’ to ’far ’ of ’a ’.
-				(maxA.z - minB.z) // distance of box ’b’ to ’near ’ of ’a ’.
+			(maxB.x - minA.x),// distance of box 'b' to 'left ' of 'a '.
+				(maxA.x - minB.x),// distance of box 'b' to 'right ' of 'a '.
+				(maxB.y - minA.y),// distance of box 'b' to 'bottom ' of 'a '.
+				(maxA.y - minB.y),// distance of box 'b' to 'top ' of 'a '.
+				(maxB.z - minA.z),// distance of box 'b' to 'far ' of 'a '.
+				(maxA.z - minB.z) // distance of box 'b' to 'near ' of 'a '.
 		};
 		float penetration = FLT_MAX;
 		Vector3 bestAxis;
@@ -515,7 +515,7 @@ bool CollisionDetection::SphereIntersection(const SphereVolume& volumeA, const T
 		Vector3 localB = -normal * volumeB.GetRadius();
 			
 		collisionInfo.AddContactPoint(localA, localB, normal, penetration);
-		return true;// we ’re colliding !
+		return true;// we 're colliding !
 	}
 	return false;
 }
@@ -532,7 +532,7 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 	Vector3 localPoint = delta - closestPointOnBox;
 	float distance = localPoint.Length();
 	
-	if (distance < volumeB.GetRadius()) {// yes , we ’re colliding !
+	if (distance < volumeB.GetRadius()) {// yes , we 're colliding !
 		Vector3 collisionNormal = localPoint.Normalised();
 		float penetration = (volumeB.GetRadius() - distance);
 		

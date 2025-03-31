@@ -52,8 +52,6 @@ namespace NCL {
 		static Rendering::TextureBase* LoadAPITexture(const std::string&filename);
 	protected:
 
-		static std::string GetFileExtension(const std::string& fileExtension);
-
 		static std::map<std::string, TextureLoadFunction> fileHandlers;
 
 		static APILoadFunction apiFunction;

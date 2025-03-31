@@ -1,5 +1,6 @@
 #pragma once
 #include <Build.h>
+#include <Core/Log/Logging.h>
 
 template<class T>
 class Singleton {

@@ -130,6 +130,7 @@ namespace NCL {
 		};
 
 		namespace Cmds {
+			// Binds a texture using DSA by default
 			void BindTexture(uint unit, uint texture);
 			// True = repeating, false = clamp
 			void SetTextureRepeating(uint target, bool state);
@@ -139,7 +140,13 @@ namespace NCL {
 			// Utils
 			bool IsShaderBound(int programID);
 			bool IsTextureBound(int texID);
-			int GetBoundShader();	
+
+			// Returns Id of the currently bound shader, 0 if no shader is bound.
+			int GetBoundShader();
+
+			// Calls glEnable or glDisable depending on a boolean condition
+			// Usage:  Cmds::ToggleFeature(GL_DEPTH_TEST, true) turns on depth test
+			void ToggleFeature(uint state, bool value);
 		}
 	}
 }
