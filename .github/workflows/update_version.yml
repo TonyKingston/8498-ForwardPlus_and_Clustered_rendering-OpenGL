@@ -71,7 +71,7 @@ jobs:
     needs: check-new-commits
     runs-on: windows-latest
     #if : github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    if: github.event_name == 'workflow_dispatch' || needs.check-new-commits.outputs.has_new_commits == 'true')
+    if: github.event_name == 'workflow_dispatch' || needs.check-new-commits.outputs.has_new_commits == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
