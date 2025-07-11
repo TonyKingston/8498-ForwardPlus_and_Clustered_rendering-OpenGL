@@ -30,7 +30,7 @@
 	} \
 	[[nodiscard]] inline constexpr bool operator!(Enum Rhs)             { \
 		using Type = __underlying_type(Enum); \
-		return !static_cast<Type>(E); \
+		return !static_cast<Type>(Rhs); \
 	} \
 	[[nodiscard]] inline constexpr Enum operator~(Enum Rhs)             { \
 		using Type = __underlying_type(Enum); \
